@@ -30,8 +30,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function ListingPage({ params }: { params: { id: string } }) {
-	const listingId = Number.parseInt(params.id);
+interface PageProps {
+  params: Promise<any>;
+}
+
+export default async function ListingPage({ params }: PageProps) {
+	const listingId = Number.parseInt((await params).id);
 	const { getListing, toggleSaved } = useMarketplace();
 	const listing = getListing(listingId);
 	const router = useRouter();

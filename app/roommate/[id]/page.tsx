@@ -88,14 +88,14 @@ const roommates = [
 	// ... rest of the roommates data
 ];
 
-export default function RoommateProfilePage({
-	params,
-}: {
-	params: { id: string };
-}) {
+interface PageProps {
+	params: Promise<any>;
+}
+
+export default async function RoommateProfilePage({ params }: PageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const router = useRouter();
-	const roommateId = Number(params.id);
+	const roommateId = Number.parseInt((await params).id);
 	const [activeTab, setActiveTab] = useState('about');
 	const [roommate, setRoommate] = useState(
 		roommates.find((r) => r.id === roommateId)
