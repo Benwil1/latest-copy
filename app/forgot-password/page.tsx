@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
                 {error && <p className="text-xs text-red-500">{error}</p>}
               </div>
 
-              <Button type="submit" className="w-full" variant="orange" disabled={isLoading}>
+              <Button type="submit" className="w-full" variant="default" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -101,4 +101,3 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
-
