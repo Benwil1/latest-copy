@@ -179,21 +179,8 @@ export default function MatchesPage() {
 
 	return (
 		<div className="min-h-screen pb-16 flex flex-col">
-			<header className="p-3 flex justify-between items-center safe-area-top bg-background/80 backdrop-blur-sm z-10">
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 p-0"
-					onClick={() => router.back()}
-				>
-					<ArrowLeft className="h-4 w-4" />
-				</Button>
-				<div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
-				<ModeToggle />
-			</header>
-
 			<main className="flex-1 flex flex-col overflow-hidden">
-				<div className="flex-1 max-w-3xl mx-auto w-full">
+				<div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
 					<Tabs
 						value={activeTab}
 						onValueChange={setActiveTab}
@@ -228,54 +215,41 @@ export default function MatchesPage() {
 								/>
 							</div>
 
-							<div className="space-y-3">
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 								{filteredMatches.map((match) => (
 									<Card
 										key={match.id}
-										className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50"
+										className="overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:border-vibrant-orange/30 group"
 										onClick={() => handleInitiateMessage(match.id)}
 									>
-										<div className="flex">
-											<div className="w-24 sm:w-32">
+										<div className="flex flex-col">
+											<div className="aspect-[4/3] relative overflow-hidden">
 												<img
 													src={match.image || '/placeholder.svg'}
 													alt={match.name}
-													className="w-full h-full object-cover"
+													className="w-full h-full object-cover object-[center_25%] group-hover:scale-105 transition-transform duration-300"
 												/>
+												{match.online && (
+													<div className="absolute top-2 left-2 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
+														<div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+														<span className="text-xs">Online</span>
+													</div>
+												)}
 											</div>
 											<CardContent className="flex-1 p-4">
-												<div className="flex items-center justify-between mb-2">
+												<div className="flex items-center justify-between">
 													<div>
-														<h3 className="font-medium">
-															{match.name}, {match.age}
-														</h3>
-														<p className="text-xs text-muted-foreground">
+														<div className="flex items-center gap-2 mb-1">
+															<h3 className="text-lg font-semibold">
+																{match.name}
+															</h3>
+															{match.verified && (
+																<CheckCircle className="h-4 w-4 text-vibrant-orange" />
+															)}
+														</div>
+														<p className="text-sm text-muted-foreground">
 															Active {match.lastActive}
 														</p>
-													</div>
-													<Badge variant="orange" className="text-xs">
-														{match.compatibility}% Match
-													</Badge>
-												</div>
-
-												<div className="grid grid-cols-3 gap-2 text-sm">
-													<div className="flex items-center">
-														<MapPin className="h-4 w-4 mr-1 text-vibrant-orange" />
-														<span className="text-muted-foreground">
-															{match.location}
-														</span>
-													</div>
-													<div className="flex items-center">
-														<DollarSign className="h-4 w-4 mr-1 text-vibrant-orange" />
-														<span className="text-muted-foreground">
-															${match.budget}
-														</span>
-													</div>
-													<div className="flex items-center">
-														<Calendar className="h-4 w-4 mr-1 text-vibrant-orange" />
-														<span className="text-muted-foreground">
-															{match.moveIn}
-														</span>
 													</div>
 												</div>
 											</CardContent>
@@ -290,19 +264,19 @@ export default function MatchesPage() {
 							className="flex-1 flex flex-col h-[calc(100vh-8rem)]"
 						>
 							{selectedMatch && currentMatch && (
-								<div className="flex flex-col h-full max-h-[calc(100vh-8rem)]">
+								<div className="flex flex-col h-full max-h-[calc(100vh-8rem)] bg-background">
 									{/* Chat Header */}
-									<div className="p-2 border-b flex items-center justify-between">
-										<div className="flex items-center gap-2">
+									<div className="px-4 py-3 border-b flex items-center justify-between bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+										<div className="flex items-center gap-3">
 											<div
-												className="cursor-pointer"
+												className="cursor-pointer group"
 												onClick={() => {
 													setIsLoading(true);
 													router.push(`/roommate/${currentMatch.id}`);
 													setTimeout(() => setIsLoading(false), 1000);
 												}}
 											>
-												<Avatar className="h-7 w-7 hover:ring-2 hover:ring-vibrant-orange transition-all">
+												<Avatar className="h-10 w-10 ring-2 ring-background group-hover:ring-vibrant-orange transition-all">
 													<AvatarImage
 														src={currentMatch.image}
 														alt={currentMatch.name}
@@ -314,78 +288,83 @@ export default function MatchesPage() {
 											</div>
 
 											<div>
-												<div className="flex items-center gap-1">
-													<h3 className="font-medium text-xs">
+												<div className="flex items-center gap-2">
+													<h3 className="font-semibold text-base">
 														{currentMatch.name}
 													</h3>
 													{currentMatch.verified && (
-														<CheckCircle className="h-3 w-3 text-vibrant-orange" />
+														<CheckCircle className="h-4 w-4 text-vibrant-orange" />
 													)}
 												</div>
-												<p className="text-[10px] text-muted-foreground">
-													{currentMatch.online ? 'Online' : 'Offline'}
-												</p>
+												<div className="flex items-center gap-2 text-sm text-muted-foreground">
+													<div className="flex items-center gap-1">
+														<div className={`w-1.5 h-1.5 rounded-full ${currentMatch.online ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+														{currentMatch.online ? 'Online' : 'Offline'}
+													</div>
+													<span>•</span>
+													<span>Active {currentMatch.lastActive}</span>
+												</div>
 											</div>
 										</div>
 
-										<div className="flex items-center gap-1">
+										<div className="flex items-center gap-2">
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-7 w-7 rounded-full hover:bg-muted"
+												className="h-9 w-9 rounded-full hover:bg-muted"
 												onClick={() =>
 													setShowCallModal({ type: 'audio', isOpen: true })
 												}
 											>
-												<Phone className="h-3 w-3" />
+												<Phone className="h-4 w-4" />
 											</Button>
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-7 w-7 rounded-full hover:bg-muted"
+												className="h-9 w-9 rounded-full hover:bg-muted"
 												onClick={() =>
 													setShowCallModal({ type: 'video', isOpen: true })
 												}
 											>
-												<Video className="h-3 w-3" />
+												<Video className="h-4 w-4" />
 											</Button>
 										</div>
 									</div>
 
-									{/* Property Card - Make it more compact on mobile */}
-									<div className="px-2 pt-2">
-										<div className="p-1.5 border rounded-md flex items-center gap-2 bg-muted/30">
-											<div className="h-6 w-6 rounded overflow-hidden shrink-0">
+									{/* Property Card */}
+									<div className="px-4 pt-3">
+										<div className="p-2.5 border rounded-lg flex items-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+											<div className="h-12 w-12 rounded-md overflow-hidden shrink-0">
 												<img
-													src="/placeholder.svg?height=32&width=32"
+													src="/placeholder.svg?height=48&width=48"
 													alt={currentMatch.property}
 													className="h-full w-full object-cover"
 												/>
 											</div>
 											<div className="min-w-0">
-												<h4 className="font-medium text-[10px] truncate">
+												<h4 className="font-medium text-sm truncate">
 													{currentMatch.property}
 												</h4>
-												<p className="text-[8px] text-muted-foreground">
+												<p className="text-xs text-muted-foreground">
 													Discussing this property
 												</p>
 											</div>
 										</div>
 									</div>
 
-									{/* Messages - Make sure this area can scroll properly */}
-									<div className="flex-1 overflow-y-auto p-2 space-y-2">
+									{/* Messages */}
+									<div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
 										{messages.map((message) => (
 											<div
 												key={message.id}
-												className={`flex ${
+												className={`flex items-end gap-2 ${
 													message.sender === 'me'
 														? 'justify-end'
 														: 'justify-start'
 												}`}
 											>
 												{message.sender === 'them' && (
-													<Avatar className="h-5 w-5 mr-1 mt-1 shrink-0">
+													<Avatar className="h-8 w-8 shrink-0">
 														<AvatarImage
 															src={currentMatch.image}
 															alt={currentMatch.name}
@@ -396,15 +375,15 @@ export default function MatchesPage() {
 													</Avatar>
 												)}
 												<div
-													className={`max-w-[75%] rounded-2xl px-2 py-1.5 ${
+													className={`max-w-[65%] rounded-2xl px-4 py-2.5 ${
 														message.sender === 'me'
 															? 'bg-vibrant-orange text-white dark:bg-elegant-orange'
-															: 'bg-secondary dark:bg-dark-accent'
+															: 'bg-muted'
 													}`}
 												>
-													<p className="text-xs break-words">{message.text}</p>
+													<p className="text-sm leading-relaxed break-words">{message.text}</p>
 													<p
-														className={`text-[10px] mt-0.5 ${
+														className={`text-xs mt-1.5 ${
 															message.sender === 'me'
 																? 'text-white/70'
 																: 'text-muted-foreground'
@@ -417,22 +396,22 @@ export default function MatchesPage() {
 										))}
 									</div>
 
-									{/* Message Input and Icebreakers - Make more compact */}
-									<div className="p-2 border-t">
-										<div className="flex items-center gap-1 mb-2">
+									{/* Message Input and Quick Replies */}
+									<div className="px-4 py-3 border-t bg-background/95 backdrop-blur-sm sticky bottom-0">
+										<div className="flex items-center gap-2 mb-3">
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-7 w-7 rounded-full p-0"
+												className="h-10 w-10 rounded-full hover:bg-muted"
 											>
-												<Paperclip className="h-3 w-3" />
+												<Paperclip className="h-5 w-5" />
 											</Button>
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-7 w-7 rounded-full p-0"
+												className="h-10 w-10 rounded-full hover:bg-muted"
 											>
-												<ImageIcon className="h-3 w-3" />
+												<ImageIcon className="h-5 w-5" />
 											</Button>
 											<Input
 												placeholder="Type a message..."
@@ -443,29 +422,29 @@ export default function MatchesPage() {
 														handleSendMessage();
 													}
 												}}
-												className="flex-1 h-7 text-xs"
+												className="flex-1 h-10 text-sm"
 											/>
 											<Button
 												size="icon"
-												className="h-7 w-7 rounded-full bg-vibrant-orange hover:bg-orange-600 dark:bg-elegant-orange dark:hover:bg-orange-700 p-0"
+												className="h-10 w-10 rounded-full bg-vibrant-orange hover:bg-orange-600 dark:bg-elegant-orange dark:hover:bg-orange-700"
 												onClick={handleSendMessage}
 												disabled={!messageText.trim()}
 											>
-												<Send className="h-3 w-3" />
+												<Send className="h-5 w-5" />
 											</Button>
 										</div>
 
-										<div className="border-t pt-1.5">
-											<p className="text-[10px] font-medium mb-1 text-muted-foreground">
+										<div className="border-t pt-3">
+											<p className="text-sm font-medium mb-2 text-muted-foreground">
 												Quick Replies
 											</p>
-											<div className="flex flex-wrap gap-1">
+											<div className="flex flex-wrap gap-2">
 												{icebreakers.map((text, index) => (
 													<Button
 														key={index}
 														variant="outline"
 														size="sm"
-														className="text-[10px] rounded-full h-6 px-1.5 py-0"
+														className="text-sm h-8 px-3 hover:bg-muted"
 														onClick={() => setMessageText(text)}
 													>
 														{text}

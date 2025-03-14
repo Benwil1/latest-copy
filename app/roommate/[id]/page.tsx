@@ -134,15 +134,6 @@ export default function RoommateProfilePage({
 	if (!roommate) {
 		return (
 			<div className="min-h-screen bg-background">
-				<header className="p-4 flex justify-between items-center">
-					<Button variant="ghost" size="icon" onClick={() => router.back()}>
-						<ArrowLeft className="h-5 w-5" />
-					</Button>
-					<div className="text-xl font-bold text-vibrant-orange">
-						RoomieMatch
-					</div>
-					<ModeToggle />
-				</header>
 				<div className="container py-8 text-center">
 					<h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
 					<p className="mb-6 text-muted-foreground">
@@ -156,22 +147,14 @@ export default function RoommateProfilePage({
 
 	return (
 		<div className="min-h-screen pb-16 bg-background">
-			<header className="p-4 flex justify-between items-center">
-				<Button variant="ghost" size="icon" onClick={() => router.back()}>
-					<ArrowLeft className="h-5 w-5" />
-				</Button>
-				<div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
-				<ModeToggle />
-			</header>
-
-			<main className="container max-w-2xl mx-auto px-4 sm:px-6">
+			<main className="container max-w-4xl mx-auto px-4 sm:px-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
 				{/* Profile Header */}
 				<div className="relative mb-16">
-					<div className="relative aspect-[4/5] sm:aspect-[16/9] w-full rounded-xl overflow-hidden mb-8">
+					<div className="relative aspect-[4/5] sm:aspect-[16/9] w-full rounded-xl overflow-hidden mb-8 h-[600px]">
 						<img
 							src={roommate.image || '/placeholder.svg'}
 							alt={roommate.name}
-							className="w-full h-full object-cover"
+							className="w-full h-full object-contain"
 						/>
 						<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
 
@@ -200,33 +183,13 @@ export default function RoommateProfilePage({
 					</div>
 
 					{/* Action buttons */}
-					<div className="flex justify-center gap-2 sm:gap-3 absolute bottom-0 left-0 right-0 translate-y-1/2">
-						<Button
-							variant="outline"
-							size="icon"
-							className="bg-white dark:bg-card h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-500/10"
-							onClick={() => router.push('/home')}
-						>
-							<X className="h-5 w-5 sm:h-6 sm:w-6" />
-						</Button>
-
-						<Button
-							variant="outline"
-							size="icon"
-							className="bg-white dark:bg-card h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-amber-500 text-amber-500 hover:bg-amber-500/10"
-							onClick={() => {}}
-						>
-							<Star className="h-5 w-5 sm:h-6 sm:w-6" />
-						</Button>
-
-						<Button
-							variant="outline"
-							size="icon"
-							className="bg-white dark:bg-card h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-green-500 text-green-500 hover:bg-green-500/10"
-							onClick={() => {}}
-						>
-							<Heart className="h-5 w-5 sm:h-6 sm:w-6" />
-						</Button>
+					<div className="flex justify-center mt-2">
+						<button className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-red-500/20 mx-2">
+							<X className="h-6 w-6 text-red-500" />
+						</button>
+						<button className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-green-500/20 mx-2">
+							<Heart className="h-6 w-6 text-green-500" />
+						</button>
 					</div>
 				</div>
 
@@ -509,23 +472,6 @@ export default function RoommateProfilePage({
 						</Card>
 					</TabsContent>
 				</Tabs>
-
-				{roommate.gallery && (
-					<div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-						{roommate.gallery.map((image, index) => (
-							<div
-								key={index}
-								className="aspect-square rounded-lg overflow-hidden"
-							>
-								<img
-									src={image || '/placeholder.svg'}
-									alt={`Gallery image ${index + 1}`}
-									className="w-full h-full object-cover"
-								/>
-							</div>
-						))}
-					</div>
-				)}
 			</main>
 		</div>
 	);

@@ -1,3 +1,5 @@
+import MobileNav from '@/components/mobile-nav';
+import Navbar from '@/components/navbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
@@ -33,7 +35,7 @@ export default function RootLayout({
 			<head>
 				<meta
 					name="viewport"
-					content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+					content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 				/>
 				<link rel="icon" href="/favicon.ico" sizes="any" />
 			</head>
@@ -47,7 +49,11 @@ export default function RootLayout({
 					<AuthProvider>
 						<MarketplaceProvider>
 							<div className="flex min-h-screen flex-col">
-								<main className="flex-1">{children}</main>
+								<Navbar />
+								<main className="flex-1 mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 md:pb-0 pt-0">
+									{children}
+								</main>
+								<MobileNav />
 							</div>
 						</MarketplaceProvider>
 					</AuthProvider>

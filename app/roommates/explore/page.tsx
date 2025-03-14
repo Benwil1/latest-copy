@@ -46,11 +46,6 @@ export default function ExploreRoommatesPage() {
 
 	return (
 		<div className="min-h-screen pb-20 sm:pb-16">
-			<header className="p-4 flex justify-between items-center">
-				<div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
-				<ModeToggle />
-			</header>
-
 			<main className="container max-w-2xl mx-auto px-4">
 				<div className="relative">
 					<div className="flex gap-2 items-center">
@@ -59,36 +54,36 @@ export default function ExploreRoommatesPage() {
 							<Input
 								type="text"
 								placeholder="Search by name, location, or interests..."
-								className="pl-9 pr-4 w-full rounded-full border-muted-foreground/20"
+								className="pl-9 pr-4 w-full h-12 rounded-full bg-muted/50 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
 						<Button
-							variant="outline"
+							variant="ghost"
 							size="icon"
 							className={cn(
-								'rounded-full border-2',
+								'h-12 w-12 rounded-full',
 								showFilters
-									? 'border-vibrant-orange text-vibrant-orange bg-vibrant-orange/10'
-									: 'border-muted-foreground/20 text-muted-foreground hover:text-vibrant-orange hover:border-vibrant-orange'
+									? 'bg-vibrant-orange text-white hover:bg-vibrant-orange/90'
+									: 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
 							)}
 							onClick={() => setShowFilters(!showFilters)}
 						>
-							<Filter className="h-4 w-4" />
+							<Filter className="h-5 w-5" />
 						</Button>
 						<Button
-							variant="outline"
+							variant="ghost"
 							size="icon"
-							className="rounded-full border-2 border-muted-foreground/20 text-muted-foreground hover:text-vibrant-orange hover:border-vibrant-orange"
+							className="h-12 w-12 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted/70"
 							onClick={() => setShowBoostDialog(true)}
 						>
-							<Sparkles className="h-4 w-4" />
+							<Sparkles className="h-5 w-5" />
 						</Button>
 					</div>
 				</div>
 
-				<div className="space-y-4">
+				<div className="space-y-4 mt-6">
 					{filteredRoommates.map((roommate) => (
 						<div
 							key={roommate.id}

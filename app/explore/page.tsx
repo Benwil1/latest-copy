@@ -134,18 +134,8 @@ export default function ExplorePage() {
 
 	return (
 		<div className="min-h-screen pb-20 sm:pb-16">
-			<header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10">
-				<div className="p-4 flex justify-between items-center max-w-7xl mx-auto">
-					<div className="text-xl font-bold text-vibrant-orange">
-						RoomieMatch
-					</div>
-					<ModeToggle />
-				</div>
-			</header>
-
-			<main className="pt-20">
+			<main className="pt-6">
 				<div className="container max-w-7xl mx-auto px-4">
-					<h1 className="text-2xl font-bold mb-6">Explore Roommates</h1>
 
 					<div className="relative mb-8">
 						<div className="flex gap-2 items-center">
@@ -273,7 +263,7 @@ export default function ExplorePage() {
 									<Button variant="outline" className="h-7 text-xs">
 										Reset
 									</Button>
-									<Button variant="orange" className="h-7 text-xs">
+									<Button variant="default" className="h-7 text-xs bg-vibrant-orange hover:bg-vibrant-orange/90">
 										Apply Filters
 									</Button>
 								</div>
@@ -285,48 +275,48 @@ export default function ExplorePage() {
 						<h2 className="text-base font-semibold">Explore Roommates</h2>
 					</div>
 
-					<div className="grid grid-cols-1 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 						{filteredRoommates.map((roommate) => (
 							<div
 								key={roommate.id}
-								className="bg-card rounded-xl overflow-hidden border hover:border-vibrant-orange/20 transition-colors cursor-pointer"
+								className="bg-card rounded-xl overflow-hidden border hover:border-vibrant-orange/20 transition-colors cursor-pointer group"
 								onClick={() => router.push(`/roommate/${roommate.id}`)}
 							>
-								<div className="aspect-[4/5] relative">
+								<div className="aspect-square relative">
 									<img
 										src={roommate.image}
 										alt={roommate.name}
-										className="w-full h-full object-cover"
+										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-									<div className="absolute top-2 right-2 flex gap-2">
+									<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+									<div className="absolute top-2 right-2 flex gap-1.5">
 										{roommate.verified && (
 											<Badge
 												variant="secondary"
-												className="bg-background/80 backdrop-blur-sm"
+												className="text-[10px] py-0 h-5 bg-background/90 backdrop-blur-sm"
 											>
 												Verified
 											</Badge>
 										)}
-										<Badge variant="orange" className="text-xs">
+										<Badge variant="default" className="text-[10px] py-0 h-5 bg-vibrant-orange">
 											{roommate.compatibility}% Match
 										</Badge>
 									</div>
-									<div className="absolute bottom-0 left-0 right-0 p-4">
-										<h2 className="text-xl font-semibold text-white mb-2">
+									<div className="absolute bottom-0 left-0 right-0 p-3">
+										<h2 className="text-base font-semibold text-white mb-1.5">
 											{roommate.name}, {roommate.age}
 										</h2>
-										<div className="flex items-center gap-4 text-sm text-white/90">
+										<div className="flex items-center gap-3 text-xs text-white/90">
 											<span>${roommate.budget}/mo</span>
 											<span>{roommate.location}</span>
 											<span>{roommate.moveIn}</span>
 										</div>
-										<div className="flex flex-wrap gap-2 mt-3">
-											{roommate.tags.map((tag, index) => (
+										<div className="flex flex-wrap gap-1.5 mt-2">
+											{roommate.tags.slice(0, 3).map((tag, index) => (
 												<Badge
 													key={index}
 													variant="secondary"
-													className="text-xs bg-background/80 backdrop-blur-sm"
+													className="text-[10px] py-0 h-5 bg-background/90 backdrop-blur-sm"
 												>
 													{tag}
 												</Badge>
@@ -396,7 +386,7 @@ export default function ExplorePage() {
 								>
 									Cancel
 								</Button>
-								<Button variant="orange" className="flex-1 pulse h-8 text-xs">
+								<Button variant="default" className="flex-1 pulse h-8 text-xs bg-vibrant-orange hover:bg-vibrant-orange/90">
 									Boost Now
 								</Button>
 							</div>

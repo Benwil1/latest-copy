@@ -114,31 +114,14 @@ export default function ExplorePage() {
 
 	return (
 		<div className="min-h-screen pb-20 sm:pb-16">
-			<header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10">
-				<div className="p-4 flex justify-between items-center max-w-7xl mx-auto">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-8 w-8 p-0"
-						onClick={() => router.back()}
-					>
-						<ArrowLeft className="h-4 w-4" />
-					</Button>
-					<div className="text-xl font-bold text-vibrant-orange">
-						RoomieMatch
-					</div>
-					<ModeToggle />
-				</div>
-			</header>
-
-			<main className="pt-20">
+			<main>
 				{/* Segmented Navigation */}
-				<div className="px-4 mb-6">
+				<div className="px-4 mb-6 pt-4">
 					<div className="max-w-2xl mx-auto">
-						<div className="flex rounded-full bg-muted p-1">
+						<div className="flex rounded-full bg-muted p-1 shadow-sm">
 							<Link
 								href="/apartments/explore"
-								className="flex-1 flex items-center justify-center px-4 py-3 rounded-full bg-background text-foreground font-medium"
+								className="flex-1 flex items-center justify-center px-4 py-3 rounded-full bg-background text-foreground font-medium shadow-sm"
 							>
 								Explore Apartments
 							</Link>

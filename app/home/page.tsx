@@ -214,129 +214,120 @@ export default function HomePage() {
 	return (
 		<ProtectedRoute>
 			<div className="min-h-screen bg-background">
-				<header className="p-4 flex justify-between items-center">
-					<Link href="/home" className="text-2xl font-bold text-vibrant-orange">
-						RoomieMatch
-					</Link>
-					<div className="flex items-center gap-4">
-						<button
-							className="text-gray-400 hover:text-gray-300"
-							aria-label="Notifications"
-						>
-							<Bell className="h-6 w-6" />
-						</button>
-						<div className="text-gray-400">
-							<ModeToggle />
+				<main className="container mx-auto px-0 sm:px-4 py-4">
+					{/* Progress bar showing profiles viewed */}
+					<div className="max-w-3xl mx-auto mb-4 px-4">
+						<div className="flex items-center gap-1">
+							{roommates.map((_, index) => (
+								<div
+									key={index}
+									className={`h-1 flex-1 rounded-full transition-all duration-300 ${index === currentIndex ? 'bg-vibrant-orange' : index < currentIndex ? 'bg-vibrant-orange/30' : 'bg-gray-200 dark:bg-gray-700'}`}
+								/>
+							))}
 						</div>
 					</div>
-				</header>
 
-				<main className="container mx-auto p-4">
-					<div className="flex items-center mb-4">
-						<h1 className="text-2xl font-semibold">Explore Roommates</h1>
-					</div>
-
-					<Card
-						ref={cardRef}
-						className={`overflow-hidden rounded-2xl shadow-lg transition-all duration-300 h-[calc(100vh-12rem)] ${
-							swipeDirection === 'left'
-								? 'animate-swipe-left'
-								: swipeDirection === 'right'
-								? 'animate-swipe-right'
-								: ''
-						}`}
-						style={
-							isDragging
-								? {
-										transform: `translateX(${offsetX}px) rotate(${
-											offsetX * 0.05
-										}deg)`,
-										transition: 'none',
-								  }
-								: undefined
-						}
-						onTouchStart={handleTouchStart}
-						onTouchMove={handleTouchMove}
-						onTouchEnd={handleTouchEnd}
-						onMouseDown={handleMouseDown}
-						onMouseMove={handleMouseMove}
-						onMouseUp={handleMouseUp}
-					>
-						<div className="relative h-full">
-							<img
-								src={currentRoommate.image}
-								alt={currentRoommate.name}
-								className="h-full w-full object-cover"
-							/>
-							{offsetX > 50 && (
-								<div className="absolute top-4 left-4 bg-green-500 text-white rounded-full p-2 transform rotate-[-15deg]">
-									<Heart className="h-8 w-8" />
-								</div>
-							)}
-							{offsetX < -50 && (
-								<div className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2 transform rotate-[15deg]">
-									<X className="h-8 w-8" />
-								</div>
-							)}
-							<div className="absolute bottom-0 inset-x-0 bg-gradient-from-transparent bg-gradient-to-b from-transparent via-black/70 to-black h-2/5 p-4">
-								<div className="flex items-center justify-between mb-2">
-									<div className="flex items-center gap-2">
-										<h2 className="text-2xl font-semibold text-white">
-											{currentRoommate.name}, {currentRoommate.age}
-										</h2>
-										{currentRoommate.verified && (
-											<CheckCircle className="h-5 w-5 text-blue-500" />
-										)}
-									</div>
-									<Badge variant="secondary" className="text-sm">
-										{currentRoommate.compatibility}% Match
-									</Badge>
+					<div className="max-w-3xl mx-auto">
+						<Card
+							ref={cardRef}
+							className={`overflow-hidden rounded-3xl shadow-2xl transition-all duration-300 h-[calc(100vh-16rem)] md:h-[calc(100vh-10rem)] md:max-h-[800px] mx-0 sm:mx-4 bg-gradient-to-br from-pink-100 to-purple-100 ${swipeDirection === 'left' ? 'animate-swipe-left' : swipeDirection === 'right' ? 'animate-swipe-right' : ''} ${isDragging ? 'scale-[1.02]' : ''}`}
+							style={isDragging ? { transform: `translateX(${offsetX}px) scale(1.02)`, cursor: 'grabbing' } : { cursor: 'grab' }}
+							onTouchStart={handleTouchStart}
+							onTouchMove={handleTouchMove}
+							onTouchEnd={handleTouchEnd}
+							onMouseDown={handleMouseDown}
+							onMouseMove={handleMouseMove}
+							onMouseUp={handleMouseUp}
+							onMouseLeave={handleMouseUp}
+						>
+							<div className="relative h-full bg-background group">
+								{/* Main profile image */}
+								<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]">
+									<img
+										src={currentRoommate.image}
+										alt={currentRoommate.name}
+										className="h-full w-full object-cover object-top rounded-3xl"
+									/>
 								</div>
 
-								<div className="flex items-center gap-4 text-gray-200 mb-3">
-									<div className="flex items-center">
-										<DollarSign className="h-4 w-4 mr-1" />
-										<span>${currentRoommate.budget}/mo</span>
+								{/* Gradient overlays */}
+								<div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
+								<div className="absolute inset-0 bg-gradient-to-t from-black/90 h-[40%] bottom-0 top-auto" />
+
+								{/* Swipe indicators */}
+								{offsetX > 50 && (
+									<div className="absolute top-8 left-8 bg-green-500 text-white rounded-full p-4 transform rotate-[-15deg] z-20 shadow-xl animate-bounce-subtle">
+										<Heart className="h-12 w-12" />
 									</div>
-									<div className="flex items-center">
-										<MapPin className="h-4 w-4 mr-1" />
-										<span>{currentRoommate.location}</span>
+								)}
+								{offsetX < -50 && (
+									<div className="absolute top-8 right-8 bg-red-500 text-white rounded-full p-4 transform rotate-[15deg] z-20 shadow-xl animate-bounce-subtle">
+										<X className="h-12 w-12" />
 									</div>
-									<div className="flex items-center">
-										<Calendar className="h-4 w-4 mr-1" />
-										<span>{currentRoommate.moveIn}</span>
+								)}
+
+								{/* Profile info */}
+								<div className="absolute bottom-0 inset-x-0 p-6 pb-28 z-10">
+									<div className="space-y-3">
+										<div className="flex items-center justify-between">
+											<div>
+												<h2 className="text-3xl font-bold text-white flex items-center gap-2">
+													{currentRoommate.name} {currentRoommate.verified && (
+														<CheckCircle className="h-6 w-6 text-vibrant-orange" />
+													)}
+												</h2>
+												<p className="text-lg text-gray-200">{currentRoommate.age} • {currentRoommate.nationality}</p>
+											</div>
+											<Badge variant="orange" className="text-sm px-3 py-1.5">
+												{currentRoommate.compatibility}% Match
+											</Badge>
+										</div>
+
+										<div className="flex items-center gap-4 text-white text-lg">
+											<div className="flex items-center gap-1">
+												<DollarSign className="h-5 w-5 text-vibrant-orange" />
+												${currentRoommate.budget}/mo
+											</div>
+											<div className="flex items-center gap-1">
+												<MapPin className="h-5 w-5 text-vibrant-orange" />
+												{currentRoommate.location}
+											</div>
+										</div>
+
+										<div className="flex flex-wrap gap-2">
+											{currentRoommate.tags.map((tag) => (
+												<Badge
+													key={tag}
+													variant="secondary"
+													className="bg-white/10 hover:bg-white/20 transition-colors text-white border-none"
+												>
+													{tag}
+												</Badge>
+											))}
+										</div>
 									</div>
 								</div>
 
-								<div className="flex flex-wrap gap-2">
-									{currentRoommate.tags.map((tag) => (
-										<Badge key={tag} variant="secondary">
-											{tag}
-										</Badge>
-									))}
+								{/* Action buttons */}
+								<div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-6 z-20">
+									<button
+										className="h-16 w-16 flex items-center justify-center rounded-full bg-white shadow-xl hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-red-500/20"
+										onClick={() => handleSwipe('left')}
+										aria-label="Pass"
+									>
+										<X className="h-8 w-8 text-red-500" />
+									</button>
+
+									<button
+										className="h-16 w-16 flex items-center justify-center rounded-full bg-white shadow-xl hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-green-500/20"
+										onClick={() => handleSwipe('right')}
+										aria-label="Like"
+									>
+										<Heart className="h-8 w-8 text-green-500" />
+									</button>
 								</div>
 							</div>
-						</div>
-					</Card>
-
-					<div className="fixed bottom-20 inset-x-0">
-						<div className="flex justify-center items-center gap-6">
-							<button
-								className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-transform hover:scale-110"
-								onClick={() => handleSwipe('left')}
-								aria-label="Pass"
-							>
-								<X className="h-6 w-6 text-red-500" />
-							</button>
-
-							<button
-								className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-transform hover:scale-110"
-								onClick={() => handleSwipe('right')}
-								aria-label="Like"
-							>
-								<Heart className="h-6 w-6 text-green-500" />
-							</button>
-						</div>
+						</Card>
 					</div>
 				</main>
 

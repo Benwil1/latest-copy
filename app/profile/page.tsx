@@ -1,7 +1,6 @@
 'use client';
 
 import MobileNav from '@/components/mobile-nav';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,17 +32,9 @@ export default function ProfilePage() {
 
 	return (
 		<div className="min-h-screen pb-16">
-			<header className="p-3 flex justify-between items-center safe-area-top border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-				<Link
-					href="/home"
-					className="text-lg font-bold text-vibrant-orange cursor-pointer"
-				>
-					RoomieMatch
-				</Link>
-				<ModeToggle />
-			</header>
 
-			<main className="container max-w-2xl mx-auto px-3 pt-4 sm:pt-6">
+
+			<main className="container max-w-2xl mx-auto px-3 py-6 sm:py-8">
 				<div className="flex flex-col items-center mb-6 sm:mb-8">
 					<div className="relative">
 						<Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-background">
@@ -386,51 +377,6 @@ export default function ProfilePage() {
 					</TabsContent>
 				</Tabs>
 
-				{/* Account Management Section */}
-				<div className="mt-8 space-y-6">
-					<h2 className="text-2xl font-semibold">Account Management</h2>
-					<p className="text-muted-foreground">
-						Manage your account access and data
-					</p>
-
-					<div className="space-y-4">
-						<Card>
-							<CardHeader className="p-4">
-								<CardTitle className="text-base sm:text-lg">Log Out</CardTitle>
-								<CardDescription>
-									Sign out of your account on this device
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="p-4 pt-0">
-								<Button
-									variant="outline"
-									className="w-full sm:w-auto"
-									onClick={() => router.push('/auth/login')}
-								>
-									<ArrowLeft className="h-4 w-4 mr-2" />
-									Log Out
-								</Button>
-							</CardContent>
-						</Card>
-
-						<Card className="border-destructive/50">
-							<CardHeader className="p-4">
-								<CardTitle className="text-base sm:text-lg text-destructive">
-									Delete Account
-								</CardTitle>
-								<CardDescription>
-									Permanently delete your account and all your data
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="p-4 pt-0">
-								<Button variant="destructive" className="w-full sm:w-auto">
-									<Trash2 className="h-4 w-4 mr-2" />
-									Delete Account
-								</Button>
-							</CardContent>
-						</Card>
-					</div>
-				</div>
 			</main>
 
 			<MobileNav />
