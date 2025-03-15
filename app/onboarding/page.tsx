@@ -427,7 +427,7 @@ export default function OnboardingPage() {
               <Button variant="ghost" onClick={handleBack} disabled={step === 1}>
                 Back
               </Button>
-              <Button variant="orange" onClick={handleNext}>
+              <Button variant="default" onClick={handleNext}>
                 {step === totalSteps ? (
                   <>
                     Complete <Check className="ml-2 h-4 w-4" />
@@ -445,4 +445,3 @@ export default function OnboardingPage() {
     </div>
   )
 }
-
