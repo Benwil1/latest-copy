@@ -113,7 +113,7 @@ export default function ExploreRoommatesPage() {
 														Verified
 													</Badge>
 												)}
-												<Badge variant="orange" className="text-xs">
+												<Badge variant="secondary" className="text-xs">
 													{roommate.compatibility}% Match
 												</Badge>
 											</div>

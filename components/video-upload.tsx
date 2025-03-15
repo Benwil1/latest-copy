@@ -148,7 +148,7 @@ export function VideoUpload({ onVideoSelected }: VideoUploadProps) {
 
           <div className="flex justify-center gap-4">
             {!isRecording ? (
-              <Button variant="orange" className="rounded-full px-6" onClick={startRecording}>
+              <Button variant="default" className="rounded-full px-6" onClick={startRecording}>
                 Start Recording
               </Button>
             ) : (
@@ -189,4 +189,3 @@ export function VideoUpload({ onVideoSelected }: VideoUploadProps) {
     </div>
   )
 }
-

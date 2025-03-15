@@ -175,7 +175,7 @@ export default async function RoommateProfilePage({ params }: PageProps) {
 										)}
 									</div>
 								</div>
-								<Badge variant="orange" className="text-xs sm:text-sm">
+								<Badge variant="secondary" className="text-xs sm:text-sm">
 									{roommate.compatibility}% Match
 								</Badge>
 							</div>

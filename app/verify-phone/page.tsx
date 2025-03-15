@@ -113,7 +113,7 @@ export default function VerifyPhonePage() {
                 {error && <p className="text-xs text-red-500 text-center">{error}</p>}
               </div>
 
-              <Button type="submit" className="w-full" variant="orange" disabled={isLoading}>
+              <Button type="submit" className="w-full" variant="default" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -150,4 +150,3 @@ export default function VerifyPhonePage() {
     </div>
   )
 }
-

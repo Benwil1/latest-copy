@@ -278,7 +278,7 @@ export default function HomePage() {
 												</h2>
 												<p className="text-lg text-gray-200">{currentRoommate.age} • {currentRoommate.nationality}</p>
 											</div>
-											<Badge variant="orange" className="text-sm px-3 py-1.5">
+											<Badge variant="secondary" className="text-sm px-3 py-1.5">
 												{currentRoommate.compatibility}% Match
 											</Badge>
 										</div>

@@ -80,7 +80,7 @@ export default function FeaturedListings() {
                   }`}
                 />
               </Button>
-              <Badge className="absolute bottom-2 left-2" variant="orange">
+              <Badge className="absolute bottom-2 left-2" variant="secondary">
                 ${listing.price}/mo
               </Badge>
             </div>
@@ -116,4 +116,3 @@ export default function FeaturedListings() {
     </div>
   )
 }
-
