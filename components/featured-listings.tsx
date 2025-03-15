@@ -70,7 +70,7 @@ export default function FeaturedListings() {
               <img src={listing.image || "/placeholder.svg"} alt={listing.title} className="w-full h-48 object-cover" />
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon"
                 className="absolute top-2 right-2 bg-white/80 dark:bg-black/50 rounded-full"
                 onClick={() => toggleFavorite(listing.id)}
               >
