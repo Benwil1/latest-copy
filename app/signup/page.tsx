@@ -178,7 +178,7 @@ export default function SignupPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     className="absolute right-1 top-1/2 transform -translate-y-1/2"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -242,4 +242,3 @@ export default function SignupPage() {
     </div>
   )
 }
-
