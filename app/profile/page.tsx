@@ -333,7 +333,7 @@ export default function ProfilePage() {
 									</div>
 								</div>
 
-								<Button variant="orange" className="w-full h-8 text-xs">
+								<Button variant="primary" className="w-full h-8 text-xs">
 									Upgrade to Premium
 								</Button>
 							</CardContent>
