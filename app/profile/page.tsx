@@ -45,8 +45,8 @@ export default function ProfilePage() {
 							<AvatarFallback>AT</AvatarFallback>
 						</Avatar>
 						<Button
-							variant="orange"
-							size="icon-sm"
+							variant="default"
+							size="icon"
 							className="absolute bottom-0 right-0 rounded-full h-6 w-6"
 						>
 							<Edit className="h-3 w-3" />
