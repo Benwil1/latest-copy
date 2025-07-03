@@ -85,17 +85,65 @@ const roommates = [
 			'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
 		],
 	},
-	// ... rest of the roommates data
+	{
+		id: 2,
+		name: 'Alex Chen',
+		age: 24,
+		nationality: 'Canada',
+		image:
+			'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+		videoProfile:
+			'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+		budget: 1000,
+		location: 'Midtown',
+		moveIn: 'Next month',
+		compatibility: 88,
+		verified: true,
+		tags: ['Non-smoker', 'Quiet', 'Student', 'Clean'],
+		bio: 'Graduate student studying computer science. Enjoys gaming and outdoor activities.',
+		occupation: 'Graduate Student',
+		lifestyle: {
+			cleanliness: 'Clean',
+			noise: 'Quiet',
+			schedule: 'Night owl',
+			guests: 'Rare guests',
+			smoking: 'Non-smoker',
+			pets: 'No pets',
+		},
+		preferences: {
+			roommate: 'Student or young professional',
+			gender: 'Any',
+			ageRange: '20-30',
+			spaceType: 'Private room',
+			bathroom: 'Shared okay',
+			furnished: 'Partially furnished',
+		},
+		interests: ['Gaming', 'Hiking', 'Technology', 'Movies', 'Cooking'],
+		languages: ['English', 'Mandarin'],
+		reviews: [
+			{
+				name: 'Jessica',
+				image:
+					'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+				rating: 5,
+				text: 'Alex is a great roommate. Very respectful and clean.',
+			},
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
+			'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
+		],
+	},
 ];
 
 interface PageProps {
-	params: Promise<any>;
+	params: { id: string };
 }
 
-export default async function RoommateProfilePage({ params }: PageProps) {
+export default function RoommateProfilePage({ params }: PageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const router = useRouter();
-	const roommateId = Number.parseInt((await params).id);
+	const roommateId = Number.parseInt(params.id);
 	const [activeTab, setActiveTab] = useState('about');
 	const [roommate, setRoommate] = useState(
 		roommates.find((r) => r.id === roommateId)
@@ -330,7 +378,7 @@ export default async function RoommateProfilePage({ params }: PageProps) {
 							<CardContent>
 								<div className="flex flex-wrap gap-2">
 									{roommate.interests.map((interest, index) => (
-										<Badge key={index} variant="gray" className="text-xs">
+										<Badge key={index} variant="secondary" className="text-xs">
 											{interest}
 										</Badge>
 									))}
