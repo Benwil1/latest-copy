@@ -15,6 +15,8 @@ import {
 	Heart,
 	MapPin,
 	X,
+	Info,
+	Star,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -37,6 +39,13 @@ const roommates = [
 		verified: true,
 		tags: ['Non-smoker', 'Pet-friendly', 'Early riser', 'Clean'],
 		bio: 'Software engineer who loves hiking and cooking. Looking for a quiet and clean roommate.',
+		interests: ['Hiking', 'Cooking', 'Reading', 'Photography'],
+		lifestyle: {
+			cleanliness: 'Very clean',
+			noise: 'Quiet',
+			schedule: 'Early riser',
+			pets: 'Pet-friendly',
+		},
 	},
 	{
 		id: 2,
@@ -52,6 +61,13 @@ const roommates = [
 		verified: true,
 		tags: ['Non-smoker', 'Night owl', 'Fitness enthusiast', 'Social'],
 		bio: "Marketing professional who enjoys fitness and weekend adventures. I'm tidy and respectful of shared spaces.",
+		interests: ['Fitness', 'Travel', 'Music', 'Cooking'],
+		lifestyle: {
+			cleanliness: 'Clean',
+			noise: 'Moderate',
+			schedule: 'Night owl',
+			pets: 'No pets',
+		},
 	},
 	{
 		id: 3,
@@ -67,6 +83,13 @@ const roommates = [
 		verified: false,
 		tags: ['Occasional smoker', 'Pet owner', 'Creative', 'Relaxed'],
 		bio: "Graphic designer with a small cat. I'm creative, laid-back, and enjoy having friends over occasionally.",
+		interests: ['Art', 'Design', 'Movies', 'Cats'],
+		lifestyle: {
+			cleanliness: 'Average',
+			noise: 'Don\'t mind noise',
+			schedule: 'Flexible',
+			pets: 'Has pets',
+		},
 	},
 	{
 		id: 4,
@@ -82,6 +105,13 @@ const roommates = [
 		verified: true,
 		tags: ['Non-smoker', 'Vegetarian', 'Early riser', 'Tech enthusiast'],
 		bio: "Software developer who loves cooking Indian food. I'm clean, quiet, and respectful of shared spaces.",
+		interests: ['Technology', 'Cooking', 'Gaming', 'Movies'],
+		lifestyle: {
+			cleanliness: 'Very clean',
+			noise: 'Quiet',
+			schedule: 'Early riser',
+			pets: 'No pets',
+		},
 	},
 	{
 		id: 5,
@@ -97,6 +127,13 @@ const roommates = [
 		verified: true,
 		tags: ['Non-smoker', 'Student', 'Clean', 'Foodie'],
 		bio: 'Graduate student studying business. I enjoy trying new restaurants, watching movies, and keeping a tidy home.',
+		interests: ['Food', 'Business', 'Movies', 'Travel'],
+		lifestyle: {
+			cleanliness: 'Very clean',
+			noise: 'Quiet',
+			schedule: 'Early riser',
+			pets: 'Pet-friendly',
+		},
 	},
 ];
 
@@ -107,6 +144,8 @@ export default function HomePage() {
 	const [startX, setStartX] = useState(0);
 	const [offsetX, setOffsetX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
+	const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
+	const [passedProfiles, setPassedProfiles] = useState<number[]>([]);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
 
@@ -114,6 +153,13 @@ export default function HomePage() {
 
 	const handleSwipe = (direction: string) => {
 		setSwipeDirection(direction);
+
+		// Track likes and passes
+		if (direction === 'right') {
+			setLikedProfiles(prev => [...prev, currentRoommate.id]);
+		} else {
+			setPassedProfiles(prev => [...prev, currentRoommate.id]);
+		}
 
 		// Reset swipe direction and move to next profile after animation
 		setTimeout(() => {
@@ -221,7 +267,13 @@ export default function HomePage() {
 							{roommates.map((_, index) => (
 								<div
 									key={index}
-									className={`h-1 flex-1 rounded-full transition-all duration-300 ${index === currentIndex ? 'bg-vibrant-orange' : index < currentIndex ? 'bg-vibrant-orange/30' : 'bg-gray-200 dark:bg-gray-700'}`}
+									className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+										index === currentIndex 
+											? 'bg-vibrant-orange' 
+											: index < currentIndex 
+											? 'bg-vibrant-orange/30' 
+											: 'bg-gray-200 dark:bg-gray-700'
+									}`}
 								/>
 							))}
 						</div>
@@ -230,8 +282,18 @@ export default function HomePage() {
 					<div className="max-w-3xl mx-auto">
 						<Card
 							ref={cardRef}
-							className={`overflow-hidden rounded-3xl shadow-2xl transition-all duration-300 h-[calc(100vh-16rem)] md:h-[calc(100vh-10rem)] md:max-h-[800px] mx-0 sm:mx-4 bg-gradient-to-br from-pink-100 to-purple-100 ${swipeDirection === 'left' ? 'animate-swipe-left' : swipeDirection === 'right' ? 'animate-swipe-right' : ''} ${isDragging ? 'scale-[1.02]' : ''}`}
-							style={isDragging ? { transform: `translateX(${offsetX}px) scale(1.02)`, cursor: 'grabbing' } : { cursor: 'grab' }}
+							className={`overflow-hidden rounded-3xl shadow-2xl transition-all duration-300 h-[calc(100vh-16rem)] md:h-[calc(100vh-10rem)] md:max-h-[800px] mx-0 sm:mx-4 bg-gradient-to-br from-pink-100 to-purple-100 ${
+								swipeDirection === 'left' 
+									? 'animate-swipe-left' 
+									: swipeDirection === 'right' 
+									? 'animate-swipe-right' 
+									: ''
+							} ${isDragging ? 'scale-[1.02]' : ''}`}
+							style={
+								isDragging 
+									? { transform: `translateX(${offsetX}px) scale(1.02)`, cursor: 'grabbing' } 
+									: { cursor: 'grab' }
+							}
 							onTouchStart={handleTouchStart}
 							onTouchMove={handleTouchMove}
 							onTouchEnd={handleTouchEnd}
@@ -266,6 +328,97 @@ export default function HomePage() {
 									</div>
 								)}
 
+								{/* Info button */}
+								<Button
+									variant="outline"
+									size="icon"
+									className="absolute top-6 right-6 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border-white/20 hover:bg-white z-20"
+									onClick={toggleDetails}
+								>
+									<Info className="h-5 w-5" />
+								</Button>
+
+								{/* Details overlay */}
+								{showDetails && (
+									<div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-30 p-6 overflow-y-auto">
+										<div className="flex justify-between items-start mb-6">
+											<h2 className="text-2xl font-bold text-white">
+												{currentRoommate.name}, {currentRoommate.age}
+											</h2>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="text-white hover:bg-white/20"
+												onClick={toggleDetails}
+											>
+												<X className="h-5 w-5" />
+											</Button>
+										</div>
+
+										<div className="space-y-6 text-white">
+											{/* Bio */}
+											<div>
+												<h3 className="text-lg font-semibold mb-2">About</h3>
+												<p className="text-white/90">{currentRoommate.bio}</p>
+											</div>
+
+											{/* Interests */}
+											<div>
+												<h3 className="text-lg font-semibold mb-2">Interests</h3>
+												<div className="flex flex-wrap gap-2">
+													{currentRoommate.interests.map((interest, index) => (
+														<Badge key={index} variant="secondary" className="bg-white/20 text-white border-white/30">
+															{interest}
+														</Badge>
+													))}
+												</div>
+											</div>
+
+											{/* Lifestyle */}
+											<div>
+												<h3 className="text-lg font-semibold mb-2">Lifestyle</h3>
+												<div className="grid grid-cols-2 gap-3">
+													<div>
+														<p className="text-sm text-white/70">Cleanliness</p>
+														<p className="font-medium">{currentRoommate.lifestyle.cleanliness}</p>
+													</div>
+													<div>
+														<p className="text-sm text-white/70">Noise Level</p>
+														<p className="font-medium">{currentRoommate.lifestyle.noise}</p>
+													</div>
+													<div>
+														<p className="text-sm text-white/70">Schedule</p>
+														<p className="font-medium">{currentRoommate.lifestyle.schedule}</p>
+													</div>
+													<div>
+														<p className="text-sm text-white/70">Pets</p>
+														<p className="font-medium">{currentRoommate.lifestyle.pets}</p>
+													</div>
+												</div>
+											</div>
+
+											{/* Housing Details */}
+											<div>
+												<h3 className="text-lg font-semibold mb-2">Housing Details</h3>
+												<div className="space-y-2">
+													<div className="flex justify-between">
+														<span className="text-white/70">Budget:</span>
+														<span className="font-medium">${currentRoommate.budget}/month</span>
+													</div>
+													<div className="flex justify-between">
+														<span className="text-white/70">Location:</span>
+														<span className="font-medium">{currentRoommate.location}</span>
+													</div>
+													<div className="flex justify-between">
+														<span className="text-white/70">Move-in:</span>
+														<span className="font-medium">{currentRoommate.moveIn}</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
+
 								{/* Profile info */}
 								<div className="absolute bottom-0 inset-x-0 p-6 pb-28 z-10">
 									<div className="space-y-3">
@@ -278,9 +431,12 @@ export default function HomePage() {
 												</h2>
 												<p className="text-lg text-gray-200">{currentRoommate.age} • {currentRoommate.nationality}</p>
 											</div>
-											<Badge variant="secondary" className="text-sm px-3 py-1.5">
-												{currentRoommate.compatibility}% Match
-											</Badge>
+											<div className="flex items-center gap-2">
+												<Badge variant="secondary" className="text-sm px-3 py-1.5 bg-white/20 text-white border-white/30">
+													<Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+													{currentRoommate.compatibility}% Match
+												</Badge>
+											</div>
 										</div>
 
 										<div className="flex items-center gap-4 text-white text-lg">
@@ -292,10 +448,14 @@ export default function HomePage() {
 												<MapPin className="h-5 w-5 text-vibrant-orange" />
 												{currentRoommate.location}
 											</div>
+											<div className="flex items-center gap-1">
+												<Calendar className="h-5 w-5 text-vibrant-orange" />
+												{currentRoommate.moveIn}
+											</div>
 										</div>
 
 										<div className="flex flex-wrap gap-2">
-											{currentRoommate.tags.map((tag) => (
+											{currentRoommate.tags.slice(0, 3).map((tag) => (
 												<Badge
 													key={tag}
 													variant="secondary"
@@ -304,6 +464,14 @@ export default function HomePage() {
 													{tag}
 												</Badge>
 											))}
+											{currentRoommate.tags.length > 3 && (
+												<Badge
+													variant="secondary"
+													className="bg-white/10 hover:bg-white/20 transition-colors text-white border-none"
+												>
+													+{currentRoommate.tags.length - 3} more
+												</Badge>
+											)}
 										</div>
 									</div>
 								</div>
@@ -319,15 +487,31 @@ export default function HomePage() {
 									</button>
 
 									<button
-										className="h-16 w-16 flex items-center justify-center rounded-full bg-white shadow-xl hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-green-500/20"
+										className="h-20 w-20 flex items-center justify-center rounded-full bg-vibrant-orange shadow-xl hover:bg-orange-600 transform transition-all hover:scale-110 active:scale-95 border-2 border-orange-300"
 										onClick={() => handleSwipe('right')}
 										aria-label="Like"
 									>
-										<Heart className="h-8 w-8 text-green-500" />
+										<Heart className="h-10 w-10 text-white" />
 									</button>
 								</div>
 							</div>
 						</Card>
+
+						{/* Stats */}
+						<div className="mt-6 px-4 flex justify-center gap-8 text-center">
+							<div>
+								<p className="text-2xl font-bold text-vibrant-orange">{likedProfiles.length}</p>
+								<p className="text-sm text-muted-foreground">Liked</p>
+							</div>
+							<div>
+								<p className="text-2xl font-bold text-gray-500">{passedProfiles.length}</p>
+								<p className="text-sm text-muted-foreground">Passed</p>
+							</div>
+							<div>
+								<p className="text-2xl font-bold text-green-500">{Math.floor(Math.random() * 5) + 1}</p>
+								<p className="text-sm text-muted-foreground">Matches</p>
+							</div>
+						</div>
 					</div>
 				</main>
 

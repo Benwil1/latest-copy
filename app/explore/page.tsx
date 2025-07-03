@@ -1,7 +1,7 @@
 'use client';
 
+import { EnhancedSearch } from '@/components/enhanced-search';
 import MobileNav from '@/components/mobile-nav';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,23 +11,17 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
 	Calendar,
 	CheckCircle,
 	DollarSign,
-	Filter,
 	MapPin,
-	Search,
-	Sparkles,
+	MessageSquare,
 	Star,
-	Zap,
 } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface Roommate {
 	id: number;
@@ -41,359 +35,409 @@ interface Roommate {
 	verified: boolean;
 	tags: string[];
 	bio: string;
+	nationality: string;
+	hasPhotos: boolean;
+	roomType: string[];
+	moveInDate?: string;
 }
 
-// Sample roommate data
+interface SearchFilters {
+	budgetRange: [number, number];
+	ageRange: [number, number];
+	location: string;
+	moveInDate: string;
+	roomType: string[];
+	lifestyle: string[];
+	verified: boolean;
+	hasPhotos: boolean;
+}
+
+// Sample roommate data with enhanced properties
 const roommates: Roommate[] = [
 	{
 		id: 1,
 		name: 'Sarah Johnson',
 		age: 26,
+		nationality: 'United States',
 		image:
 			'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
 		budget: 1200,
 		location: 'Downtown',
 		moveIn: 'Immediate',
+		moveInDate: '2024-02-01',
 		compatibility: 92,
 		verified: true,
-		tags: ['Non-smoker', 'Pet-friendly', 'Early bird', 'Professional'],
-		bio: 'Software engineer looking for a clean and quiet space. Love cooking and hiking on weekends.',
+		hasPhotos: true,
+		roomType: ['Private Room', 'Entire Apartment'],
+		tags: ['Non-smoker', 'Pet-friendly', 'Early riser', 'Professional', 'Clean'],
+		bio: 'Software engineer who loves hiking and cooking. Looking for a quiet and clean roommate.',
 	},
 	{
 		id: 2,
 		name: 'Michael Chen',
 		age: 28,
+		nationality: 'Canada',
 		image:
 			'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
 		budget: 1500,
 		location: 'Midtown',
 		moveIn: 'Next month',
+		moveInDate: '2024-03-01',
 		compatibility: 85,
 		verified: true,
-		tags: ['Student', 'Night owl', 'Vegetarian', 'Music lover'],
-		bio: 'Graduate student in Computer Science. Clean, respectful, and always up for good conversations.',
+		hasPhotos: true,
+		roomType: ['Shared Room', 'Studio'],
+		tags: ['Non-smoker', 'Night owl', 'Social', 'Professional'],
+		bio: "Marketing professional who enjoys fitness and weekend adventures. I'm tidy and respectful of shared spaces.",
 	},
 	{
 		id: 3,
 		name: 'Emma Rodriguez',
 		age: 24,
+		nationality: 'Spain',
 		image:
-			'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+			'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
 		budget: 1100,
 		location: 'Westside',
 		moveIn: 'Flexible',
+		moveInDate: '2024-04-01',
 		compatibility: 78,
 		verified: false,
-		tags: ['Creative', 'Pet owner', 'Relaxed', 'Social'],
-		bio: '',
+		hasPhotos: true,
+		roomType: ['Private Room', 'House'],
+		tags: ['Pet-friendly', 'Student', 'Quiet', 'Vegetarian'],
+		bio: "Graphic designer with a small cat. I'm creative, laid-back, and enjoy having friends over occasionally.",
 	},
 	{
 		id: 4,
-		name: 'David Kim',
-		age: 29,
+		name: 'Raj Patel',
+		age: 27,
+		nationality: 'India',
 		image:
 			'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
-		budget: 1600,
-		location: 'Uptown',
+		budget: 1300,
+		location: 'Downtown',
 		moveIn: 'Next month',
-		compatibility: 73,
+		moveInDate: '2024-03-15',
+		compatibility: 81,
 		verified: true,
-		tags: ['Non-smoker', 'Clean', 'Professional', 'Quiet'],
-		bio: '',
+		hasPhotos: true,
+		roomType: ['Entire Apartment', 'Studio'],
+		tags: ['Non-smoker', 'Vegetarian', 'Early riser', 'Professional', 'Clean'],
+		bio: "Software developer who loves cooking Indian food. I'm clean, quiet, and respectful of shared spaces.",
 	},
 	{
 		id: 5,
-		name: 'Olivia Martinez',
+		name: 'Sophia Kim',
 		age: 25,
+		nationality: 'South Korea',
 		image:
-			'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
-		budget: 1300,
-		location: 'Downtown',
+			'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+		budget: 1400,
+		location: 'Eastside',
 		moveIn: 'Immediate',
-		compatibility: 88,
+		moveInDate: '2024-02-15',
+		compatibility: 89,
 		verified: true,
-		tags: ['Non-smoker', 'Student', 'Social', 'Clean'],
-		bio: '',
+		hasPhotos: true,
+		roomType: ['Private Room', 'Shared Room'],
+		tags: ['Non-smoker', 'Student', 'Clean', 'Early riser'],
+		bio: 'Graduate student studying business. I enjoy trying new restaurants, watching movies, and keeping a tidy home.',
+	},
+	{
+		id: 6,
+		name: 'Alex Thompson',
+		age: 30,
+		nationality: 'United Kingdom',
+		image:
+			'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
+		budget: 1800,
+		location: 'Downtown',
+		moveIn: 'Next month',
+		moveInDate: '2024-03-01',
+		compatibility: 87,
+		verified: true,
+		hasPhotos: false,
+		roomType: ['Entire Apartment', 'House'],
+		tags: ['Night owl', 'Social', 'Professional', 'Pet-friendly'],
+		bio: 'Financial analyst who enjoys nightlife and social events. Looking for someone who shares similar interests.',
+	},
+	{
+		id: 7,
+		name: 'Maya Singh',
+		age: 23,
+		nationality: 'India',
+		image:
+			'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1888&auto=format&fit=crop&ixlib=rb-4.0.3',
+		budget: 900,
+		location: 'Uptown',
+		moveIn: 'Flexible',
+		moveInDate: '2024-05-01',
+		compatibility: 75,
+		verified: false,
+		hasPhotos: true,
+		roomType: ['Shared Room', 'Studio'],
+		tags: ['Student', 'Quiet', 'Vegetarian', 'Early riser'],
+		bio: 'Medical student looking for a quiet study environment. I keep to myself but am friendly.',
+	},
+	{
+		id: 8,
+		name: 'James Wilson',
+		age: 29,
+		nationality: 'Australia',
+		image:
+			'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
+		budget: 1600,
+		location: 'Midtown',
+		moveIn: 'Immediate',
+		moveInDate: '2024-02-01',
+		compatibility: 83,
+		verified: true,
+		hasPhotos: true,
+		roomType: ['Private Room', 'Entire Apartment'],
+		tags: ['Non-smoker', 'Social', 'Professional', 'Clean'],
+		bio: 'Software architect who enjoys cooking and outdoor activities. Looking for a responsible roommate.',
 	},
 ];
 
 export default function ExplorePage() {
 	const router = useRouter();
-	const [showFilters, setShowFilters] = useState(false);
-	const [searchQuery, setSearchQuery] = useState('');
-	const [showBoostDialog, setShowBoostDialog] = useState(false);
+	const [filters, setFilters] = useState<SearchFilters>({
+		budgetRange: [500, 3000],
+		ageRange: [18, 65],
+		location: '',
+		moveInDate: '',
+		roomType: [],
+		lifestyle: [],
+		verified: false,
+		hasPhotos: false,
+	});
 
-	const filteredRoommates = roommates.filter(
-		(roommate) =>
-			roommate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			roommate.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			roommate.tags.some((tag) =>
-				tag.toLowerCase().includes(searchQuery.toLowerCase())
-			)
-	);
+	// Filter roommates based on all criteria
+	const filteredRoommates = useMemo(() => {
+		return roommates.filter((roommate) => {
+			// Budget filter
+			const budgetMatch = roommate.budget >= filters.budgetRange[0] && 
+							   roommate.budget <= filters.budgetRange[1];
+
+			// Age filter
+			const ageMatch = roommate.age >= filters.ageRange[0] && 
+							roommate.age <= filters.ageRange[1];
+
+			// Location filter
+			const locationMatch = !filters.location || 
+								 roommate.location.toLowerCase().includes(filters.location.toLowerCase());
+
+			// Move-in date filter (if specified)
+			const moveInMatch = !filters.moveInDate || 
+							   (roommate.moveInDate && new Date(roommate.moveInDate) <= new Date(filters.moveInDate));
+
+			// Room type filter
+			const roomTypeMatch = filters.roomType.length === 0 || 
+								 filters.roomType.some(type => roommate.roomType.includes(type));
+
+			// Lifestyle filter
+			const lifestyleMatch = filters.lifestyle.length === 0 || 
+								  filters.lifestyle.every(lifestyle => roommate.tags.includes(lifestyle));
+
+			// Verified filter
+			const verifiedMatch = !filters.verified || roommate.verified;
+
+			// Has photos filter
+			const photosMatch = !filters.hasPhotos || roommate.hasPhotos;
+
+			return budgetMatch && ageMatch && locationMatch && moveInMatch && 
+				   roomTypeMatch && lifestyleMatch && verifiedMatch && photosMatch;
+		});
+	}, [filters]);
+
+	const handleFiltersChange = (newFilters: SearchFilters) => {
+		setFilters(newFilters);
+	};
+
+	const handleContact = (roommateId: number) => {
+		// Navigate to matches page or direct message
+		router.push(`/matches?contact=${roommateId}`);
+	};
 
 	return (
 		<div className="min-h-screen pb-20 sm:pb-16">
 			<main className="pt-6">
 				<div className="container max-w-7xl mx-auto px-4">
+					{/* Enhanced Search Component */}
+					<EnhancedSearch 
+						onFiltersChange={handleFiltersChange}
+						className="mb-8"
+					/>
 
-					<div className="relative mb-8">
-						<div className="flex gap-2 items-center">
-							<div className="relative flex-1">
-								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									type="text"
-									placeholder="Search by name, location, or interests..."
-									className="pl-9 pr-4 h-12 w-full rounded-full bg-muted/50 border-0 focus:ring-0 focus:ring-offset-0"
-									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
-							</div>
-							<Button
-								variant="ghost"
-								size="icon"
-								className={cn(
-									'h-12 w-12 rounded-full',
-									showFilters
-										? 'bg-vibrant-orange text-white hover:bg-vibrant-orange/90'
-										: 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
-								)}
-								onClick={() => setShowFilters(!showFilters)}
-							>
-								<Filter className="h-5 w-5" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-12 w-12 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted/70"
-								onClick={() => setShowBoostDialog(true)}
-							>
-								<Sparkles className="h-5 w-5" />
-							</Button>
+					{/* Results Header */}
+					<div className="flex justify-between items-center mb-6">
+						<div>
+							<h2 className="text-xl font-semibold">
+								{filteredRoommates.length} Roommate{filteredRoommates.length !== 1 ? 's' : ''} Found
+							</h2>
+							<p className="text-sm text-muted-foreground">
+								Find your perfect roommate match
+							</p>
 						</div>
 					</div>
 
-					{showFilters && (
-						<Card className="mb-4 animate-fade-in">
-							<CardHeader className="p-3">
-								<CardTitle className="text-base">Filters</CardTitle>
-								<CardDescription className="text-xs">
-									Refine your search
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="p-3 pt-0 space-y-3">
-								<div className="space-y-1">
-									<label className="text-xs font-medium">Budget Range</label>
-									<div className="flex items-center gap-2">
-										<Input
-											placeholder="Min"
-											type="number"
-											className="w-1/2 h-7 text-xs"
+					{/* Roommate Grid */}
+					{filteredRoommates.length > 0 ? (
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+							{filteredRoommates.map((roommate) => (
+								<Card
+									key={roommate.id}
+									className="group overflow-hidden border hover:border-vibrant-orange/20 transition-all duration-300 hover:shadow-lg cursor-pointer"
+									onClick={() => router.push(`/roommate/${roommate.id}`)}
+								>
+									<div className="relative aspect-[4/5] overflow-hidden">
+										<img
+											src={roommate.image}
+											alt={roommate.name}
+											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 										/>
-										<span className="text-xs">-</span>
-										<Input
-											placeholder="Max"
-											type="number"
-											className="w-1/2 h-7 text-xs"
-										/>
-									</div>
-								</div>
-
-								<div className="space-y-1">
-									<label className="text-xs font-medium">Location</label>
-									<Input placeholder="Enter location" className="h-7 text-xs" />
-								</div>
-
-								<div className="space-y-1">
-									<label className="text-xs font-medium">
-										Move-in Date Range
-									</label>
-									<div className="flex items-center gap-2">
-										<Input
-											type="date"
-											className="w-1/2 h-7 text-xs"
-											placeholder="From"
-										/>
-										<span className="text-xs">-</span>
-										<Input
-											type="date"
-											className="w-1/2 h-7 text-xs"
-											placeholder="To"
-										/>
-									</div>
-								</div>
-
-								<div className="space-y-1">
-									<label className="text-xs font-medium">
-										Living Space Type
-									</label>
-									<div className="flex flex-wrap gap-1">
-										<Button
-											variant="outline"
-											size="sm"
-											className="rounded-full h-6 text-[10px] px-2 py-0"
-										>
-											Private Room
-										</Button>
-										<Button
-											variant="outline"
-											size="sm"
-											className="rounded-full h-6 text-[10px] px-2 py-0"
-										>
-											Shared Room
-										</Button>
-										<Button
-											variant="outline"
-											size="sm"
-											className="rounded-full h-6 text-[10px] px-2 py-0"
-										>
-											Entire Apartment
-										</Button>
-										<Button
-											variant="outline"
-											size="sm"
-											className="rounded-full h-6 text-[10px] px-2 py-0"
-										>
-											Studio
-										</Button>
-									</div>
-								</div>
-
-								<div className="pt-1 flex justify-between">
-									<Button variant="outline" className="h-7 text-xs">
-										Reset
-									</Button>
-									<Button variant="default" className="h-7 text-xs bg-vibrant-orange hover:bg-vibrant-orange/90">
-										Apply Filters
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-
-					<div className="flex justify-between items-center mb-3">
-						<h2 className="text-base font-semibold">Explore Roommates</h2>
-					</div>
-
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-						{filteredRoommates.map((roommate) => (
-							<div
-								key={roommate.id}
-								className="bg-card rounded-xl overflow-hidden border hover:border-vibrant-orange/20 transition-colors cursor-pointer group"
-								onClick={() => router.push(`/roommate/${roommate.id}`)}
-							>
-								<div className="aspect-square relative">
-									<img
-										src={roommate.image}
-										alt={roommate.name}
-										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-									<div className="absolute top-2 right-2 flex gap-1.5">
-										{roommate.verified && (
-											<Badge
-												variant="secondary"
-												className="text-[10px] py-0 h-5 bg-background/90 backdrop-blur-sm"
+										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+										
+										{/* Overlay Badges */}
+										<div className="absolute top-3 right-3 flex flex-col gap-2">
+											{roommate.verified && (
+												<Badge
+													variant="secondary"
+													className="text-xs bg-background/90 backdrop-blur-sm"
+												>
+													<CheckCircle className="h-3 w-3 mr-1" />
+													Verified
+												</Badge>
+											)}
+											<Badge 
+												variant="default" 
+												className="text-xs bg-vibrant-orange hover:bg-vibrant-orange/90"
 											>
-												Verified
+												{roommate.compatibility}% Match
 											</Badge>
-										)}
-										<Badge variant="default" className="text-[10px] py-0 h-5 bg-vibrant-orange">
-											{roommate.compatibility}% Match
-										</Badge>
-									</div>
-									<div className="absolute bottom-0 left-0 right-0 p-3">
-										<h2 className="text-base font-semibold text-white mb-1.5">
-											{roommate.name}, {roommate.age}
-										</h2>
-										<div className="flex items-center gap-3 text-xs text-white/90">
-											<span>${roommate.budget}/mo</span>
-											<span>{roommate.location}</span>
-											<span>{roommate.moveIn}</span>
 										</div>
-										<div className="flex flex-wrap gap-1.5 mt-2">
+
+										{/* Bottom Info Overlay */}
+										<div className="absolute bottom-0 left-0 right-0 p-4">
+											<div className="text-white">
+												<h3 className="text-lg font-semibold mb-1">
+													{roommate.name}, {roommate.age}
+												</h3>
+												<div className="flex items-center gap-4 text-sm text-white/90 mb-2">
+													<div className="flex items-center gap-1">
+														<DollarSign className="h-3 w-3" />
+														${roommate.budget}/mo
+													</div>
+													<div className="flex items-center gap-1">
+														<MapPin className="h-3 w-3" />
+														{roommate.location}
+													</div>
+												</div>
+												<div className="flex items-center gap-1 text-sm text-white/90">
+													<Calendar className="h-3 w-3" />
+													{roommate.moveIn}
+												</div>
+											</div>
+										</div>
+									</div>
+
+									{/* Card Content */}
+									<CardContent className="p-4">
+										<div className="flex flex-wrap gap-1 mb-3">
 											{roommate.tags.slice(0, 3).map((tag, index) => (
 												<Badge
 													key={index}
-													variant="secondary"
-													className="text-[10px] py-0 h-5 bg-background/90 backdrop-blur-sm"
+													variant="outline"
+													className="text-xs"
 												>
 													{tag}
 												</Badge>
 											))}
+											{roommate.tags.length > 3 && (
+												<Badge variant="outline" className="text-xs">
+													+{roommate.tags.length - 3}
+												</Badge>
+											)}
 										</div>
-									</div>
-								</div>
-							</div>
-						))}
 
-						{filteredRoommates.length === 0 && (
-							<div className="text-center py-12 text-muted-foreground">
-								<p className="text-lg mb-2">No roommates found</p>
-								<p className="text-sm">
-									Try adjusting your filters or search criteria
-								</p>
-							</div>
-						)}
-					</div>
-				</div>
-			</main>
-
-			{showBoostDialog && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-					<Card className="w-full max-w-xs animate-bounce-in">
-						<CardHeader className="p-3">
-							<CardTitle className="text-base flex items-center gap-1">
-								<Zap className="h-4 w-4 text-amber-500" />
-								Boost Your Profile
-							</CardTitle>
-							<CardDescription className="text-xs">
-								Get more visibility and matches
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="p-3 pt-0 space-y-3">
-							<div className="space-y-2">
-								<div className="flex items-center gap-2">
-									<div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-										<Zap className="h-4 w-4 text-amber-500" />
-									</div>
-									<div>
-										<h3 className="text-xs font-medium">24-Hour Boost</h3>
-										<p className="text-[10px] text-muted-foreground">
-											Your profile will be shown to 10x more people
+										<p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+											{roommate.bio}
 										</p>
-									</div>
-								</div>
 
-								<div className="flex items-center gap-2">
-									<div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-										<Star className="h-4 w-4 text-amber-500" />
-									</div>
-									<div>
-										<h3 className="text-xs font-medium">Priority Matching</h3>
-										<p className="text-[10px] text-muted-foreground">
-											Your profile will appear at the top of search results
-										</p>
-									</div>
-								</div>
-							</div>
-
-							<div className="flex gap-2">
+										<div className="flex gap-2">
+											<Button
+												size="sm"
+												className="flex-1 bg-vibrant-orange hover:bg-orange-600"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleContact(roommate.id);
+												}}
+											>
+												<MessageSquare className="h-3 w-3 mr-1" />
+												Message
+											</Button>
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={(e) => {
+													e.stopPropagation();
+													router.push(`/roommate/${roommate.id}`);
+												}}
+											>
+												View Profile
+											</Button>
+										</div>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					) : (
+						<Card className="text-center py-12">
+							<CardHeader>
+								<CardTitle className="text-xl">No roommates found</CardTitle>
+								<CardDescription>
+									Try adjusting your search filters to find more matches
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
 								<Button
 									variant="outline"
-									className="flex-1 h-8 text-xs"
-									onClick={() => setShowBoostDialog(false)}
+									onClick={() => setFilters({
+										budgetRange: [500, 3000],
+										ageRange: [18, 65],
+										location: '',
+										moveInDate: '',
+										roomType: [],
+										lifestyle: [],
+										verified: false,
+										hasPhotos: false,
+									})}
 								>
-									Cancel
+									Clear All Filters
 								</Button>
-								<Button variant="default" className="flex-1 pulse h-8 text-xs bg-vibrant-orange hover:bg-vibrant-orange/90">
-									Boost Now
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Search Tips */}
+					{filteredRoommates.length > 0 && (
+						<Card className="mt-8 bg-gradient-to-r from-vibrant-orange/5 to-purple-500/5 border-vibrant-orange/20">
+							<CardContent className="p-6">
+								<h3 className="font-semibold mb-2 text-vibrant-orange">
+									💡 Search Tips
+								</h3>
+								<div className="text-sm text-muted-foreground space-y-1">
+									<p>• Use lifestyle filters to find roommates with compatible habits</p>
+									<p>• Set a realistic budget range to see more options</p>
+									<p>• Consider roommates in nearby areas for more choices</p>
+									<p>• Verified profiles have gone through our identity verification process</p>
+								</div>
+							</CardContent>
+						</Card>
+					)}
 				</div>
-			)}
+			</main>
 
 			<MobileNav />
 		</div>
