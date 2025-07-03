@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 
 // Sample roommate data - in a real app, this would come from an API
 const roommates = [
@@ -137,13 +137,14 @@ const roommates = [
 ];
 
 interface PageProps {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }
 
 export default function RoommateProfilePage({ params }: PageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const router = useRouter();
-	const roommateId = Number.parseInt(params.id);
+	const resolvedParams = use(params);
+	const roommateId = Number.parseInt(resolvedParams.id);
 	const [activeTab, setActiveTab] = useState('about');
 	const [roommate, setRoommate] = useState(
 		roommates.find((r) => r.id === roommateId)
