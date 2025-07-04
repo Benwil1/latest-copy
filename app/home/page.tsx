@@ -17,6 +17,7 @@ import {
 	X,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -243,10 +244,12 @@ export default function HomePage() {
 							<div className="relative h-full bg-background group">
 								{/* Main profile image */}
 								<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]">
-									<img
+									<Image
 										src={currentRoommate.image}
 										alt={currentRoommate.name}
-										className="h-full w-full object-cover object-top rounded-3xl"
+										layout="fill"
+										objectFit="cover"
+										className="h-full w-full object-top rounded-3xl"
 									/>
 								</div>
 

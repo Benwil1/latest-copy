@@ -28,6 +28,7 @@ import {
 	Upload,
 } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 
 // Add useMarketplace and useRouter imports
 import { useMarketplace } from '@/context/marketplace-context';
@@ -455,10 +456,12 @@ export default function CreateListingPage() {
 											key={index}
 											className="relative h-32 rounded-md overflow-hidden"
 										>
-											<img
+											<Image
 												src={image || '/placeholder.svg'}
 												alt={`Property image ${index + 1}`}
-												className="w-full h-full object-cover"
+												layout="fill"
+												objectFit="cover"
+												className="w-full h-full"
 											/>
 										</div>
 									))}
@@ -551,10 +554,12 @@ export default function CreateListingPage() {
 													key={index}
 													className="h-16 rounded-md overflow-hidden"
 												>
-													<img
+													<Image
 														src={image || '/placeholder.svg'}
 														alt={`Property thumbnail ${index + 1}`}
-														className="w-full h-full object-cover"
+														layout="fill"
+														objectFit="cover"
+														className="w-full h-full"
 													/>
 												</div>
 											))

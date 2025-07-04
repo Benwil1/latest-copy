@@ -5,6 +5,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 // Sample apartment data - in a real app, this would come from an API
@@ -74,10 +75,12 @@ export default function ApartmentDetailsPage() {
 									index === 0 ? 'sm:col-span-2 lg:col-span-2' : ''
 								}`}
 							>
-								<img
+								<Image
 									src={image}
 									alt={`Apartment view ${index + 1}`}
-									className="absolute inset-0 w-full h-full object-cover"
+									layout="fill"
+									objectFit="cover"
+									className="absolute inset-0 w-full h-full"
 								/>
 							</div>
 						))}

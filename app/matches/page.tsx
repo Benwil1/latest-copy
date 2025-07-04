@@ -26,6 +26,7 @@ import {
 	X,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -224,10 +225,12 @@ export default function MatchesPage() {
 									>
 										<div className="flex flex-col">
 											<div className="aspect-[4/3] relative overflow-hidden">
-												<img
+												<Image
 													src={match.image || '/placeholder.svg'}
 													alt={match.name}
-													className="w-full h-full object-cover object-[center_25%] group-hover:scale-105 transition-transform duration-300"
+													layout="fill"
+													objectFit="cover"
+													className="object-[center_25%] group-hover:scale-105 transition-transform duration-300"
 												/>
 												{match.online && (
 													<div className="absolute top-2 left-2 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
@@ -334,11 +337,12 @@ export default function MatchesPage() {
 									{/* Property Card */}
 									<div className="px-4 pt-3">
 										<div className="p-2.5 border rounded-lg flex items-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-											<div className="h-12 w-12 rounded-md overflow-hidden shrink-0">
-												<img
+											<div className="h-12 w-12 rounded-md overflow-hidden shrink-0 relative">
+												<Image
 													src="/placeholder.svg?height=48&width=48"
 													alt={currentMatch.property}
-													className="h-full w-full object-cover"
+													layout="fill"
+													objectFit="cover"
 												/>
 											</div>
 											<div className="min-w-0">

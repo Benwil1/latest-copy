@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage as UIAvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Send, Image, Paperclip, Phone, Video, ArrowLeft, Mic, PhoneOff, X } from "lucide-react"
+import { CheckCircle, Send, Image as ImageIcon, Paperclip, Phone, Video, ArrowLeft, Mic, PhoneOff, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 // Sample conversations data
 const conversations = [
@@ -208,11 +209,12 @@ export default function MessagesPage() {
             {/* Property Card */}
             <Card className="mx-4 mt-4">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-12 w-12 rounded overflow-hidden">
-                  <img
+                <div className="h-12 w-12 rounded overflow-hidden relative">
+                  <Image
                     src="/placeholder.svg?height=48&width=48"
                     alt={selectedConversation.property}
-                    className="h-full w-full object-cover"
+                    layout="fill"
+                    objectFit="cover"
                   />
                 </div>
                 <div>
@@ -257,7 +259,7 @@ export default function MessagesPage() {
                   <Paperclip className="h-5 w-5" />
                 </Button>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <Image className="h-5 w-5" />
+                  <ImageIcon className="h-5 w-5" alt="" />
                 </Button>
                 <Input
                   placeholder="Type a message..."

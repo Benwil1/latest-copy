@@ -283,10 +283,12 @@ export default function ExplorePage() {
 								onClick={() => router.push(`/roommate/${roommate.id}`)}
 							>
 								<div className="aspect-square relative">
-									<img
+									<Image
 										src={roommate.image}
 										alt={roommate.name}
-										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+										layout="fill"
+										objectFit="cover"
+										className="w-full h-full group-hover:scale-105 transition-transform duration-300"
 									/>
 									<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 									<div className="absolute top-2 right-2 flex gap-1.5">

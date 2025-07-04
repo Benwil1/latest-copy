@@ -23,6 +23,7 @@ import {
 	X,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -151,10 +152,12 @@ export default async function RoommateProfilePage({ params }: PageProps) {
 				{/* Profile Header */}
 				<div className="relative mb-16">
 					<div className="relative aspect-[4/5] sm:aspect-[16/9] w-full rounded-xl overflow-hidden mb-8 h-[600px]">
-						<img
+						<Image
 							src={roommate.image || '/placeholder.svg'}
 							alt={roommate.name}
-							className="w-full h-full object-contain"
+							layout="fill"
+							objectFit="contain"
+							className="w-full h-full"
 						/>
 						<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
 
