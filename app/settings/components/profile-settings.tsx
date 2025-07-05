@@ -11,23 +11,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
+import { useAuth } from '@/context/auth-context'
 
 interface ProfileSettingsProps {
   onSave: () => void
 }
 
 export default function ProfileSettings({ onSave }: ProfileSettingsProps) {
-  // Mock user data - in a real app, this would come from an API or context
+  const { user, updateProfile } = useAuth();
+  // Use real user for initial values
   const [formData, setFormData] = useState({
-    name: "Alex Taylor",
-    email: "alex.taylor@example.com",
-    phone: "+1 (555) 123-4567",
-    bio: "Software engineer who loves hiking and cooking. Looking for a quiet and clean roommate in the downtown area. I'm an early riser and enjoy having a tidy living space.",
-    occupation: "Software Engineer",
-    location: "New York City",
-    nationality: "United States",
-    languages: ["English", "Spanish"],
-    profilePicture: "/placeholder.svg?height=96&width=96&text=Alex",
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    bio: user?.bio || '',
+    occupation: user?.occupation || '',
+    location: user?.location || '',
+    nationality: user?.nationality || '',
+    languages: user?.languages || [],
+    profilePicture: user?.profilePicture || '/placeholder.svg?height=96&width=96&text=User',
   })
 
   const [isUploading, setIsUploading] = useState(false)
@@ -55,16 +57,13 @@ export default function ProfileSettings({ onSave }: ProfileSettingsProps) {
     }, 1500)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false)
-      onSave()
-    }, 1000)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    await updateProfile(formData);
+    setIsSaving(false);
+    onSave();
+  };
 
   return (
     <form onSubmit={handleSubmit}>
