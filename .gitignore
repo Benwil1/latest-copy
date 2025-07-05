@@ -17,7 +17,13 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env*
+.env*.local
+!.env.example
+# Add other .env files if they should NOT be ignored, e.g. !.env.production
+# If you want to ignore all .env files including .env itself:
+# .env*
+# and then specifically un-ignore examples:
+# !.env.example
 
 # vercel
 .vercel
@@ -25,4 +31,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env
+# .env # This line was moved/handled by the .env* rule above.
