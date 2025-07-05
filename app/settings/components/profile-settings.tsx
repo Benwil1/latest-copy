@@ -221,4 +221,3 @@ export default function ProfileSettings({ onSave }: ProfileSettingsProps) {
     </form>
   )
 }
-

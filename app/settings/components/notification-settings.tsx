@@ -312,4 +312,3 @@ export default function NotificationSettings({ onSave }: NotificationSettingsPro
     </form>
   )
 }
-

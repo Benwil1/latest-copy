@@ -1,10 +1,10 @@
 'use client';
 
 import { ModeToggle } from '@/components/mode-toggle';
-import NotificationSettings from '@/components/settings/notification-settings';
-import PrivacySettings from '@/components/settings/privacy-settings';
-import ProfileSettings from '@/components/settings/profile-settings';
-import SecuritySettings from '@/components/settings/security-settings';
+import NotificationSettings from '@/app/settings/components/notification-settings';
+import PrivacySettings from '@/app/settings/components/privacy-settings';
+import ProfileSettings from '@/app/settings/components/profile-settings';
+import SecuritySettings from '@/app/settings/components/security-settings';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';

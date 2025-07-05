@@ -3,7 +3,7 @@
 import {
 	ApartmentFilters,
 	type FilterValues,
-} from '@/components/apartment-filters';
+} from '@/app/apartments/components/apartment-filters';
 import { BoostDialog } from '@/components/boost-dialog';
 import MobileNav from '@/components/mobile-nav';
 import { ModeToggle } from '@/components/mode-toggle';
