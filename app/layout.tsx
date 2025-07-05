@@ -12,7 +12,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-	title: 'RoomieMatch | Find Your Perfect Roommate',
+	title: 'RoommieSwipe | Find Your Perfect Roommate',
 	description:
 		'Swipe, match, and connect with potential roommates in your area',
 	icons: {

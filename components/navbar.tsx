@@ -1,6 +1,7 @@
 'use client';
 
 import { ModeToggle } from '@/components/mode-toggle';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
 	NavigationMenu,
@@ -11,10 +12,13 @@ import {
 	NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { UserButton } from '@/components/user-button';
+import { useAuth } from '@/context/auth-context';
 import {
+	Bell,
 	Building,
 	Heart,
 	Home,
+	LogOut,
 	Menu,
 	MessageSquare,
 	PlusCircle,
@@ -55,6 +59,7 @@ function ListItem({ href, title, icon, children }: ListItemProps) {
 
 export default function Navbar() {
 	const pathname = usePathname();
+	const { logout } = useAuth();
 
 	const isActive = (path: string) => {
 		return pathname === path;
@@ -65,7 +70,7 @@ export default function Navbar() {
 			<div className="container flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-[1600px]">
 				<Link href="/" className="flex items-center gap-1 sm:gap-2">
 					<span className="text-xl sm:text-2xl font-bold text-primary">
-						RoomEase
+						RomieSwipe
 					</span>
 				</Link>
 
@@ -148,11 +153,27 @@ export default function Navbar() {
 
 				<div className="flex items-center gap-4">
 					<ModeToggle />
-					<Button variant="ghost" size="icon" className="md:hidden" asChild>
-						<Link href="/menu">
-							<Menu className="h-5 w-5" />
-							<span className="sr-only">Menu</span>
+					<Button
+						variant="ghost"
+						size="icon"
+						title="Notifications"
+						asChild
+						className="relative"
+					>
+						<Link href="/notifications">
+							<Bell className="h-5 w-5" />
+							<span className="sr-only">Notifications</span>
+							<Badge
+								variant="destructive"
+								className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+							>
+								2
+							</Badge>
 						</Link>
+					</Button>
+					<Button variant="ghost" size="icon" title="Logout" onClick={logout}>
+						<LogOut className="h-5 w-5" />
+						<span className="sr-only">Logout</span>
 					</Button>
 					<Button
 						variant="ghost"

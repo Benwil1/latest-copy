@@ -126,13 +126,7 @@ export default function MatchesPage() {
 	const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
 	const [messageText, setMessageText] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [showCallModal, setShowCallModal] = useState<{
-		type: 'audio' | 'video';
-		isOpen: boolean;
-	}>({
-		type: 'audio',
-		isOpen: false,
-	});
+	const [sidebarOpen, setSidebarOpen] = useState(false); // for mobile
 	const [isLoading, setIsLoading] = useState(false);
 
 	const router = useRouter();
@@ -168,7 +162,6 @@ export default function MatchesPage() {
 		}
 	};
 
-	// Filter matches based on search query
 	const filteredMatches = matches.filter(
 		(match) =>
 			match.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -177,358 +170,196 @@ export default function MatchesPage() {
 
 	const currentMatch = matches.find((match) => match.id === selectedMatch);
 
+	const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
 	return (
-		<div className="min-h-screen pb-16 flex flex-col">
-			<main className="flex-1 flex flex-col overflow-hidden">
-				<div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-					<Tabs
-						value={activeTab}
-						onValueChange={setActiveTab}
-						className="h-full flex flex-col"
-					>
-						<div className="px-3 pt-2 pb-1">
-							<TabsList className="grid w-full grid-cols-2 h-9">
-								<TabsTrigger value="matches" className="text-xs">
-									Matches
-								</TabsTrigger>
-								<TabsTrigger
-									value="chat"
-									disabled={!selectedMatch}
-									className="text-xs"
-								>
-									Chat
-								</TabsTrigger>
-							</TabsList>
+		<div className="min-h-screen flex flex-col bg-background">
+			<main className="flex-1 flex h-[100dvh]">
+				{/* Sidebar (conversation list) */}
+				{(!isMobile || !selectedMatch) && (
+					<aside className="w-full max-w-xs border-r border-border bg-background flex flex-col h-full">
+						<div className="p-4 border-b border-border flex items-center justify-between">
+							<h2 className="text-xl font-bold text-vibrant-orange animate-fade-in-up">
+								Messages
+							</h2>
 						</div>
-
-						<TabsContent
-							value="matches"
-							className="p-3 space-y-3 flex-1 overflow-auto"
-						>
-							<div className="relative">
-								<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									placeholder="Search matches..."
-									className="pl-8 h-8 text-xs"
-									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
-							</div>
-
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-								{filteredMatches.map((match) => (
-									<Card
+						<div className="p-3">
+							<input
+								type="text"
+								placeholder="Search..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="w-full mb-3 px-3 py-2 rounded-full border border-border text-sm focus:outline-none focus:ring-2 focus:ring-vibrant-orange bg-muted transform-gpu hover:scale-105 transition-transform duration-200"
+							/>
+							<div className="space-y-2 overflow-y-auto max-h-[calc(100vh-10rem)]">
+								{filteredMatches.map((match, index) => (
+									<button
 										key={match.id}
-										className="overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:border-vibrant-orange/30 group"
-										onClick={() => handleInitiateMessage(match.id)}
+										onClick={() => setSelectedMatch(match.id)}
+										className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-orange-50 dark:hover:bg-orange-950/20 focus:bg-orange-100 dark:focus:bg-orange-950/30 text-left transform-gpu hover:scale-105 hover:translate-y-[-2px] hover:shadow-lg ${
+											selectedMatch === match.id
+												? 'bg-orange-100 dark:bg-orange-950/30 shadow-md'
+												: ''
+										}`}
+										style={{
+											animationDelay: `${index * 100}ms`,
+											animation: 'fade-in-up 0.6s ease-out forwards',
+										}}
 									>
-										<div className="flex flex-col">
-											<div className="aspect-[4/3] relative overflow-hidden">
-												<img
-													src={match.image || '/placeholder.svg'}
+										<div className="relative">
+											<Avatar className="h-12 w-12 transform-gpu hover:scale-110 transition-transform duration-300">
+												<AvatarImage
+													src={match.image}
 													alt={match.name}
-													className="w-full h-full object-cover object-[center_25%] group-hover:scale-105 transition-transform duration-300"
+													className="object-cover w-full h-full"
 												/>
-												{match.online && (
-													<div className="absolute top-2 left-2 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
-														<div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-														<span className="text-xs">Online</span>
-													</div>
-												)}
-											</div>
-											<CardContent className="flex-1 p-4">
-												<div className="flex items-center justify-between">
-													<div>
-														<div className="flex items-center gap-2 mb-1">
-															<h3 className="text-lg font-semibold">
-																{match.name}
-															</h3>
-															{match.verified && (
-																<CheckCircle className="h-4 w-4 text-vibrant-orange" />
-															)}
-														</div>
-														<p className="text-sm text-muted-foreground">
-															Active {match.lastActive}
-														</p>
-													</div>
-												</div>
-											</CardContent>
+												<AvatarFallback>{match.name.charAt(0)}</AvatarFallback>
+											</Avatar>
+											{match.online && (
+												<span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+											)}
 										</div>
-									</Card>
-								))}
-							</div>
-						</TabsContent>
 
-						<TabsContent
-							value="chat"
-							className="flex-1 flex flex-col h-[calc(100vh-8rem)]"
-						>
-							{selectedMatch && currentMatch && (
-								<div className="flex flex-col h-full max-h-[calc(100vh-8rem)] bg-background">
-									{/* Chat Header */}
-									<div className="px-4 py-3 border-b flex items-center justify-between bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-										<div className="flex items-center gap-3">
-											<div
-												className="cursor-pointer group"
-												onClick={() => {
-													setIsLoading(true);
-													router.push(`/roommate/${currentMatch.id}`);
-													setTimeout(() => setIsLoading(false), 1000);
-												}}
-											>
-												<Avatar className="h-10 w-10 ring-2 ring-background group-hover:ring-vibrant-orange transition-all">
-													<AvatarImage
-														src={currentMatch.image}
-														alt={currentMatch.name}
-													/>
-													<AvatarFallback>
-														{currentMatch.name.charAt(0)}
-													</AvatarFallback>
-												</Avatar>
-											</div>
-
-											<div>
-												<div className="flex items-center gap-2">
-													<h3 className="font-semibold text-base">
-														{currentMatch.name}
+										<div className="flex-1 min-w-0">
+											<div className="flex items-center justify-between mb-1 min-w-0 gap-2">
+												<div className="flex items-center gap-1 min-w-0">
+													<h3 className="font-medium truncate max-w-[120px] sm:max-w-[160px]">
+														{match.name}, {match.age}
 													</h3>
-													{currentMatch.verified && (
-														<CheckCircle className="h-4 w-4 text-vibrant-orange" />
+													{match.verified && (
+														<CheckCircle className="h-4 w-4 text-vibrant-orange shrink-0" />
 													)}
 												</div>
-												<div className="flex items-center gap-2 text-sm text-muted-foreground">
-													<div className="flex items-center gap-1">
-														<div className={`w-1.5 h-1.5 rounded-full ${currentMatch.online ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-														{currentMatch.online ? 'Online' : 'Offline'}
-													</div>
-													<span>•</span>
-													<span>Active {currentMatch.lastActive}</span>
-												</div>
+												<span className="text-xs text-muted-foreground whitespace-nowrap ml-2 shrink-0">
+													{match.lastActive}
+												</span>
 											</div>
-										</div>
 
-										<div className="flex items-center gap-2">
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-9 w-9 rounded-full hover:bg-muted"
-												onClick={() =>
-													setShowCallModal({ type: 'audio', isOpen: true })
-												}
-											>
-												<Phone className="h-4 w-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-9 w-9 rounded-full hover:bg-muted"
-												onClick={() =>
-													setShowCallModal({ type: 'video', isOpen: true })
-												}
-											>
-												<Video className="h-4 w-4" />
-											</Button>
-										</div>
-									</div>
-
-									{/* Property Card */}
-									<div className="px-4 pt-3">
-										<div className="p-2.5 border rounded-lg flex items-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-											<div className="h-12 w-12 rounded-md overflow-hidden shrink-0">
-												<img
-													src="/placeholder.svg?height=48&width=48"
-													alt={currentMatch.property}
-													className="h-full w-full object-cover"
-												/>
-											</div>
-											<div className="min-w-0">
-												<h4 className="font-medium text-sm truncate">
-													{currentMatch.property}
-												</h4>
-												<p className="text-xs text-muted-foreground">
-													Discussing this property
-												</p>
-											</div>
-										</div>
-									</div>
-
-									{/* Messages */}
-									<div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-										{messages.map((message) => (
-											<div
-												key={message.id}
-												className={`flex items-end gap-2 ${
-													message.sender === 'me'
-														? 'justify-end'
-														: 'justify-start'
-												}`}
-											>
-												{message.sender === 'them' && (
-													<Avatar className="h-8 w-8 shrink-0">
-														<AvatarImage
-															src={currentMatch.image}
-															alt={currentMatch.name}
-														/>
-														<AvatarFallback>
-															{currentMatch.name.charAt(0)}
-														</AvatarFallback>
-													</Avatar>
-												)}
-												<div
-													className={`max-w-[65%] rounded-2xl px-4 py-2.5 ${
-														message.sender === 'me'
-															? 'bg-vibrant-orange text-white dark:bg-elegant-orange'
-															: 'bg-muted'
-													}`}
-												>
-													<p className="text-sm leading-relaxed break-words">{message.text}</p>
-													<p
-														className={`text-xs mt-1.5 ${
-															message.sender === 'me'
-																? 'text-white/70'
-																: 'text-muted-foreground'
-														}`}
-													>
-														{message.time}
-													</p>
-												</div>
-											</div>
-										))}
-									</div>
-
-									{/* Message Input and Quick Replies */}
-									<div className="px-4 py-3 border-t bg-background/95 backdrop-blur-sm sticky bottom-0">
-										<div className="flex items-center gap-2 mb-3">
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-10 w-10 rounded-full hover:bg-muted"
-											>
-												<Paperclip className="h-5 w-5" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-10 w-10 rounded-full hover:bg-muted"
-											>
-												<ImageIcon className="h-5 w-5" />
-											</Button>
-											<Input
-												placeholder="Type a message..."
-												value={messageText}
-												onChange={(e) => setMessageText(e.target.value)}
-												onKeyDown={(e) => {
-													if (e.key === 'Enter') {
-														handleSendMessage();
-													}
-												}}
-												className="flex-1 h-10 text-sm"
-											/>
-											<Button
-												size="icon"
-												className="h-10 w-10 rounded-full bg-vibrant-orange hover:bg-orange-600 dark:bg-elegant-orange dark:hover:bg-orange-700"
-												onClick={handleSendMessage}
-												disabled={!messageText.trim()}
-											>
-												<Send className="h-5 w-5" />
-											</Button>
-										</div>
-
-										<div className="border-t pt-3">
-											<p className="text-sm font-medium mb-2 text-muted-foreground">
-												Quick Replies
+											<p className="text-sm text-muted-foreground truncate mb-1">
+												{match.lastMessage}
 											</p>
-											<div className="flex flex-wrap gap-2">
-												{icebreakers.map((text, index) => (
-													<Button
-														key={index}
-														variant="outline"
-														size="sm"
-														className="text-sm h-8 px-3 hover:bg-muted"
-														onClick={() => setMessageText(text)}
+
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<Badge
+														variant="secondary"
+														className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
 													>
-														{text}
-													</Button>
-												))}
+														{match.compatibility}% match
+													</Badge>
+													<span className="text-xs text-muted-foreground">
+														{match.location}
+													</span>
+												</div>
+												{match.unread && (
+													<div className="w-2 h-2 bg-vibrant-orange rounded-full animate-pulse" />
+												)}
 											</div>
 										</div>
-									</div>
-								</div>
-							)}
-						</TabsContent>
-					</Tabs>
-				</div>
-			</main>
-
-			{/* Call Modal */}
-			{showCallModal.isOpen && (
-				<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-					<Card className="w-full max-w-xs animate-in fade-in slide-in-from-bottom-4">
-						<div className="p-3 flex items-center justify-between">
-							<h3 className="font-medium text-sm">
-								{showCallModal.type === 'audio' ? 'Audio' : 'Video'} Call with{' '}
-								{currentMatch?.name}
-							</h3>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-7 w-7 p-0"
-								onClick={() =>
-									setShowCallModal({ type: 'audio', isOpen: false })
-								}
-							>
-								<X className="h-4 w-4" />
-							</Button>
+									</button>
+								))}
+							</div>
 						</div>
-						<div className="p-3 space-y-3">
-							{showCallModal.type === 'video' && (
-								<div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-									<div className="text-center">
-										<Video className="h-10 w-10 mx-auto mb-1 text-muted-foreground" />
-										<p className="text-xs text-muted-foreground">
-											Video preview
+					</aside>
+				)}
+
+				{/* Chat area */}
+				{selectedMatch && currentMatch && (
+					<section className="flex-1 flex flex-col h-[100dvh] max-h-[100dvh] bg-background">
+						{/* Header */}
+						<div className="flex items-center gap-4 p-4 border-b border-border bg-background sticky top-0 z-10">
+							{isMobile && (
+								<button
+									onClick={() => setSelectedMatch(null)}
+									className="mr-2"
+									title="Back"
+								>
+									<ArrowLeft className="h-6 w-6 text-vibrant-orange" />
+								</button>
+							)}
+							<Avatar className="h-10 w-10 ring-2 ring-vibrant-orange">
+								<AvatarImage
+									src={currentMatch.image}
+									alt={currentMatch.name}
+									className="object-cover w-full h-full"
+								/>
+								<AvatarFallback>{currentMatch.name.charAt(0)}</AvatarFallback>
+							</Avatar>
+							<div>
+								<div className="flex items-center gap-2">
+									<span className="font-bold text-lg text-foreground">
+										{currentMatch.name}
+									</span>
+									{currentMatch.verified && (
+										<CheckCircle className="h-5 w-5 text-vibrant-orange" />
+									)}
+								</div>
+								<span className="text-xs text-muted-foreground">
+									{currentMatch.online ? 'Online' : currentMatch.lastActive}
+								</span>
+							</div>
+							<div className="ml-auto flex gap-2">
+								<Button variant="ghost" size="icon" title="Call">
+									<Phone className="h-5 w-5" />
+								</Button>
+								<Button variant="ghost" size="icon" title="Video call">
+									<Video className="h-5 w-5" />
+								</Button>
+							</div>
+						</div>
+
+						{/* Messages */}
+						<div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 py-4 space-y-4 bg-background pb-24 md:pb-0">
+							{messages.map((message) => (
+								<div
+									key={message.id}
+									className={`flex ${
+										message.sender === 'me' ? 'justify-end' : 'justify-start'
+									}`}
+								>
+									<div
+										className={`max-w-[80vw] sm:max-w-md rounded-2xl px-4 py-2.5 shadow-sm text-sm break-words ${
+											message.sender === 'me'
+												? 'bg-vibrant-orange text-white rounded-br-md'
+												: 'bg-muted text-foreground rounded-bl-md'
+										}`}
+									>
+										<p>{message.text}</p>
+										<p className="text-xs mt-1 text-right opacity-60">
+											{message.time}
 										</p>
 									</div>
 								</div>
-							)}
-
-							<div className="flex justify-center gap-3">
-								{showCallModal.type === 'video' && (
-									<Button
-										variant="outline"
-										size="icon"
-										className="rounded-full h-10 w-10 p-0"
-									>
-										<Video className="h-4 w-4" />
-									</Button>
-								)}
-								<Button
-									variant="outline"
-									size="icon"
-									className="rounded-full h-10 w-10 p-0"
-								>
-									<Mic className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="destructive"
-									size="icon"
-									className="rounded-full h-10 w-10 p-0"
-									onClick={() =>
-										setShowCallModal({ type: 'audio', isOpen: false })
-									}
-								>
-									<PhoneOff className="h-4 w-4" />
-								</Button>
-							</div>
-
-							<div className="text-center text-xs text-muted-foreground">
-								<p>Calling {currentMatch?.name}...</p>
-							</div>
+							))}
 						</div>
-					</Card>
-				</div>
-			)}
 
+						{/* Message Input */}
+						<div
+							className="w-full border-t border-border flex items-center gap-2 px-2 sm:px-6 py-3 z-20 md:sticky md:bottom-0 md:bg-background fixed bottom-24 left-0 bg-background"
+							style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.02)' }}
+						>
+							<Button variant="ghost" size="icon">
+								<Paperclip className="h-5 w-5" />
+							</Button>
+							<Input
+								placeholder="Message..."
+								value={messageText}
+								onChange={(e) => setMessageText(e.target.value)}
+								className="flex-1 rounded-full px-4 py-2 text-[16px] border border-border focus:ring-2 focus:ring-vibrant-orange"
+								onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+							/>
+							<Button
+								size="icon"
+								className="bg-vibrant-orange hover:bg-orange-600 rounded-full"
+								onClick={handleSendMessage}
+								disabled={!messageText.trim()}
+							>
+								<Send className="h-5 w-5" />
+							</Button>
+						</div>
+					</section>
+				)}
+			</main>
 			<MobileNav />
 		</div>
 	);

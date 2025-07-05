@@ -67,13 +67,8 @@ export default function PostApartmentPage() {
 
 	return (
 		<div className="min-h-screen pb-16">
-			<header className="p-4 flex justify-between items-center">
-				<div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
-				<ModeToggle />
-			</header>
-
 			{/* Segmented Navigation */}
-			<div className="px-4 mb-6">
+			<div className="px-4 mb-6 mt-10">
 				<div className="flex rounded-full bg-muted p-1">
 					<Link
 						href="/apartments/explore"

@@ -13,10 +13,10 @@ import {
 	DollarSign,
 	Flag,
 	Heart,
-	MapPin,
-	X,
 	Info,
+	MapPin,
 	Star,
+	X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -86,7 +86,7 @@ const roommates = [
 		interests: ['Art', 'Design', 'Movies', 'Cats'],
 		lifestyle: {
 			cleanliness: 'Average',
-			noise: 'Don\'t mind noise',
+			noise: "Don't mind noise",
 			schedule: 'Flexible',
 			pets: 'Has pets',
 		},
@@ -156,9 +156,9 @@ export default function HomePage() {
 
 		// Track likes and passes
 		if (direction === 'right') {
-			setLikedProfiles(prev => [...prev, currentRoommate.id]);
+			setLikedProfiles((prev) => [...prev, currentRoommate.id]);
 		} else {
-			setPassedProfiles(prev => [...prev, currentRoommate.id]);
+			setPassedProfiles((prev) => [...prev, currentRoommate.id]);
 		}
 
 		// Reset swipe direction and move to next profile after animation
@@ -203,11 +203,12 @@ export default function HomePage() {
 			// Swiped left
 			handleSwipe('left');
 		} else {
-			// Reset if not swiped far enough
+			// Reset position
 			setOffsetX(0);
 		}
 	};
 
+	// Mouse event handlers for desktop
 	const handleMouseDown = (e: React.MouseEvent) => {
 		setStartX(e.clientX);
 		setIsDragging(true);
@@ -225,18 +226,15 @@ export default function HomePage() {
 		setIsDragging(false);
 
 		if (offsetX > 100) {
-			// Swiped right
 			handleSwipe('right');
 		} else if (offsetX < -100) {
-			// Swiped left
 			handleSwipe('left');
 		} else {
-			// Reset if not swiped far enough
 			setOffsetX(0);
 		}
 	};
 
-	// Clean up mouse events when component unmounts
+	// Add global mouse up listener
 	useEffect(() => {
 		const handleMouseUpGlobal = () => {
 			if (isDragging) {
@@ -251,10 +249,8 @@ export default function HomePage() {
 			}
 		};
 
-		window.addEventListener('mouseup', handleMouseUpGlobal);
-		return () => {
-			window.removeEventListener('mouseup', handleMouseUpGlobal);
-		};
+		document.addEventListener('mouseup', handleMouseUpGlobal);
+		return () => document.removeEventListener('mouseup', handleMouseUpGlobal);
 	}, [isDragging, offsetX]);
 
 	return (
@@ -268,10 +264,10 @@ export default function HomePage() {
 								<div
 									key={index}
 									className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-										index === currentIndex 
-											? 'bg-vibrant-orange' 
-											: index < currentIndex 
-											? 'bg-vibrant-orange/30' 
+										index === currentIndex
+											? 'bg-vibrant-orange'
+											: index < currentIndex
+											? 'bg-vibrant-orange/30'
 											: 'bg-gray-200 dark:bg-gray-700'
 									}`}
 								/>
@@ -283,15 +279,18 @@ export default function HomePage() {
 						<Card
 							ref={cardRef}
 							className={`overflow-hidden rounded-3xl shadow-2xl transition-all duration-300 h-[calc(100vh-16rem)] md:h-[calc(100vh-10rem)] md:max-h-[800px] mx-0 sm:mx-4 bg-gradient-to-br from-pink-100 to-purple-100 ${
-								swipeDirection === 'left' 
-									? 'animate-swipe-left' 
-									: swipeDirection === 'right' 
-									? 'animate-swipe-right' 
+								swipeDirection === 'left'
+									? 'animate-swipe-left'
+									: swipeDirection === 'right'
+									? 'animate-swipe-right'
 									: ''
 							} ${isDragging ? 'scale-[1.02]' : ''}`}
 							style={
-								isDragging 
-									? { transform: `translateX(${offsetX}px) scale(1.02)`, cursor: 'grabbing' } 
+								isDragging
+									? {
+											transform: `translateX(${offsetX}px) scale(1.02)`,
+											cursor: 'grabbing',
+									  }
 									: { cursor: 'grab' }
 							}
 							onTouchStart={handleTouchStart}
@@ -364,10 +363,16 @@ export default function HomePage() {
 
 											{/* Interests */}
 											<div>
-												<h3 className="text-lg font-semibold mb-2">Interests</h3>
+												<h3 className="text-lg font-semibold mb-2">
+													Interests
+												</h3>
 												<div className="flex flex-wrap gap-2">
 													{currentRoommate.interests.map((interest, index) => (
-														<Badge key={index} variant="secondary" className="bg-white/20 text-white border-white/30">
+														<Badge
+															key={index}
+															variant="secondary"
+															className="bg-white/20 text-white border-white/30"
+														>
 															{interest}
 														</Badge>
 													))}
@@ -376,42 +381,60 @@ export default function HomePage() {
 
 											{/* Lifestyle */}
 											<div>
-												<h3 className="text-lg font-semibold mb-2">Lifestyle</h3>
+												<h3 className="text-lg font-semibold mb-2">
+													Lifestyle
+												</h3>
 												<div className="grid grid-cols-2 gap-3">
 													<div>
 														<p className="text-sm text-white/70">Cleanliness</p>
-														<p className="font-medium">{currentRoommate.lifestyle.cleanliness}</p>
+														<p className="font-medium">
+															{currentRoommate.lifestyle.cleanliness}
+														</p>
 													</div>
 													<div>
 														<p className="text-sm text-white/70">Noise Level</p>
-														<p className="font-medium">{currentRoommate.lifestyle.noise}</p>
+														<p className="font-medium">
+															{currentRoommate.lifestyle.noise}
+														</p>
 													</div>
 													<div>
 														<p className="text-sm text-white/70">Schedule</p>
-														<p className="font-medium">{currentRoommate.lifestyle.schedule}</p>
+														<p className="font-medium">
+															{currentRoommate.lifestyle.schedule}
+														</p>
 													</div>
 													<div>
 														<p className="text-sm text-white/70">Pets</p>
-														<p className="font-medium">{currentRoommate.lifestyle.pets}</p>
+														<p className="font-medium">
+															{currentRoommate.lifestyle.pets}
+														</p>
 													</div>
 												</div>
 											</div>
 
 											{/* Housing Details */}
 											<div>
-												<h3 className="text-lg font-semibold mb-2">Housing Details</h3>
+												<h3 className="text-lg font-semibold mb-2">
+													Housing Details
+												</h3>
 												<div className="space-y-2">
 													<div className="flex justify-between">
 														<span className="text-white/70">Budget:</span>
-														<span className="font-medium">${currentRoommate.budget}/month</span>
+														<span className="font-medium">
+															${currentRoommate.budget}/month
+														</span>
 													</div>
 													<div className="flex justify-between">
 														<span className="text-white/70">Location:</span>
-														<span className="font-medium">{currentRoommate.location}</span>
+														<span className="font-medium">
+															{currentRoommate.location}
+														</span>
 													</div>
 													<div className="flex justify-between">
 														<span className="text-white/70">Move-in:</span>
-														<span className="font-medium">{currentRoommate.moveIn}</span>
+														<span className="font-medium">
+															{currentRoommate.moveIn}
+														</span>
 													</div>
 												</div>
 											</div>
@@ -425,14 +448,20 @@ export default function HomePage() {
 										<div className="flex items-center justify-between">
 											<div>
 												<h2 className="text-3xl font-bold text-white flex items-center gap-2">
-													{currentRoommate.name} {currentRoommate.verified && (
+													{currentRoommate.name}{' '}
+													{currentRoommate.verified && (
 														<CheckCircle className="h-6 w-6 text-vibrant-orange" />
 													)}
 												</h2>
-												<p className="text-lg text-gray-200">{currentRoommate.age} • {currentRoommate.nationality}</p>
+												<p className="text-lg text-gray-200">
+													{currentRoommate.age} • {currentRoommate.nationality}
+												</p>
 											</div>
 											<div className="flex items-center gap-2">
-												<Badge variant="secondary" className="text-sm px-3 py-1.5 bg-white/20 text-white border-white/30">
+												<Badge
+													variant="secondary"
+													className="text-sm px-3 py-1.5 bg-white/20 text-white border-white/30"
+												>
 													<Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
 													{currentRoommate.compatibility}% Match
 												</Badge>
@@ -441,8 +470,8 @@ export default function HomePage() {
 
 										<div className="flex items-center gap-4 text-white text-lg">
 											<div className="flex items-center gap-1">
-												<DollarSign className="h-5 w-5 text-vibrant-orange" />
-												${currentRoommate.budget}/mo
+												<DollarSign className="h-5 w-5 text-vibrant-orange" />$
+												{currentRoommate.budget}/mo
 											</div>
 											<div className="flex items-center gap-1">
 												<MapPin className="h-5 w-5 text-vibrant-orange" />
@@ -500,15 +529,21 @@ export default function HomePage() {
 						{/* Stats */}
 						<div className="mt-6 px-4 flex justify-center gap-8 text-center">
 							<div>
-								<p className="text-2xl font-bold text-vibrant-orange">{likedProfiles.length}</p>
+								<p className="text-2xl font-bold text-vibrant-orange">
+									{likedProfiles.length}
+								</p>
 								<p className="text-sm text-muted-foreground">Liked</p>
 							</div>
 							<div>
-								<p className="text-2xl font-bold text-gray-500">{passedProfiles.length}</p>
+								<p className="text-2xl font-bold text-gray-500">
+									{passedProfiles.length}
+								</p>
 								<p className="text-sm text-muted-foreground">Passed</p>
 							</div>
 							<div>
-								<p className="text-2xl font-bold text-green-500">{Math.floor(Math.random() * 5) + 1}</p>
+								<p className="text-2xl font-bold text-green-500">
+									{Math.floor(Math.random() * 5) + 1}
+								</p>
 								<p className="text-sm text-muted-foreground">Matches</p>
 							</div>
 						</div>

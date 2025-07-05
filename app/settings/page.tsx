@@ -29,21 +29,6 @@ export default function SettingsPage() {
 
 	return (
 		<div className="min-h-screen pb-16">
-			<header className="p-4 flex justify-between items-center border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-				<div className="flex items-center gap-2">
-					<Button variant="ghost" size="icon" onClick={() => router.back()}>
-						<ArrowLeft className="h-5 w-5" />
-					</Button>
-					<Link
-						href="/home"
-						className="text-xl font-bold text-vibrant-orange cursor-pointer"
-					>
-						RoomieMatch
-					</Link>
-				</div>
-				<ModeToggle />
-			</header>
-
 			<main className="container max-w-4xl mx-auto p-4 sm:p-6">
 				<h1 className="text-2xl font-bold mb-6 sm:mb-8">Settings</h1>
 
