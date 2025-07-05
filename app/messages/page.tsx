@@ -233,15 +233,19 @@ export default function MessagesPage() {
                     </Avatar>
                   )}
                   <div
-                    className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                      message.sender === "me"
-                        ? "bg-vibrant-orange text-white dark:bg-elegant-orange"
-                        : "bg-secondary dark:bg-dark-accent"
+                    className={`max-w-[70%] rounded-xl px-3.5 py-2.5 ${
+                      message.sender === 'me'
+                        ? 'bg-vibrant-orange text-white rounded-br-none'
+                        : 'bg-muted text-foreground rounded-bl-none'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm leading-snug break-words">{message.text}</p>
                     <p
-                      className={`text-xs mt-1 ${message.sender === "me" ? "text-white/70" : "text-muted-foreground"}`}
+                      className={`text-[0.7rem] mt-1.5 text-right ${
+                        message.sender === 'me'
+                          ? 'text-white/80'
+                          : 'text-muted-foreground/80'
+                      }`}
                     >
                       {message.time}
                     </p>

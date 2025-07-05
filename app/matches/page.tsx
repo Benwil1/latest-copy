@@ -219,41 +219,39 @@ export default function MatchesPage() {
 								{filteredMatches.map((match) => (
 									<Card
 										key={match.id}
-										className="overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:border-vibrant-orange/30 group"
+										className="relative overflow-hidden cursor-pointer transition-all hover:shadow-xl group aspect-[3/4] rounded-xl border hover:border-vibrant-orange/50"
 										onClick={() => handleInitiateMessage(match.id)}
 									>
-										<div className="flex flex-col">
-											<div className="aspect-[4/3] relative overflow-hidden">
-												<img
-													src={match.image || '/placeholder.svg'}
-													alt={match.name}
-													className="w-full h-full object-cover object-[center_25%] group-hover:scale-105 transition-transform duration-300"
-												/>
-												{match.online && (
-													<div className="absolute top-2 left-2 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
-														<div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-														<span className="text-xs">Online</span>
-													</div>
+										<img
+											src={match.image || '/placeholder.svg'}
+											alt={match.name}
+											className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+										/>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+										<div className="absolute top-2 left-2">
+											{match.online && (
+												<Badge
+													variant="secondary"
+													className="bg-background/80 backdrop-blur-sm text-xs px-2 py-0.5"
+												>
+													<span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse" />
+													Online
+												</Badge>
+											)}
+										</div>
+										<CardContent className="absolute bottom-0 left-0 right-0 p-4 text-white">
+											<div className="flex items-center gap-2 mb-1">
+												<h3 className="text-xl font-bold">
+													{match.name}, {match.age}
+												</h3>
+												{match.verified && (
+													<CheckCircle className="h-5 w-5 text-sky-400" />
 												)}
 											</div>
-											<CardContent className="flex-1 p-4">
-												<div className="flex items-center justify-between">
-													<div>
-														<div className="flex items-center gap-2 mb-1">
-															<h3 className="text-lg font-semibold">
-																{match.name}
-															</h3>
-															{match.verified && (
-																<CheckCircle className="h-4 w-4 text-vibrant-orange" />
-															)}
-														</div>
-														<p className="text-sm text-muted-foreground">
-															Active {match.lastActive}
-														</p>
-													</div>
-												</div>
-											</CardContent>
-										</div>
+											<p className="text-xs text-white/80">
+												Active {match.lastActive}
+											</p>
+										</CardContent>
 									</Card>
 								))}
 							</div>
@@ -375,18 +373,18 @@ export default function MatchesPage() {
 													</Avatar>
 												)}
 												<div
-													className={`max-w-[65%] rounded-2xl px-4 py-2.5 ${
+													className={`max-w-[70%] rounded-xl px-3.5 py-2.5 ${
 														message.sender === 'me'
-															? 'bg-vibrant-orange text-white dark:bg-elegant-orange'
-															: 'bg-muted'
+															? 'bg-vibrant-orange text-white rounded-br-none'
+															: 'bg-muted text-foreground rounded-bl-none'
 													}`}
 												>
-													<p className="text-sm leading-relaxed break-words">{message.text}</p>
+													<p className="text-sm leading-snug break-words">{message.text}</p>
 													<p
-														className={`text-xs mt-1.5 ${
+														className={`text-[0.7rem] mt-1.5 text-right ${
 															message.sender === 'me'
-																? 'text-white/70'
-																: 'text-muted-foreground'
+																? 'text-white/80'
+																: 'text-muted-foreground/80'
 														}`}
 													>
 														{message.time}
