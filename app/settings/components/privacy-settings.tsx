@@ -272,4 +272,3 @@ export default function PrivacySettings({ onSave }: PrivacySettingsProps) {
     </form>
   )
 }
-
