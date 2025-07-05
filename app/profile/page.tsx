@@ -12,6 +12,7 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/auth-context';
 import {
 	ArrowLeft,
 	CheckCircle,
@@ -29,40 +30,51 @@ import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
 	const router = useRouter();
+	const { user } = useAuth();
+
+	if (!user)
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				Loading...
+			</div>
+		);
 
 	return (
 		<div className="min-h-screen pb-16">
-
-
 			<main className="container max-w-2xl mx-auto px-3 py-6 sm:py-8">
 				<div className="flex flex-col items-center mb-6 sm:mb-8">
 					<div className="relative">
 						<Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-background">
 							<AvatarImage
-								src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3"
-								alt="Alex Taylor"
+								src={
+									user.profilePicture ||
+									'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=256&h=256&facepad=2&q=80'
+								}
+								alt={user.name}
 							/>
-							<AvatarFallback>AT</AvatarFallback>
+							<AvatarFallback>{user.name?.charAt(0) || '?'}</AvatarFallback>
 						</Avatar>
 						<Button
 							variant="default"
 							size="icon"
 							className="absolute bottom-0 right-0 rounded-full h-6 w-6"
+							asChild
 						>
-							<Edit className="h-3 w-3" />
+							<Link href="/profile/edit">
+								<Edit className="h-3 w-3" />
+							</Link>
 						</Button>
 					</div>
-
 					<div className="mt-4 text-center">
 						<div className="flex items-center justify-center gap-1">
-							<h1 className="text-xl font-bold">Alex Taylor, 27</h1>
+							<h1 className="text-xl font-bold">{user.name}</h1>
 							<CheckCircle className="h-4 w-4 text-vibrant-orange" />
 						</div>
 						<p className="text-muted-foreground text-sm">
-							Software Engineer • New York City
+							{user.occupation || 'Member'}
+							{user.location ? ` • ${user.location}` : ''}
 						</p>
 					</div>
-
 					<div className="flex gap-2 mt-4">
 						<Button
 							variant="outline"
@@ -108,11 +120,7 @@ export default function ProfilePage() {
 								<CardTitle className="text-base sm:text-lg">Bio</CardTitle>
 							</CardHeader>
 							<CardContent className="p-4 pt-0">
-								<p className="text-sm">
-									Software engineer who loves hiking and cooking. Looking for a
-									quiet and clean roommate in the downtown area. I'm an early
-									riser and enjoy having a tidy living space.
-								</p>
+								<p className="text-sm">{user.bio || 'No bio yet.'}</p>
 							</CardContent>
 						</Card>
 
@@ -156,7 +164,7 @@ export default function ProfilePage() {
 										<span className="text-xs">Email Verified</span>
 									</div>
 									<Badge variant="success" className="text-[10px]">
-										Completed
+										{user.emailVerified ? 'Completed' : 'Pending'}
 									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
@@ -165,7 +173,7 @@ export default function ProfilePage() {
 										<span className="text-xs">Phone Verified</span>
 									</div>
 									<Badge variant="success" className="text-[10px]">
-										Completed
+										{user.phoneVerified ? 'Completed' : 'Pending'}
 									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
@@ -376,7 +384,6 @@ export default function ProfilePage() {
 						</Card>
 					</TabsContent>
 				</Tabs>
-
 			</main>
 
 			<MobileNav />

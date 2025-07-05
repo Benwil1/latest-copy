@@ -18,6 +18,7 @@ export type User = {
 	emailVerified: boolean;
 	phoneVerified: boolean;
 	twoFactorEnabled: boolean;
+	role?: string;
 };
 
 type AuthContextType = {
@@ -41,6 +42,7 @@ type AuthContextType = {
 		newPassword: string
 	) => Promise<boolean>;
 	deleteAccount: () => Promise<void>;
+	updateProfile: (profile: Partial<User>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,6 +56,7 @@ const MOCK_USER: User = {
 	emailVerified: true,
 	phoneVerified: true,
 	twoFactorEnabled: false,
+	role: 'user',
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -107,10 +110,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const mockUser = {
-				...MOCK_USER,
-				email,
-			};
+			let mockUser;
+			if (email === 'admin@email.com' && password === 'admin123') {
+				mockUser = {
+					...MOCK_USER,
+					name: 'Admin User',
+					email,
+					role: 'admin',
+				};
+			} else {
+				mockUser = {
+					...MOCK_USER,
+					email,
+					role: 'user',
+				};
+			}
 			setUser(mockUser);
 			localStorage.setItem('user', JSON.stringify(mockUser));
 
@@ -370,6 +384,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const updateProfile = async (profile: Partial<User>) => {
+		setIsLoading(true);
+		try {
+			const updatedUser = { ...user, ...profile };
+			setUser(updatedUser);
+			localStorage.setItem('user', JSON.stringify(updatedUser));
+			// Optionally, show a toast here if you want
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	const value = {
 		user,
 		isLoading,
@@ -383,6 +409,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		resetPassword,
 		updatePassword,
 		deleteAccount,
+		updateProfile,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

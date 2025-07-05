@@ -59,7 +59,7 @@ function ListItem({ href, title, icon, children }: ListItemProps) {
 
 export default function Navbar() {
 	const pathname = usePathname();
-	const { logout } = useAuth();
+	const { logout, user } = useAuth();
 
 	const isActive = (path: string) => {
 		return pathname === path;
@@ -153,6 +153,16 @@ export default function Navbar() {
 
 				<div className="flex items-center gap-4">
 					<ModeToggle />
+					{user?.role === 'admin' && (
+						<Button
+							variant="outline"
+							size="sm"
+							asChild
+							className="font-semibold text-primary border-primary hover:bg-primary/10"
+						>
+							<Link href="/admin">Admin</Link>
+						</Button>
+					)}
 					<Button
 						variant="ghost"
 						size="icon"
