@@ -36,7 +36,7 @@ export default function OnboardingPage() {
         <Button variant="ghost" size="icon" onClick={handleBack} disabled={step === 1}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
+        <div className="text-xl font-bold text-vibrant-orange">RoommieSwipe</div>
         <ModeToggle />
       </header>
 

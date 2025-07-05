@@ -57,7 +57,7 @@ export default function ApartmentDetailsPage() {
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
 					<div className="text-xl font-bold text-vibrant-orange">
-						RoomieMatch
+						RomieSwipe
 					</div>
 					<ModeToggle />
 				</div>

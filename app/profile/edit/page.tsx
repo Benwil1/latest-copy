@@ -78,7 +78,7 @@ export default function EditProfilePage() {
 						href="/home"
 						className="text-xl font-bold text-vibrant-orange cursor-pointer"
 					>
-						RoomieMatch
+						RomieSwipe
 					</Link>
 				</div>
 				<ModeToggle />

@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 			toast({
 				title: 'Login successful',
-				description: 'Welcome back to RoomieMatch!',
+				description: 'Welcome back to RomieSwipe!',
 			});
 
 			router.push('/home');

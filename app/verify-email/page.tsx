@@ -78,14 +78,6 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="p-4 flex justify-between items-center">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/verify-phone")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="text-xl font-bold text-vibrant-orange">RoomieMatch</div>
-        <ModeToggle />
-      </header>
-
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
