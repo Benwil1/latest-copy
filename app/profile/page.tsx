@@ -200,7 +200,7 @@ export default function ProfilePage() {
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">Budget</span>
 									<span className="text-xs font-medium">
-										$1,200 - $1,800/month
+										{user.budget ? `${user.budget}/month` : '—'}
 									</span>
 								</div>
 								<div className="flex justify-between">
@@ -208,14 +208,16 @@ export default function ProfilePage() {
 										Location
 									</span>
 									<span className="text-xs font-medium">
-										Downtown, New York
+										{user.preferredLocation || '—'}
 									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">
 										Move-in Date
 									</span>
-									<span className="text-xs font-medium">Flexible</span>
+									<span className="text-xs font-medium">
+										{user.moveInDate || '—'}
+									</span>
 								</div>
 							</CardContent>
 						</Card>
@@ -229,31 +231,31 @@ export default function ProfilePage() {
 							<CardContent className="p-4 pt-0 space-y-3">
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">Smoking</span>
-									<Badge variant="gray" className="text-[10px]">
-										Non-smoker
-									</Badge>
+									<span className="text-xs font-medium">
+										{user.lifestyle?.smoking || '—'}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">Pets</span>
-									<Badge variant="gray" className="text-[10px]">
-										Pet-friendly
-									</Badge>
+									<span className="text-xs font-medium">
+										{user.lifestyle?.pets || '—'}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">
 										Cleanliness
 									</span>
-									<Badge variant="gray" className="text-[10px]">
-										Very neat
-									</Badge>
+									<span className="text-xs font-medium">
+										{user.lifestyle?.cleanliness || '—'}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">
 										Schedule
 									</span>
-									<Badge variant="gray" className="text-[10px]">
-										Early riser
-									</Badge>
+									<span className="text-xs font-medium">
+										{user.lifestyle?.work || '—'}
+									</span>
 								</div>
 							</CardContent>
 						</Card>
@@ -269,20 +271,24 @@ export default function ProfilePage() {
 									<span className="text-xs text-muted-foreground">
 										Age Range
 									</span>
-									<span className="text-xs font-medium">23-35</span>
+									<span className="text-xs font-medium">
+										{user.roommatePreferences?.ageRange || '—'}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">
 										Gender Preference
 									</span>
-									<span className="text-xs font-medium">No preference</span>
+									<span className="text-xs font-medium">
+										{user.roommatePreferences?.gender || '—'}
+									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-xs text-muted-foreground">
 										Occupation
 									</span>
 									<span className="text-xs font-medium">
-										Professional/Student
+										{user.roommatePreferences?.occupation || '—'}
 									</span>
 								</div>
 							</CardContent>
