@@ -162,7 +162,7 @@ export default function AdminPage() {
 		setUserPage(newPage);
 	}
 
-	function handleBanUnban(userId, newStatus) {
+	function handleBanUnban(userId: number, newStatus: string) {
 		setUsers((prev) =>
 			prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
 		);
