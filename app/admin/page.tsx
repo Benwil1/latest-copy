@@ -174,7 +174,7 @@ export default function AdminPage() {
 		);
 	}
 
-	function handleDeleteListing(listingId) {
+	function handleDeleteListing(listingId: number) {
 		setListings((prev) => prev.filter((l) => l.id !== listingId));
 	}
 
