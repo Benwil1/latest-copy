@@ -85,13 +85,13 @@ export default function OnboardingPage() {
 	}, []);
 
 	// Handle input changes
-	const handleChange = (field, value) => {
+	const handleChange = (field: string, value: any) => {
 		setForm((prev) => ({ ...prev, [field]: value }));
 		setErrors((prev) => ({ ...prev, [field]: '' }));
 	};
 
 	// Handle nested lifestyle changes
-	const handleLifestyleChange = (field, value) => {
+	const handleLifestyleChange = (field: string, value: any) => {
 		setForm((prev) => ({
 			...prev,
 			lifestyle: { ...prev.lifestyle, [field]: value },
@@ -100,13 +100,13 @@ export default function OnboardingPage() {
 	};
 
 	// Handle array fields (amenities, interests, photos)
-	const handleArrayChange = (field, value) => {
+	const handleArrayChange = (field: string, value: any) => {
 		setForm((prev) => {
 			const arr = prev[field];
 			return {
 				...prev,
 				[field]: arr.includes(value)
-					? arr.filter((v) => v !== value)
+					? arr.filter((v: any) => v !== value)
 					: [...arr, value],
 			};
 		});
@@ -271,6 +271,7 @@ export default function OnboardingPage() {
 													handleChange('nationality', e.target.value)
 												}
 												className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vibrant-orange focus-visible:ring-offset-2"
+												title="Select your nationality"
 											>
 												<option value="">Select your nationality</option>
 												<option value="United States">United States</option>
