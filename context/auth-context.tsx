@@ -46,6 +46,11 @@ export type User = {
 	bio?: string;
 	interests?: string[];
 	occupation?: string;
+	roommatePreferences?: {
+		ageRange?: string;
+		gender?: string;
+		occupation?: string;
+	};
 };
 
 type AuthContextType = {
