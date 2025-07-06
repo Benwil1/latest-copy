@@ -157,7 +157,7 @@ export default function AdminPage() {
 		});
 	}
 
-	function handlePageChange(newPage) {
+	function handlePageChange(newPage: number) {
 		if (newPage < 1 || newPage > totalPages) return;
 		setUserPage(newPage);
 	}
