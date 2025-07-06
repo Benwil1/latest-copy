@@ -114,15 +114,19 @@ export default function AdminPage() {
 
 	const sortedUsers = [...filteredUsers].sort((a, b) => {
 		const { key, direction } = userSort;
-		let aValue = a[key as keyof typeof a];
-		let bValue = b[key as keyof typeof b];
 		if (key === 'createdAt') {
-			aValue = new Date(aValue as string);
-			bValue = new Date(bValue as string);
+			const aDate = new Date(a[key as keyof typeof a] as string);
+			const bDate = new Date(b[key as keyof typeof b] as string);
+			if (aDate < bDate) return direction === 'asc' ? -1 : 1;
+			if (aDate > bDate) return direction === 'asc' ? 1 : -1;
+			return 0;
+		} else {
+			const aValue = a[key as keyof typeof a] as string | number;
+			const bValue = b[key as keyof typeof b] as string | number;
+			if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+			if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+			return 0;
 		}
-		if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-		if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-		return 0;
 	});
 
 	const totalPages = Math.ceil(sortedUsers.length / USERS_PER_PAGE);
