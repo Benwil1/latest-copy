@@ -99,8 +99,9 @@ export default function OnboardingPage() {
 		setErrors((prev) => ({ ...prev, [field]: '' }));
 	};
 
-	// Handle array fields (amenities, interests, photos)
-	const handleArrayChange = (field: string, value: any) => {
+	type ArrayField = 'photos' | 'amenities' | 'interests';
+
+	const handleArrayChange = (field: ArrayField, value: any) => {
 		setForm((prev) => {
 			const arr = prev[field];
 			return {
@@ -1008,6 +1009,7 @@ export default function OnboardingPage() {
 													}))
 												}
 												className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+												title="Select roommate gender preference"
 											>
 												<option value="">No preference</option>
 												<option value="male">Male</option>
