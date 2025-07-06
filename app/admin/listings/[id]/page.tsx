@@ -50,18 +50,18 @@ export default function ListingDetailsPage() {
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Title</label>
 						<Input
-							value={editListing.title}
+							value={editListing?.title ?? ''}
 							onChange={(e) =>
-								setEditListing({ ...editListing, title: e.target.value })
+								editListing && setEditListing({ ...editListing, title: e.target.value })
 							}
 						/>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Owner</label>
 						<Input
-							value={editListing.owner}
+							value={editListing?.owner ?? ''}
 							onChange={(e) =>
-								setEditListing({ ...editListing, owner: e.target.value })
+								editListing && setEditListing({ ...editListing, owner: e.target.value })
 							}
 						/>
 					</div>
@@ -69,9 +69,9 @@ export default function ListingDetailsPage() {
 						<label className="block text-sm font-medium">Status</label>
 						<select
 							className="w-full rounded-md border border-border bg-muted p-2"
-							value={editListing.status}
+							value={editListing?.status ?? ''}
 							onChange={(e) =>
-								setEditListing({ ...editListing, status: e.target.value })
+								editListing && setEditListing({ ...editListing, status: e.target.value })
 							}
 							title="Listing Status"
 						>
