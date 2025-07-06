@@ -168,7 +168,7 @@ export default function AdminPage() {
 		);
 	}
 
-	function handleApprove(listingId) {
+	function handleApprove(listingId: number) {
 		setListings((prev) =>
 			prev.map((l) => (l.id === listingId ? { ...l, status: 'active' } : l))
 		);
