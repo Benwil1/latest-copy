@@ -495,7 +495,7 @@ export default function AdminPage() {
 												) : (
 													<Button
 														size="sm"
-														variant="success"
+														variant="default"
 														className="flex-1"
 														onClick={() => handleBanUnban(user.id, 'active')}
 													>
@@ -589,7 +589,7 @@ export default function AdminPage() {
 												{listing.status !== 'active' && (
 													<Button
 														size="sm"
-														variant="success"
+														variant="default"
 														className="flex-1"
 														onClick={() => handleApprove(listing.id)}
 													>
@@ -659,7 +659,7 @@ export default function AdminPage() {
 												{report.status === 'open' && (
 													<Button
 														size="sm"
-														variant="success"
+														variant="default"
 														className="flex-1"
 														onClick={() => handleResolve(report.id)}
 													>
