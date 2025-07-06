@@ -25,7 +25,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -33,6 +33,7 @@ const formSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
 	description: z.string().min(1, 'Description is required'),
 	price: z.string().min(1, 'Price is required'),
+	country: z.string().min(1, 'Country is required'),
 	location: z.string().min(1, 'Location is required'),
 	moveInDate: z.string().min(1, 'Move-in date is required'),
 	roomType: z.string().min(1, 'Room type is required'),
@@ -43,6 +44,7 @@ const formSchema = z.object({
 
 export default function PostApartmentPage() {
 	const [images, setImages] = useState<File[]>([]);
+	const [geo, setGeo] = useState({ country: '', city: '' });
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -50,6 +52,7 @@ export default function PostApartmentPage() {
 			title: '',
 			description: '',
 			price: '',
+			country: '',
 			location: '',
 			moveInDate: '',
 			roomType: '',
@@ -58,6 +61,17 @@ export default function PostApartmentPage() {
 			preferences: '',
 		},
 	});
+
+	useEffect(() => {
+		fetch('https://ipapi.co/json/')
+			.then((res) => res.json())
+			.then((data) => {
+				setGeo({ country: data.country_name || '', city: data.city || '' });
+				form.setValue('country', data.country_name || '');
+				form.setValue('location', data.city || '');
+			})
+			.catch(() => {});
+	}, []);
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
 		// Here you would typically send both the form data and images to your backend
@@ -141,6 +155,124 @@ export default function PostApartmentPage() {
 							<div className="grid grid-cols-2 gap-4">
 								<FormField
 									control={form.control}
+									name="country"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Country</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												value={field.value || geo.country}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select country" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="United States">
+														United States
+													</SelectItem>
+													<SelectItem value="Canada">Canada</SelectItem>
+													<SelectItem value="United Kingdom">
+														United Kingdom
+													</SelectItem>
+													<SelectItem value="Australia">Australia</SelectItem>
+													<SelectItem value="Germany">Germany</SelectItem>
+													<SelectItem value="France">France</SelectItem>
+													<SelectItem value="Spain">Spain</SelectItem>
+													<SelectItem value="Italy">Italy</SelectItem>
+													<SelectItem value="Japan">Japan</SelectItem>
+													<SelectItem value="China">China</SelectItem>
+													<SelectItem value="India">India</SelectItem>
+													<SelectItem value="Brazil">Brazil</SelectItem>
+													<SelectItem value="Mexico">Mexico</SelectItem>
+													<SelectItem value="South Africa">
+														South Africa
+													</SelectItem>
+													<SelectItem value="Nigeria">Nigeria</SelectItem>
+													<SelectItem value="Egypt">Egypt</SelectItem>
+													<SelectItem value="Russia">Russia</SelectItem>
+													<SelectItem value="Turkey">Turkey</SelectItem>
+													<SelectItem value="Argentina">Argentina</SelectItem>
+													<SelectItem value="Colombia">Colombia</SelectItem>
+													<SelectItem value="Indonesia">Indonesia</SelectItem>
+													<SelectItem value="Pakistan">Pakistan</SelectItem>
+													<SelectItem value="Bangladesh">Bangladesh</SelectItem>
+													<SelectItem value="Philippines">
+														Philippines
+													</SelectItem>
+													<SelectItem value="Vietnam">Vietnam</SelectItem>
+													<SelectItem value="Thailand">Thailand</SelectItem>
+													<SelectItem value="Malaysia">Malaysia</SelectItem>
+													<SelectItem value="Singapore">Singapore</SelectItem>
+													<SelectItem value="South Korea">
+														South Korea
+													</SelectItem>
+													<SelectItem value="Saudi Arabia">
+														Saudi Arabia
+													</SelectItem>
+													<SelectItem value="United Arab Emirates">
+														United Arab Emirates
+													</SelectItem>
+													<SelectItem value="Netherlands">
+														Netherlands
+													</SelectItem>
+													<SelectItem value="Sweden">Sweden</SelectItem>
+													<SelectItem value="Norway">Norway</SelectItem>
+													<SelectItem value="Denmark">Denmark</SelectItem>
+													<SelectItem value="Finland">Finland</SelectItem>
+													<SelectItem value="Poland">Poland</SelectItem>
+													<SelectItem value="Switzerland">
+														Switzerland
+													</SelectItem>
+													<SelectItem value="Austria">Austria</SelectItem>
+													<SelectItem value="Belgium">Belgium</SelectItem>
+													<SelectItem value="Ireland">Ireland</SelectItem>
+													<SelectItem value="Portugal">Portugal</SelectItem>
+													<SelectItem value="Greece">Greece</SelectItem>
+													<SelectItem value="Czech Republic">
+														Czech Republic
+													</SelectItem>
+													<SelectItem value="Hungary">Hungary</SelectItem>
+													<SelectItem value="Romania">Romania</SelectItem>
+													<SelectItem value="Ukraine">Ukraine</SelectItem>
+													<SelectItem value="Chile">Chile</SelectItem>
+													<SelectItem value="Peru">Peru</SelectItem>
+													<SelectItem value="New Zealand">
+														New Zealand
+													</SelectItem>
+													<SelectItem value="Morocco">Morocco</SelectItem>
+													<SelectItem value="Kenya">Kenya</SelectItem>
+													<SelectItem value="Ghana">Ghana</SelectItem>
+													<SelectItem value="Other">Other</SelectItem>
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="location"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>City/Location</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="e.g., New York"
+													{...field}
+													value={field.value || geo.city}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
 									name="price"
 									render={({ field }) => (
 										<FormItem>
@@ -155,22 +287,6 @@ export default function PostApartmentPage() {
 
 								<FormField
 									control={form.control}
-									name="location"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Location</FormLabel>
-											<FormControl>
-												<Input placeholder="e.g., Downtown" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-
-							<div className="grid grid-cols-2 gap-4">
-								<FormField
-									control={form.control}
 									name="moveInDate"
 									render={({ field }) => (
 										<FormItem>
@@ -182,7 +298,9 @@ export default function PostApartmentPage() {
 										</FormItem>
 									)}
 								/>
+							</div>
 
+							<div className="grid grid-cols-2 gap-4">
 								<FormField
 									control={form.control}
 									name="roomType"
@@ -211,37 +329,37 @@ export default function PostApartmentPage() {
 										</FormItem>
 									)}
 								/>
-							</div>
 
-							<FormField
-								control={form.control}
-								name="furnished"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Furnished</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Is the apartment furnished?" />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value="yes">
-													Yes, Fully Furnished
-												</SelectItem>
-												<SelectItem value="partially">
-													Partially Furnished
-												</SelectItem>
-												<SelectItem value="no">No, Unfurnished</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+								<FormField
+									control={form.control}
+									name="furnished"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Furnished</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Is the apartment furnished?" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="yes">
+														Yes, Fully Furnished
+													</SelectItem>
+													<SelectItem value="partially">
+														Partially Furnished
+													</SelectItem>
+													<SelectItem value="no">No, Unfurnished</SelectItem>
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 
 							<FormField
 								control={form.control}

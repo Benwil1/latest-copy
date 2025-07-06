@@ -1,8 +1,8 @@
 import React from 'react';
 
 export const metadata = {
-	title: 'Apartments | RoommieSwipe',
-	description: 'Find your perfect apartment on RoommieSwipe',
+	title: 'Apartments | RoomieMatch',
+	description: 'Find your perfect apartment on RoomieMatch',
 };
 
 export default function ApartmentsLayout({
