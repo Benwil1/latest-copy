@@ -114,11 +114,11 @@ export default function AdminPage() {
 
 	const sortedUsers = [...filteredUsers].sort((a, b) => {
 		const { key, direction } = userSort;
-		let aValue = a[key];
-		let bValue = b[key];
+		let aValue = a[key as keyof typeof a];
+		let bValue = b[key as keyof typeof b];
 		if (key === 'createdAt') {
-			aValue = new Date(aValue);
-			bValue = new Date(bValue);
+			aValue = new Date(aValue as string);
+			bValue = new Date(bValue as string);
 		}
 		if (aValue < bValue) return direction === 'asc' ? -1 : 1;
 		if (aValue > bValue) return direction === 'asc' ? 1 : -1;
@@ -157,9 +157,7 @@ export default function AdminPage() {
 
 	function handleApprove(listingId) {
 		setListings((prev) =>
-			prev.map((l) =>
-				l.id === listingId ? { ...l, status: 'active' } : l
-			)
+			prev.map((l) => (l.id === listingId ? { ...l, status: 'active' } : l))
 		);
 	}
 
@@ -169,9 +167,7 @@ export default function AdminPage() {
 
 	function handleResolve(reportId) {
 		setReports((prev) =>
-			prev.map((r) =>
-				r.id === reportId ? { ...r, status: 'resolved' } : r
-			)
+			prev.map((r) => (r.id === reportId ? { ...r, status: 'resolved' } : r))
 		);
 	}
 
@@ -355,9 +351,7 @@ export default function AdminPage() {
 										<CardTitle className="text-lg">Listings</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div className="text-3xl font-bold">
-											{listings.length}
-										</div>
+										<div className="text-3xl font-bold">{listings.length}</div>
 										<div className="text-muted-foreground text-sm">
 											Total listings
 										</div>
@@ -369,9 +363,7 @@ export default function AdminPage() {
 										<CardTitle className="text-lg">Reports</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div className="text-3xl font-bold">
-											{reports.length}
-										</div>
+										<div className="text-3xl font-bold">{reports.length}</div>
 										<div className="text-muted-foreground text-sm">
 											Open reports
 										</div>

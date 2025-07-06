@@ -52,7 +52,8 @@ export default function ListingDetailsPage() {
 						<Input
 							value={editListing?.title ?? ''}
 							onChange={(e) =>
-								editListing && setEditListing({ ...editListing, title: e.target.value })
+								editListing &&
+								setEditListing({ ...editListing, title: e.target.value })
 							}
 						/>
 					</div>
@@ -61,7 +62,8 @@ export default function ListingDetailsPage() {
 						<Input
 							value={editListing?.owner ?? ''}
 							onChange={(e) =>
-								editListing && setEditListing({ ...editListing, owner: e.target.value })
+								editListing &&
+								setEditListing({ ...editListing, owner: e.target.value })
 							}
 						/>
 					</div>
@@ -71,7 +73,8 @@ export default function ListingDetailsPage() {
 							className="w-full rounded-md border border-border bg-muted p-2"
 							value={editListing?.status ?? ''}
 							onChange={(e) =>
-								editListing && setEditListing({ ...editListing, status: e.target.value })
+								editListing &&
+								setEditListing({ ...editListing, status: e.target.value })
 							}
 							title="Listing Status"
 						>
