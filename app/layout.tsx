@@ -38,6 +38,7 @@ export default function RootLayout({
 					name="viewport"
 					content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 				/>
+				<meta property="og:type" content="website" />
 				<link rel="icon" href="/favicon.ico" sizes="any" />
 			</head>
 			<body className={inter.className}>
