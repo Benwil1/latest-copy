@@ -95,6 +95,15 @@ const mockReports = [
 
 const USERS_PER_PAGE = 5;
 
+type UserKey =
+	| 'id'
+	| 'name'
+	| 'email'
+	| 'status'
+	| 'role'
+	| 'createdAt'
+	| 'location';
+
 export default function AdminPage() {
 	const [userSearch, setUserSearch] = useState('');
 	const [listingSearch, setListingSearch] = useState('');
@@ -139,7 +148,7 @@ export default function AdminPage() {
 		l.title.toLowerCase().includes(listingSearch.toLowerCase())
 	);
 
-	function handleSort(key) {
+	function handleSort(key: UserKey) {
 		setUserSort((prev) => {
 			if (prev.key === key) {
 				return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
