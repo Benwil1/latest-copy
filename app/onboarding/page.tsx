@@ -27,6 +27,29 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+type OnboardingErrors = {
+	age?: string;
+	nationality?: string;
+	gender?: string;
+	photos?: string;
+	budget?: string;
+	preferredLocation?: string;
+	moveInDate?: string;
+	spaceType?: string;
+	bathroom?: string;
+	furnished?: string;
+	smoking?: string;
+	pets?: string;
+	cleanliness?: string;
+	noise?: string;
+	guests?: string;
+	work?: string;
+	ageRange?: string;
+	occupation?: string;
+	bio?: string;
+	interests?: string;
+};
+
 export default function OnboardingPage() {
 	const router = useRouter();
 	const { setCurrencyByCountry, currency } = useCurrency();
@@ -66,7 +89,7 @@ export default function OnboardingPage() {
 			occupation: '',
 		},
 	});
-	const [errors, setErrors] = useState({});
+	const [errors, setErrors] = useState<OnboardingErrors>({});
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,7 +138,7 @@ export default function OnboardingPage() {
 
 	// Validation per step
 	const validateStep = () => {
-		const newErrors = {};
+		const newErrors: OnboardingErrors = {};
 		if (step === 1) {
 			if (!form.age) newErrors.age = 'Age is required';
 			if (!form.nationality) newErrors.nationality = 'Nationality is required';
