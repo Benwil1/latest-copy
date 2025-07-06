@@ -25,14 +25,14 @@ import {
 	Upload,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function OnboardingPage() {
 	const router = useRouter();
-	const { setCurrencyByCountry } = useCurrency();
+	const { setCurrencyByCountry, currency } = useCurrency();
 	const { user, updateProfile } = useAuth();
 	const [step, setStep] = useState(1);
-	const totalSteps = 7;
+	const totalSteps = 8;
 	const progress = (step / totalSteps) * 100;
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,10 +60,29 @@ export default function OnboardingPage() {
 		},
 		bio: '',
 		interests: [],
+		roommatePreferences: {
+			ageRange: '',
+			gender: '',
+			occupation: '',
+		},
 	});
 	const [errors, setErrors] = useState({});
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Auto-detect country by IP and set currency on mount if nationality is not set
+	useEffect(() => {
+		if (!form.nationality) {
+			fetch('https://ipapi.co/json/')
+				.then((res) => res.json())
+				.then((data) => {
+					if (data && data.country_name) {
+						setCurrencyByCountry(data.country_name);
+					}
+				});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	// Handle input changes
 	const handleChange = (field, value) => {
@@ -134,6 +153,14 @@ export default function OnboardingPage() {
 			if (!form.lifestyle.work) newErrors.work = 'Work schedule is required';
 		}
 		if (step === 7) {
+			if (!form.roommatePreferences.ageRange)
+				newErrors.ageRange = 'Age range is required';
+			if (!form.roommatePreferences.gender)
+				newErrors.gender = 'Gender preference is required';
+			if (!form.roommatePreferences.occupation)
+				newErrors.occupation = 'Occupation is required';
+		}
+		if (step === 8) {
 			if (!form.bio) newErrors.bio = 'Bio is required';
 			if (form.interests.length === 0)
 				newErrors.interests = 'Select at least 1 interest';
@@ -171,9 +198,9 @@ export default function OnboardingPage() {
 
 	// Responsive container and sticky progress bar
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-background to-muted flex flex-col items-center justify-center px-2 py-4">
+		<div className="min-h-screen flex flex-col items-center justify-center px-2 py-4 bg-background dark:bg-[image:var(--onboarding-gradient)]">
 			<div className="w-full max-w-lg mx-auto">
-				<div className="sticky top-0 z-20 bg-background/80 backdrop-blur rounded-b-xl shadow-md mb-6">
+				<div className="sticky top-0 z-20 bg-background/80 dark:bg-card/90 backdrop-blur rounded-b-xl shadow-md mb-6">
 					<div className="flex justify-between items-center px-4 pt-4 pb-2">
 						<span className="text-xs font-medium text-muted-foreground">
 							Step {step} of {totalSteps}
@@ -182,7 +209,10 @@ export default function OnboardingPage() {
 							{Math.round(progress)}% Complete
 						</span>
 					</div>
-					<Progress value={progress} className="h-2 rounded-b-xl" />
+					<Progress
+						value={progress}
+						className="h-2 rounded-b-xl bg-muted dark:bg-muted/60 [&_.progress-bar]:bg-accent"
+					/>
 				</div>
 				<motion.div
 					key={step}
@@ -191,7 +221,7 @@ export default function OnboardingPage() {
 					exit={{ opacity: 0, x: -40 }}
 					transition={{ duration: 0.3 }}
 				>
-					<Card className="w-full shadow-xl rounded-2xl bg-background/90">
+					<Card className="w-full shadow-xl rounded-2xl bg-card/90 border border-border">
 						<AnimatePresence mode="wait">
 							{step === 1 && (
 								<motion.div
@@ -482,16 +512,23 @@ export default function OnboardingPage() {
 									<CardContent className="space-y-4">
 										<div className="space-y-2">
 											<label htmlFor="budget" className="text-sm font-medium">
-												Monthly Budget (USD)
+												Monthly Budget ({currency.code})
 											</label>
-											<Input
-												id="budget"
-												type="number"
-												placeholder="Enter your maximum budget"
-												value={form.budget}
-												onChange={(e) => handleChange('budget', e.target.value)}
-												className="w-full"
-											/>
+											<div className="relative">
+												<Input
+													id="budget"
+													type="number"
+													placeholder={`Enter your maximum budget in ${currency.code}`}
+													value={form.budget}
+													onChange={(e) =>
+														handleChange('budget', e.target.value)
+													}
+													className="w-full pr-16"
+												/>
+												<span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
+													{currency.symbol}
+												</span>
+											</div>
 											{errors.budget && (
 												<p className="text-xs text-red-500 mt-1">
 													{errors.budget}
@@ -917,6 +954,97 @@ export default function OnboardingPage() {
 								</motion.div>
 							)}
 							{step === 7 && (
+								<motion.div
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -20 }}
+									transition={{ duration: 0.2 }}
+								>
+									<CardHeader className="text-center">
+										<CardTitle className="text-2xl font-bold">
+											Roommate Preferences
+										</CardTitle>
+										<CardDescription>
+											Tell us about your ideal roommate
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="space-y-2">
+											<label className="text-sm font-medium">Age Range</label>
+											<Input
+												placeholder="e.g. 23-35"
+												value={form.roommatePreferences.ageRange}
+												onChange={(e) =>
+													setForm((prev) => ({
+														...prev,
+														roommatePreferences: {
+															...prev.roommatePreferences,
+															ageRange: e.target.value,
+														},
+													}))
+												}
+												className="w-full"
+											/>
+											{errors.ageRange && (
+												<p className="text-xs text-red-500 mt-1">
+													{errors.ageRange}
+												</p>
+											)}
+										</div>
+										<div className="space-y-2">
+											<label className="text-sm font-medium">
+												Gender Preference
+											</label>
+											<select
+												value={form.roommatePreferences.gender}
+												onChange={(e) =>
+													setForm((prev) => ({
+														...prev,
+														roommatePreferences: {
+															...prev.roommatePreferences,
+															gender: e.target.value,
+														},
+													}))
+												}
+												className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+											>
+												<option value="">No preference</option>
+												<option value="male">Male</option>
+												<option value="female">Female</option>
+												<option value="non-binary">Non-binary</option>
+											</select>
+											{errors.gender && (
+												<p className="text-xs text-red-500 mt-1">
+													{errors.gender}
+												</p>
+											)}
+										</div>
+										<div className="space-y-2">
+											<label className="text-sm font-medium">Occupation</label>
+											<Input
+												placeholder="e.g. Professional/Student"
+												value={form.roommatePreferences.occupation}
+												onChange={(e) =>
+													setForm((prev) => ({
+														...prev,
+														roommatePreferences: {
+															...prev.roommatePreferences,
+															occupation: e.target.value,
+														},
+													}))
+												}
+												className="w-full"
+											/>
+											{errors.occupation && (
+												<p className="text-xs text-red-500 mt-1">
+													{errors.occupation}
+												</p>
+											)}
+										</div>
+									</CardContent>
+								</motion.div>
+							)}
+							{step === 8 && (
 								<motion.div
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
