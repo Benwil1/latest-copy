@@ -449,7 +449,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const updateProfile = async (profile: Partial<User>) => {
 		setIsLoading(true);
 		try {
-			const updatedUser = { ...user, ...profile };
+			if (!user) return; // Ensure user is defined
+			const updatedUser: User = { ...user, ...profile };
 			setUser(updatedUser);
 			localStorage.setItem(
 				'user',
