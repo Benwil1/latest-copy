@@ -68,26 +68,27 @@ export default function UserDetailsPage() {
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Name</label>
 						<Input
-							value={editUser.name}
+							value={editUser?.name ?? ''}
 							onChange={(e) =>
-								setEditUser({ ...editUser, name: e.target.value })
+								editUser && setEditUser({ ...editUser, name: e.target.value })
 							}
 						/>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Email</label>
 						<Input
-							value={editUser.email}
+							value={editUser?.email ?? ''}
 							onChange={(e) =>
-								setEditUser({ ...editUser, email: e.target.value })
+								editUser && setEditUser({ ...editUser, email: e.target.value })
 							}
 						/>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Location</label>
 						<Input
-							value={editUser.location}
+							value={editUser?.location ?? ''}
 							onChange={(e) =>
+								editUser &&
 								setEditUser({ ...editUser, location: e.target.value })
 							}
 						/>
@@ -97,9 +98,9 @@ export default function UserDetailsPage() {
 							<label className="block text-sm font-medium">Role</label>
 							<select
 								className="w-full rounded-md border border-border bg-muted p-2"
-								value={editUser.role}
+								value={editUser?.role ?? ''}
 								onChange={(e) =>
-									setEditUser({ ...editUser, role: e.target.value })
+									editUser && setEditUser({ ...editUser, role: e.target.value })
 								}
 								title="User Role"
 							>
@@ -111,8 +112,9 @@ export default function UserDetailsPage() {
 							<label className="block text-sm font-medium">Status</label>
 							<select
 								className="w-full rounded-md border border-border bg-muted p-2"
-								value={editUser.status}
+								value={editUser?.status ?? ''}
 								onChange={(e) =>
+									editUser &&
 									setEditUser({ ...editUser, status: e.target.value })
 								}
 								title="User Status"
@@ -124,7 +126,7 @@ export default function UserDetailsPage() {
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Created</label>
-						<Input value={editUser.createdAt} disabled />
+						<Input value={editUser?.createdAt ?? ''} disabled />
 					</div>
 					<hr className="my-4 border-muted" />
 					<Button className="w-full mt-2">Save (Mock)</Button>
