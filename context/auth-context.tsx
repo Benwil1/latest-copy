@@ -19,6 +19,33 @@ export type User = {
 	phoneVerified: boolean;
 	twoFactorEnabled: boolean;
 	role?: string;
+	profilePicture?: string;
+	country?: string;
+	nationality?: string;
+	location?: string;
+	// Onboarding fields
+	age?: string;
+	gender?: string;
+	photos?: string[];
+	video?: string;
+	budget?: string;
+	preferredLocation?: string;
+	moveInDate?: string;
+	spaceType?: string;
+	bathroom?: string;
+	furnished?: string;
+	amenities?: string[];
+	lifestyle?: {
+		smoking: string;
+		pets: string;
+		cleanliness: string;
+		noise: string;
+		guests: string;
+		work: string;
+	};
+	bio?: string;
+	interests?: string[];
+	occupation?: string;
 };
 
 type AuthContextType = {
@@ -30,7 +57,10 @@ type AuthContextType = {
 		name: string,
 		email: string,
 		phone: string,
-		password: string
+		password: string,
+		country?: string,
+		nationality?: string,
+		location?: string
 	) => Promise<void>;
 	logout: () => Promise<void>;
 	verifyPhone: (code: string) => Promise<boolean>;
@@ -57,7 +87,26 @@ const MOCK_USER: User = {
 	phoneVerified: true,
 	twoFactorEnabled: false,
 	role: 'user',
+	profilePicture: '',
 };
+
+// Utility to strip large base64 data from user before saving to localStorage
+function stripLargeFields(user: any) {
+	return {
+		...user,
+		photos: Array.isArray(user.photos)
+			? user.photos.map((p: string) =>
+					typeof p === 'string' && p.startsWith('data:') ? '' : p
+			  )
+			: [],
+		video:
+			user.video &&
+			typeof user.video === 'string' &&
+			user.video.startsWith('data:')
+				? ''
+				: user.video,
+	};
+}
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
@@ -151,14 +200,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		name: string,
 		email: string,
 		phone: string,
-		password: string
+		password: string,
+		country?: string,
+		nationality?: string,
+		location?: string
 	) => {
 		setIsLoading(true);
 		try {
-			// In a real app, this would be an API call to register
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			// Create a new user object
+			// Get onboarding data from localStorage if available
+			const onboardingData = localStorage.getItem('onboarding');
+			const onboarding = onboardingData ? JSON.parse(onboardingData) : {};
+
 			const newUser: User = {
 				...MOCK_USER,
 				name,
@@ -166,16 +220,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				phone,
 				emailVerified: false,
 				phoneVerified: false,
+				country,
+				nationality,
+				location,
+				// Include onboarding data
+				...onboarding,
 			};
-
 			setUser(newUser);
-			localStorage.setItem('user', JSON.stringify(newUser));
-
+			localStorage.setItem('user', JSON.stringify(stripLargeFields(newUser)));
 			toast({
 				title: 'Account created',
 				description: 'Please verify your phone number to continue.',
 			});
-
 			router.push('/verify-phone');
 		} catch (error) {
 			console.error('Signup failed', error);
@@ -389,8 +445,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			const updatedUser = { ...user, ...profile };
 			setUser(updatedUser);
-			localStorage.setItem('user', JSON.stringify(updatedUser));
-			// Optionally, show a toast here if you want
+			localStorage.setItem(
+				'user',
+				JSON.stringify(stripLargeFields(updatedUser))
+			);
+
+			// Also update onboarding data in localStorage to keep it in sync
+			const onboardingData = localStorage.getItem('onboarding');
+			const onboarding = onboardingData ? JSON.parse(onboardingData) : {};
+			const updatedOnboarding = { ...onboarding, ...profile };
+			localStorage.setItem('onboarding', JSON.stringify(updatedOnboarding));
+
+			toast({
+				title: 'Profile updated',
+				description: 'Your profile has been updated successfully.',
+			});
+		} catch (error) {
+			console.error('Profile update failed', error);
+			toast({
+				title: 'Update failed',
+				description: 'Please try again.',
+				variant: 'destructive',
+			});
 		} finally {
 			setIsLoading(false);
 		}

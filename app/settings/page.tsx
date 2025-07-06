@@ -1,10 +1,10 @@
 'use client';
 
-import { ModeToggle } from '@/components/mode-toggle';
 import NotificationSettings from '@/app/settings/components/notification-settings';
 import PrivacySettings from '@/app/settings/components/privacy-settings';
 import ProfileSettings from '@/app/settings/components/profile-settings';
 import SecuritySettings from '@/app/settings/components/security-settings';
+import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,13 @@ export default function SettingsPage() {
 	return (
 		<div className="min-h-screen pb-16">
 			<main className="container max-w-4xl mx-auto p-4 sm:p-6">
+				<Link
+					href="/profile"
+					className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-primary hover:underline"
+				>
+					<ArrowLeft className="h-4 w-4" />
+					Back to Profile
+				</Link>
 				<h1 className="text-2xl font-bold mb-6 sm:mb-8">Settings</h1>
 
 				<div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
