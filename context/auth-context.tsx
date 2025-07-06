@@ -51,6 +51,7 @@ export type User = {
 		gender?: string;
 		occupation?: string;
 	};
+	languages?: string[];
 };
 
 type AuthContextType = {
