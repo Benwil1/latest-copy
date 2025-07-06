@@ -45,33 +45,36 @@ export default function ReportDetailsPage() {
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Type</label>
 						<div className="rounded bg-muted px-3 py-2">
-							{editReport.type.charAt(0).toUpperCase() +
-								editReport.type.slice(1)}
+							{editReport
+								? editReport.type.charAt(0).toUpperCase() +
+								  editReport.type.slice(1)
+								: ''}
 						</div>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Target</label>
 						<div className="rounded bg-muted px-3 py-2">
-							{editReport.target}
+							{editReport?.target ?? ''}
 						</div>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Reason</label>
 						<div className="rounded bg-muted px-3 py-2">
-							{editReport.reason}
+							{editReport?.reason ?? ''}
 						</div>
 					</div>
 					<div className="space-y-2">
 						<label className="block text-sm font-medium">Status</label>
 						<div className="rounded bg-muted px-3 py-2">
-							{editReport.status}
+							{editReport?.status ?? ''}
 						</div>
 					</div>
 					<hr className="my-4 border-muted" />
-					{editReport.status === 'open' && (
+					{editReport?.status === 'open' && (
 						<Button
 							className="w-full mt-2"
 							onClick={() =>
+								editReport &&
 								setEditReport({ ...editReport, status: 'resolved' })
 							}
 						>
