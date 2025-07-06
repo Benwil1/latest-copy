@@ -41,7 +41,7 @@ export default function OnboardingPage() {
 		age: '',
 		nationality: '',
 		gender: '',
-		photos: [], // array of URLs or base64 strings
+		photos: [] as string[], // array of URLs or base64 strings
 		video: '', // URL or base64 string
 		budget: '',
 		preferredLocation: '',
@@ -49,7 +49,7 @@ export default function OnboardingPage() {
 		spaceType: '',
 		bathroom: '',
 		furnished: '',
-		amenities: [],
+		amenities: [] as string[],
 		lifestyle: {
 			smoking: '',
 			pets: '',
@@ -59,7 +59,7 @@ export default function OnboardingPage() {
 			work: '',
 		},
 		bio: '',
-		interests: [],
+		interests: [] as string[],
 		roommatePreferences: {
 			ageRange: '',
 			gender: '',
