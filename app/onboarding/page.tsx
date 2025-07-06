@@ -1096,7 +1096,6 @@ export default function OnboardingPage() {
 												className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 												value={form.bio}
 												onChange={(e) => handleChange('bio', e.target.value)}
-												className="w-full"
 											/>
 											{errors.bio && (
 												<p className="text-xs text-red-500 mt-1">
