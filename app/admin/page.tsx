@@ -178,7 +178,7 @@ export default function AdminPage() {
 		setListings((prev) => prev.filter((l) => l.id !== listingId));
 	}
 
-	function handleResolve(reportId) {
+	function handleResolve(reportId: number) {
 		setReports((prev) =>
 			prev.map((r) => (r.id === reportId ? { ...r, status: 'resolved' } : r))
 		);
