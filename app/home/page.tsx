@@ -148,6 +148,7 @@ export default function HomePage() {
 	const [passedProfiles, setPassedProfiles] = useState<number[]>([]);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
+	const [matchCount, setMatchCount] = useState(0);
 
 	const currentRoommate = roommates[currentIndex];
 
@@ -252,6 +253,10 @@ export default function HomePage() {
 		document.addEventListener('mouseup', handleMouseUpGlobal);
 		return () => document.removeEventListener('mouseup', handleMouseUpGlobal);
 	}, [isDragging, offsetX]);
+
+	useEffect(() => {
+		setMatchCount(Math.floor(Math.random() * 5) + 1);
+	}, []);
 
 	return (
 		<ProtectedRoute>
@@ -542,7 +547,7 @@ export default function HomePage() {
 							</div>
 							<div>
 								<p className="text-2xl font-bold text-green-500">
-									{Math.floor(Math.random() * 5) + 1}
+									{matchCount}
 								</p>
 								<p className="text-sm text-muted-foreground">Matches</p>
 							</div>
