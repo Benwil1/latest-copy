@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
+import { use, useEffect, useState } from 'react';
 
 // Sample roommate data - in a real app, this would come from an API
 const roommates = [
@@ -196,24 +196,23 @@ export default function RoommateProfilePage({ params }: PageProps) {
 
 	return (
 		<div className="min-h-screen pb-16 bg-background">
-			<main className="container max-w-4xl mx-auto px-4 sm:px-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+			<main className="container max-w-4xl mx-auto px-2 sm:px-4 mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
 				{/* Profile Header */}
-				<div className="relative mb-16">
-					<div className="relative aspect-[4/5] sm:aspect-[16/9] w-full rounded-xl overflow-hidden mb-8 h-[600px]">
+				<div className="relative mb-8 md:mb-16 flex flex-col items-center">
+					<div className="relative w-full max-w-xs aspect-[4/5] rounded-xl overflow-hidden mb-6 mx-auto">
 						<img
 							src={roommate.image || '/placeholder.svg'}
 							alt={roommate.name}
-							className="w-full h-full object-contain"
+							className="w-full h-full object-cover"
 						/>
 						<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-
-						<div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-							<div className="flex items-center justify-between">
+						<div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 								<div>
-									<h1 className="text-xl sm:text-2xl font-bold text-white">
+									<h1 className="text-lg sm:text-2xl font-bold text-white">
 										{roommate.name}, {roommate.age}
 									</h1>
-									<div className="flex items-center text-white/90 text-sm sm:text-base">
+									<div className="flex items-center text-white/90 text-sm sm:text-base mt-1">
 										<MapPin className="h-4 w-4 mr-1" />
 										<span>{roommate.location}</span>
 										{roommate.verified && (
@@ -224,303 +223,245 @@ export default function RoommateProfilePage({ params }: PageProps) {
 										)}
 									</div>
 								</div>
-								<Badge variant="secondary" className="text-xs sm:text-sm">
+								<Badge variant="secondary" className="text-xs sm:text-sm w-fit">
 									{roommate.compatibility}% Match
 								</Badge>
 							</div>
 						</div>
 					</div>
-
-					{/* Action buttons */}
-					<div className="flex justify-center mt-2">
-						<button className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-red-500/20 mx-2">
-							<X className="h-6 w-6 text-red-500" />
-						</button>
-						<button className="h-12 w-12 flex items-center justify-center rounded-full bg-white shadow-lg hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-green-500/20 mx-2">
-							<Heart className="h-6 w-6 text-green-500" />
-						</button>
-					</div>
 				</div>
-
 				{/* Tabs */}
-				<Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-					<TabsList className="grid w-full grid-cols-3">
-						<TabsTrigger value="about" className="text-xs sm:text-sm">
-							About
-						</TabsTrigger>
-						<TabsTrigger value="preferences" className="text-xs sm:text-sm">
-							Preferences
-						</TabsTrigger>
-						<TabsTrigger value="reviews" className="text-xs sm:text-sm">
-							Reviews
-						</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="about" className="space-y-4 mt-4">
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Bio</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<p className="text-sm">{roommate.bio}</p>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Basic Info</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Occupation
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.occupation}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Nationality
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.nationality}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Languages
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.languages.join(', ')}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">Budget</span>
-									<span className="text-sm font-medium">
-										${roommate.budget}/month
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Move-in Date
-									</span>
-									<span className="text-sm font-medium">{roommate.moveIn}</span>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Lifestyle</CardTitle>
-							</CardHeader>
-							<CardContent className="grid grid-cols-2 gap-3">
-								<div className="flex items-start gap-2">
-									<Sparkles className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Cleanliness</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.cleanliness}
-										</p>
+				<div className="w-full">
+					<Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+						<TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap rounded-lg bg-muted p-1 mb-4">
+							<TabsTrigger
+								value="about"
+								className="flex-1 min-w-[100px] px-4 py-2 rounded-lg text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary focus:outline-none"
+							>
+								About
+							</TabsTrigger>
+							<TabsTrigger
+								value="preferences"
+								className="flex-1 min-w-[100px] px-4 py-2 rounded-lg text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary focus:outline-none"
+							>
+								Preferences
+							</TabsTrigger>
+							<TabsTrigger
+								value="reviews"
+								className="flex-1 min-w-[100px] px-4 py-2 rounded-lg text-xs sm:text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary focus:outline-none"
+							>
+								Reviews
+							</TabsTrigger>
+						</TabsList>
+						<TabsContent value="about" className="space-y-4 mt-2">
+							<Card className="p-3 sm:p-4">
+								<CardHeader>
+									<CardTitle className="text-base sm:text-lg">Bio</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<p className="text-sm">{roommate.bio}</p>
+								</CardContent>
+							</Card>
+							<Card className="p-3 sm:p-4">
+								<CardHeader>
+									<CardTitle className="text-base sm:text-lg">
+										Basic Info
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="space-y-3">
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Occupation
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.occupation}
+										</span>
 									</div>
-								</div>
-								<div className="flex items-start gap-2">
-									<Volume2 className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Noise Level</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.noise}
-										</p>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Nationality
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.nationality}
+										</span>
 									</div>
-								</div>
-								<div className="flex items-start gap-2">
-									<Clock className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Schedule</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.schedule}
-										</p>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Languages
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.languages.join(', ')}
+										</span>
 									</div>
-								</div>
-								<div className="flex items-start gap-2">
-									<Users className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Guests</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.guests}
-										</p>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Budget
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											${roommate.budget}/month
+										</span>
 									</div>
-								</div>
-								<div className="flex items-start gap-2">
-									<Flag className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Smoking</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.smoking}
-										</p>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Move-in Date
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.moveIn}
+										</span>
 									</div>
-								</div>
-								<div className="flex items-start gap-2">
-									<Home className="h-4 w-4 text-vibrant-orange mt-0.5" />
-									<div>
-										<p className="text-xs text-muted-foreground">Pets</p>
-										<p className="text-sm font-medium">
-											{roommate.lifestyle.pets}
-										</p>
+								</CardContent>
+							</Card>
+							<Card className="p-3 sm:p-4">
+								<CardHeader>
+									<CardTitle className="text-base sm:text-lg">
+										Lifestyle
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm">
+									<div className="flex items-start gap-2">
+										<Home className="h-4 w-4 text-vibrant-orange mt-0.5" />
+										<div>
+											<p className="text-xs text-muted-foreground">
+												Cleanliness
+											</p>
+											<p className="text-sm font-medium">
+												{roommate.lifestyle.cleanliness}
+											</p>
+										</div>
 									</div>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Interests</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="flex flex-wrap gap-2">
-									{roommate.interests.map((interest, index) => (
-										<Badge key={index} variant="secondary" className="text-xs">
-											{interest}
-										</Badge>
-									))}
-								</div>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
-					<TabsContent value="preferences" className="space-y-4 mt-4">
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Roommate Preferences</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Looking for
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.roommate}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Gender Preference
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.gender}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Age Range
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.ageRange}
-									</span>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">
-									Living Space Preferences
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Space Type
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.spaceType}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Bathroom
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.bathroom}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Furnished
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.preferences.furnished}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">Budget</span>
-									<span className="text-sm font-medium">
-										Up to ${roommate.budget}/month
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Location
-									</span>
-									<span className="text-sm font-medium">
-										{roommate.location}
-									</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-sm text-muted-foreground">
-										Move-in Date
-									</span>
-									<span className="text-sm font-medium">{roommate.moveIn}</span>
-								</div>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
-					<TabsContent value="reviews" className="space-y-4 mt-4">
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-lg">Roommate Reviews</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								{roommate.reviews.length > 0 ? (
-									roommate.reviews.map((review, index) => (
-										<div
-											key={index}
-											className="border-b pb-4 last:border-0 last:pb-0"
-										>
-											<div className="flex items-center gap-2 mb-2">
-												<Avatar className="h-8 w-8">
-													<AvatarImage src={review.image} alt={review.name} />
-													<AvatarFallback>{review.name[0]}</AvatarFallback>
-												</Avatar>
-												<div>
-													<p className="text-sm font-medium">{review.name}</p>
-													<div className="flex items-center">
-														{Array.from({ length: 5 }).map((_, i) => (
-															<Star
-																key={i}
-																className={`h-3 w-3 ${
-																	i < review.rating
-																		? 'text-yellow-500 fill-yellow-500'
-																		: 'text-gray-300'
-																}`}
-															/>
-														))}
+									<div className="flex items-start gap-2">
+										<Home className="h-4 w-4 text-vibrant-orange mt-0.5" />
+										<div>
+											<p className="text-xs text-muted-foreground">
+												Noise Level
+											</p>
+											<p className="text-sm font-medium">
+												{roommate.lifestyle.noise}
+											</p>
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<Home className="h-4 w-4 text-vibrant-orange mt-0.5" />
+										<div>
+											<p className="text-xs text-muted-foreground">Schedule</p>
+											<p className="text-sm font-medium">
+												{roommate.lifestyle.schedule}
+											</p>
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<Home className="h-4 w-4 text-vibrant-orange mt-0.5" />
+										<div>
+											<p className="text-xs text-muted-foreground">Pets</p>
+											<p className="text-sm font-medium">
+												{roommate.lifestyle.pets}
+											</p>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+							<Card className="p-3 sm:p-4">
+								<CardHeader>
+									<CardTitle className="text-base sm:text-lg">
+										Interests
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className="flex flex-wrap gap-2">
+										{roommate.interests.map((interest, index) => (
+											<Badge
+												key={index}
+												variant="secondary"
+												className="text-xs"
+											>
+												{interest}
+											</Badge>
+										))}
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+						<TabsContent value="preferences" className="space-y-4 mt-2">
+							<Card className="p-3 sm:p-4">
+								<CardHeader>
+									<CardTitle className="text-base sm:text-lg">
+										Roommate Preferences
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="space-y-3">
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Looking for
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.preferences.roommate}
+										</span>
+									</div>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Gender Preference
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.preferences.gender}
+										</span>
+									</div>
+									<div className="flex justify-between">
+										<span className="text-xs sm:text-sm text-muted-foreground">
+											Age Range
+										</span>
+										<span className="text-xs sm:text-sm font-medium">
+											{roommate.preferences.ageRange}
+										</span>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+						<TabsContent value="reviews" className="space-y-4 mt-2">
+							<Card>
+								<CardHeader>
+									<CardTitle className="text-lg">Roommate Reviews</CardTitle>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									{roommate.reviews.length > 0 ? (
+										roommate.reviews.map((review, index) => (
+											<div
+												key={index}
+												className="border-b pb-4 last:border-0 last:pb-0"
+											>
+												<div className="flex items-center gap-2 mb-2">
+													<Avatar className="h-8 w-8">
+														<AvatarImage src={review.image} alt={review.name} />
+														<AvatarFallback>{review.name[0]}</AvatarFallback>
+													</Avatar>
+													<div>
+														<p className="text-sm font-medium">{review.name}</p>
+														<div className="flex items-center">
+															{Array.from({ length: 5 }).map((_, i) => (
+																<Star
+																	key={i}
+																	className={`h-3 w-3 ${
+																		i < review.rating
+																			? 'text-yellow-500 fill-yellow-500'
+																			: 'text-gray-300'
+																	}`}
+																/>
+															))}
+														</div>
 													</div>
 												</div>
+												<p className="text-sm">{review.text}</p>
 											</div>
-											<p className="text-sm">{review.text}</p>
-										</div>
-									))
-								) : (
-									<p className="text-sm text-muted-foreground">
-										No reviews yet.
-									</p>
-								)}
-							</CardContent>
-						</Card>
-					</TabsContent>
-				</Tabs>
+										))
+									) : (
+										<p className="text-sm text-muted-foreground">
+											No reviews yet.
+										</p>
+									)}
+								</CardContent>
+							</Card>
+						</TabsContent>
+					</Tabs>
+				</div>
 			</main>
 		</div>
 	);
