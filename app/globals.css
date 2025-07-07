@@ -284,3 +284,18 @@ select,
 button {
 	font-size: 16px !important;
 }
+
+@keyframes dislike-card {
+	0% {
+		opacity: 1;
+		transform: translateX(0) scale(1) rotate(var(--tw-rotate));
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(-60px) scale(0.95) rotate(var(--tw-rotate));
+	}
+}
+
+.animate-dislike-card {
+	animation: dislike-card 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

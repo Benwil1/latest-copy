@@ -102,33 +102,24 @@ export default function MobileNav() {
 					<div className="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
 				)}
 			</Link>
-			<Link
-				href="/notifications"
-				className="flex flex-col items-center p-2 relative"
-			>
-				<Bell
-					className={`h-5 w-5 ${
-						isActive('/notifications')
-							? 'text-primary'
-							: 'text-muted-foreground'
+			<Link href="/likes" className="flex flex-col items-center p-2">
+				<span
+					className={`h-5 w-5 text-2xl flex items-center justify-center ${
+						isActive('/likes') ? 'text-primary' : 'text-muted-foreground'
 					}`}
-				/>
+				>
+					🏠
+				</span>
 				<span
 					className={`text-xs ${
-						isActive('/notifications')
+						isActive('/likes')
 							? 'text-primary font-medium'
 							: 'text-muted-foreground'
 					}`}
 				>
-					Notifications
+					Likes
 				</span>
-				<Badge
-					variant="destructive"
-					className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
-				>
-					2
-				</Badge>
-				{isActive('/notifications') && (
+				{isActive('/likes') && (
 					<div className="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
 				)}
 			</Link>

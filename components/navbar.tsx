@@ -149,6 +149,14 @@ export default function Navbar() {
 					>
 						Matches
 					</Link>
+					<Link
+						href="/likes"
+						className={`text-sm font-medium transition-colors hover:text-primary ${
+							isActive('/likes') ? 'text-primary' : 'text-muted-foreground'
+						}`}
+					>
+						Likes
+					</Link>
 				</nav>
 
 				<div className="flex items-center gap-4">
