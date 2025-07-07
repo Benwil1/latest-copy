@@ -6,7 +6,7 @@ import confetti from 'canvas-confetti';
 import { CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Fragment, useRef, useState } from 'react';
-import { Roommate, roommates } from '../explore/page';
+import { Roommate, roommates } from '../explore/roommates-data';
 
 export default function LikesPage() {
 	const { user, updateProfile } = useAuth();

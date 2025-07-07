@@ -29,7 +29,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Roommate, roommates } from '../explore/page';
+import { Roommate, roommates } from '../explore/roommates-data';
 
 // Sample messages for a conversation
 const messages = [
