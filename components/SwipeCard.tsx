@@ -9,16 +9,24 @@ import {
 	useMotionValue,
 	useTransform,
 } from 'framer-motion';
-import { Heart, X } from 'lucide-react';
+import { Heart, Undo2, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 interface SwipeCardProps {
 	profile: User;
 	isActive: boolean;
 	onSwipe: (direction: 'left' | 'right') => void;
+	canUndo?: boolean;
+	onUndo?: () => void;
 }
 
-export function SwipeCard({ profile, isActive, onSwipe }: SwipeCardProps) {
+export function SwipeCard({
+	profile,
+	isActive,
+	onSwipe,
+	canUndo,
+	onUndo,
+}: SwipeCardProps) {
 	const controls = useAnimation();
 	const x = useMotionValue(0);
 	const rotate = useTransform(x, [-200, 200], [-30, 30]);
@@ -78,7 +86,18 @@ export function SwipeCard({ profile, isActive, onSwipe }: SwipeCardProps) {
 							size="lg"
 							variant="outline"
 							className="rounded-full h-12 w-12 p-0"
+							onClick={onUndo}
+							disabled={!canUndo}
+							aria-label="Undo last swipe"
+						>
+							<Undo2 className="h-6 w-6" />
+						</Button>
+						<Button
+							size="lg"
+							variant="outline"
+							className="rounded-full h-12 w-12 p-0"
 							onClick={() => onSwipe('left')}
+							aria-label="Dislike"
 						>
 							<X className="h-6 w-6" />
 						</Button>
@@ -86,6 +105,7 @@ export function SwipeCard({ profile, isActive, onSwipe }: SwipeCardProps) {
 							size="lg"
 							className="rounded-full h-12 w-12 p-0 bg-rose-500 hover:bg-rose-600"
 							onClick={() => onSwipe('right')}
+							aria-label="Like"
 						>
 							<Heart className="h-6 w-6" />
 						</Button>

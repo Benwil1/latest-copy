@@ -17,6 +17,7 @@ import {
 	MapPin,
 	Star,
 	X,
+	Undo2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -149,31 +150,41 @@ export default function HomePage() {
 	const cardRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
 	const [matchCount, setMatchCount] = useState(0);
+	const [actionHistory, setActionHistory] = useState<{ type: 'like' | 'dislike'; roommateId: number }[]>([]);
 
 	const currentRoommate = roommates[currentIndex];
 
 	const handleSwipe = (direction: string) => {
 		setSwipeDirection(direction);
-
-		// Track likes and passes
 		if (direction === 'right') {
 			setLikedProfiles((prev) => [...prev, currentRoommate.id]);
+			setActionHistory((prev) => [...prev, { type: 'like', roommateId: currentRoommate.id }]);
 		} else {
 			setPassedProfiles((prev) => [...prev, currentRoommate.id]);
+			setActionHistory((prev) => [...prev, { type: 'dislike', roommateId: currentRoommate.id }]);
 		}
-
-		// Reset swipe direction and move to next profile after animation
 		setTimeout(() => {
 			setSwipeDirection(null);
 			if (currentIndex < roommates.length - 1) {
 				setCurrentIndex(currentIndex + 1);
 			} else {
-				// Reset to first profile when we reach the end
 				setCurrentIndex(0);
 			}
 			setShowDetails(false);
 			setOffsetX(0);
 		}, 300);
+	};
+
+	const handleUndo = () => {
+		if (actionHistory.length === 0) return;
+		const lastAction = actionHistory[actionHistory.length - 1];
+		if (lastAction.type === 'like') {
+			setLikedProfiles((prev) => prev.filter((id) => id !== lastAction.roommateId));
+		} else if (lastAction.type === 'dislike') {
+			setPassedProfiles((prev) => prev.filter((id) => id !== lastAction.roommateId));
+		}
+		setCurrentIndex(roommates.findIndex(r => r.id === lastAction.roommateId));
+		setActionHistory((prev) => prev.slice(0, -1));
 	};
 
 	const toggleDetails = () => {
@@ -512,6 +523,15 @@ export default function HomePage() {
 
 								{/* Action buttons */}
 								<div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-6 z-20">
+									{actionHistory.length > 0 && (
+										<button
+											className="h-14 w-14 flex items-center justify-center rounded-full bg-white shadow-xl hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-blue-500/20"
+											onClick={handleUndo}
+											aria-label="Undo"
+										>
+											<Undo2 className="h-8 w-8 text-blue-500" />
+										</button>
+									)}
 									<button
 										className="h-16 w-16 flex items-center justify-center rounded-full bg-white shadow-xl hover:bg-gray-50 transform transition-all hover:scale-110 active:scale-95 border-2 border-red-500/20"
 										onClick={() => handleSwipe('left')}
@@ -519,7 +539,6 @@ export default function HomePage() {
 									>
 										<X className="h-8 w-8 text-red-500" />
 									</button>
-
 									<button
 										className="h-20 w-20 flex items-center justify-center rounded-full bg-vibrant-orange shadow-xl hover:bg-orange-600 transform transition-all hover:scale-110 active:scale-95 border-2 border-orange-300"
 										onClick={() => handleSwipe('right')}

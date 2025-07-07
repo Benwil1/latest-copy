@@ -27,10 +27,11 @@ import {
 	MapPin,
 	MessageSquare,
 	Star,
+	Undo2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { roommates, Roommate } from './roommates-data';
+import { Roommate, roommates } from './roommates-data';
 
 interface SearchFilters {
 	budgetRange: [number, number];
@@ -57,6 +58,11 @@ export default function ExplorePage() {
 		verified: false,
 		hasPhotos: false,
 	});
+	const [lastAction, setLastAction] = useState<null | {
+		type: 'like' | 'dislike';
+		roommate: Roommate;
+	}>(null);
+	const [dislikedIds, setDislikedIds] = useState<string[]>([]);
 
 	// Filter roommates based on all criteria
 	const filteredRoommates = useMemo(() => {
@@ -64,12 +70,12 @@ export default function ExplorePage() {
 			// Budget filter
 			const budgetMatch =
 				roommate.budget >= filters.budgetRange[0] &&
-							   roommate.budget <= filters.budgetRange[1];
+				roommate.budget <= filters.budgetRange[1];
 
 			// Age filter
 			const ageMatch =
 				roommate.age >= filters.ageRange[0] &&
-							roommate.age <= filters.ageRange[1];
+				roommate.age <= filters.ageRange[1];
 
 			// Location filter
 			const locationMatch =
@@ -161,12 +167,48 @@ export default function ExplorePage() {
 		});
 	};
 
+	// Like handler
+	const handleLike = (roommate: Roommate) => {
+		if (!user) return;
+		if (user.likedUserIds?.includes(roommate.id.toString())) return;
+		updateProfile({
+			likedUserIds: [...(user.likedUserIds || []), roommate.id.toString()],
+		});
+		setLastAction({ type: 'like', roommate });
+	};
+
+	// Dislike handler
+	const handleDislike = (roommate: Roommate) => {
+		setDislikedIds((prev) => [...prev, roommate.id.toString()]);
+		setLastAction({ type: 'dislike', roommate });
+	};
+
+	// Undo handler
+	const handleUndo = () => {
+		if (!lastAction) return;
+		if (lastAction.type === 'like') {
+			// Remove from likedUserIds
+			updateProfile({
+				likedUserIds: (user?.likedUserIds || []).filter(
+					(id) => id !== lastAction.roommate.id.toString()
+				),
+			});
+		} else if (lastAction.type === 'dislike') {
+			// Remove from dislikedIds to re-show card
+			setDislikedIds((prev) =>
+				prev.filter((id) => id !== lastAction.roommate.id.toString())
+			);
+		}
+		setLastAction(null);
+		toast({ title: 'Last swipe undone!' });
+	};
+
 	return (
 		<div className="min-h-screen pb-20 sm:pb-16">
 			<main className="pt-6">
 				<div className="container max-w-7xl mx-auto px-4">
 					{/* Enhanced Search Component */}
-					<EnhancedSearch 
+					<EnhancedSearch
 						onFiltersChange={handleFiltersChange}
 						className="mb-8"
 					/>
@@ -195,178 +237,188 @@ export default function ExplorePage() {
 					{/* Roommate Grid */}
 					{filteredRoommates.length > 0 ? (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-							{filteredRoommates.map((roommate) => (
-								<Card
-									key={roommate.id}
-									className="group overflow-hidden border hover:border-vibrant-orange/20 transition-all duration-300 hover:shadow-lg cursor-pointer flex flex-col h-full min-h-0"
-									onClick={() => router.push(`/roommate/${roommate.id}`)}
-								>
-									<div className="relative aspect-[4/5] overflow-hidden">
-										<img
-											src={roommate.image}
-											alt={roommate.name}
-											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-										
-										{/* Overlay Badges */}
-										<div className="absolute top-3 right-3 flex flex-col gap-2">
-											{roommate.verified && (
-												<Badge
-													variant="secondary"
-													className="text-xs bg-background/90 backdrop-blur-sm"
-												>
-													<CheckCircle className="h-3 w-3 mr-1" />
-													Verified
-												</Badge>
-											)}
-											<Badge 
-												variant="default" 
-												className="text-xs bg-vibrant-orange hover:bg-vibrant-orange/90"
-											>
-												{roommate.compatibility}% Match
-											</Badge>
-										</div>
+							{filteredRoommates
+								.filter((r) => !dislikedIds.includes(r.id.toString()))
+								.map((roommate) => (
+									<Card
+										key={roommate.id}
+										className="group overflow-hidden border hover:border-vibrant-orange/20 transition-all duration-300 hover:shadow-lg cursor-pointer flex flex-col h-full min-h-0"
+										onClick={() => router.push(`/roommate/${roommate.id}`)}
+									>
+										<div className="relative aspect-[4/5] overflow-hidden">
+											<img
+												src={roommate.image}
+												alt={roommate.name}
+												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+											/>
+											<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-										{/* Bottom Info Overlay */}
-										<div className="absolute bottom-0 left-0 right-0 p-4">
-											<div className="text-white">
-												<h3 className="text-lg font-semibold mb-1">
-													{roommate.name}, {roommate.age}
-												</h3>
-												<div className="flex items-center gap-4 text-sm text-white/90 mb-2">
-													<div className="flex items-center gap-1">
-														<DollarSign className="h-3 w-3" />${roommate.budget}
-														/mo
+											{/* Overlay Badges */}
+											<div className="absolute top-3 right-3 flex flex-col gap-2">
+												{roommate.verified && (
+													<Badge
+														variant="secondary"
+														className="text-xs bg-background/90 backdrop-blur-sm"
+													>
+														<CheckCircle className="h-3 w-3 mr-1" />
+														Verified
+													</Badge>
+												)}
+												<Badge
+													variant="default"
+													className="text-xs bg-vibrant-orange hover:bg-vibrant-orange/90"
+												>
+													{roommate.compatibility}% Match
+												</Badge>
+											</div>
+
+											{/* Bottom Info Overlay */}
+											<div className="absolute bottom-0 left-0 right-0 p-4">
+												<div className="text-white">
+													<h3 className="text-lg font-semibold mb-1">
+														{roommate.name}, {roommate.age}
+													</h3>
+													<div className="flex items-center gap-4 text-sm text-white/90 mb-2">
+														<div className="flex items-center gap-1">
+															<DollarSign className="h-3 w-3" />$
+															{roommate.budget}
+															/mo
+														</div>
+														<div className="flex items-center gap-1">
+															<MapPin className="h-3 w-3" />
+															{roommate.location}
+														</div>
 													</div>
-													<div className="flex items-center gap-1">
-														<MapPin className="h-3 w-3" />
-														{roommate.location}
+													<div className="flex items-center gap-1 text-sm text-white/90">
+														<Calendar className="h-3 w-3" />
+														{roommate.moveIn}
 													</div>
-												</div>
-												<div className="flex items-center gap-1 text-sm text-white/90">
-													<Calendar className="h-3 w-3" />
-													{roommate.moveIn}
 												</div>
 											</div>
 										</div>
-									</div>
 
-									{/* Card Content */}
-									<CardContent className="flex flex-col flex-1 min-h-0 overflow-y-auto p-4">
-										<div className="flex flex-wrap gap-1 mb-3">
-											{roommate.tags.slice(0, 3).map((tag, index) => (
-												<Badge
-													key={index}
-													variant="outline"
-													className="text-xs"
-												>
-													{tag}
-												</Badge>
-											))}
-											{roommate.tags.length > 3 && (
-												<Badge variant="outline" className="text-xs">
-													+{roommate.tags.length - 3}
-												</Badge>
-											)}
-										</div>
+										{/* Card Content */}
+										<CardContent className="flex flex-col flex-1 min-h-0 overflow-y-auto p-4">
+											<div className="flex flex-wrap gap-1 mb-3">
+												{roommate.tags.slice(0, 3).map((tag, index) => (
+													<Badge
+														key={index}
+														variant="outline"
+														className="text-xs"
+													>
+														{tag}
+													</Badge>
+												))}
+												{roommate.tags.length > 3 && (
+													<Badge variant="outline" className="text-xs">
+														+{roommate.tags.length - 3}
+													</Badge>
+												)}
+											</div>
 
-										<p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-											{roommate.bio}
-										</p>
+											<p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+												{roommate.bio}
+											</p>
 
-										<div className="flex w-full justify-between items-center gap-2 mt-auto">
-											<TooltipProvider>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															size="icon"
-															variant={
-																user?.likedUserIds?.includes(
-																	roommate.id.toString()
-																)
-																	? 'default'
-																	: 'outline'
-															}
-															onClick={(e) => {
-																e.stopPropagation();
-																if (!user) return;
-																if (
-																	user.likedUserIds?.includes(
+											<div className="flex w-full justify-between items-center gap-2 mt-auto">
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																size="icon"
+																variant="outline"
+																className="ml-2"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleDislike(roommate);
+																}}
+																aria-label="Dislike"
+															>
+																<span role="img" aria-label="Dislike">
+																	❌
+																</span>
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>Dislike</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																size="icon"
+																variant={
+																	user?.likedUserIds?.includes(
 																		roommate.id.toString()
 																	)
-																)
-																	return;
-																updateProfile({
-																	likedUserIds: [
-																		...(user.likedUserIds || []),
-																		roommate.id.toString(),
-																	],
-																});
-															}}
-															disabled={user?.likedUserIds?.includes(
-																roommate.id.toString()
-															)}
-															aria-label="Like"
-														>
-															<span role="img" aria-label="Like">
-																❤️
-															</span>
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>Like</TooltipContent>
-												</Tooltip>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<span className="mx-auto">
-											<Button
-																size="icon"
-																className="bg-vibrant-orange hover:bg-orange-600"
-																disabled={
-																	!(
-																		user?.likedUserIds?.includes(
-																			roommate.id.toString()
-																		) &&
-																		roommate.likedUserIds?.includes(user.id)
-																	)
+																		? 'default'
+																		: 'outline'
 																}
-												onClick={(e) => {
-													e.stopPropagation();
-													handleContact(roommate.id);
-												}}
-																aria-label="Message"
-											>
-																<span role="img" aria-label="Message">
-																	💬
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleLike(roommate);
+																}}
+																disabled={user?.likedUserIds?.includes(
+																	roommate.id.toString()
+																)}
+																aria-label="Like"
+															>
+																<span role="img" aria-label="Like">
+																	❤️
 																</span>
-											</Button>
-														</span>
-													</TooltipTrigger>
-													<TooltipContent>Message</TooltipContent>
-												</Tooltip>
-												<Tooltip>
-													<TooltipTrigger asChild>
-											<Button
-															size="icon"
-												variant="outline"
-												onClick={(e) => {
-													e.stopPropagation();
-													router.push(`/roommate/${roommate.id}`);
-												}}
-															aria-label="View Profile"
-											>
-															<span role="img" aria-label="View Profile">
-																👁️
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>Like</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<span className="mx-auto">
+																<Button
+																	size="icon"
+																	className="bg-vibrant-orange hover:bg-orange-600"
+																	disabled={
+																		!(
+																			user?.likedUserIds?.includes(
+																				roommate.id.toString()
+																			) &&
+																			roommate.likedUserIds?.includes(user.id)
+																		)
+																	}
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		handleContact(roommate.id);
+																	}}
+																	aria-label="Message"
+																>
+																	<span role="img" aria-label="Message">
+																		💬
+																	</span>
+																</Button>
 															</span>
-											</Button>
-													</TooltipTrigger>
-													<TooltipContent>View Profile</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-										</div>
-									</CardContent>
-								</Card>
-							))}
+														</TooltipTrigger>
+														<TooltipContent>Message</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																size="icon"
+																variant="outline"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	router.push(`/roommate/${roommate.id}`);
+																}}
+																aria-label="View Profile"
+															>
+																<span role="img" aria-label="View Profile">
+																	👁️
+																</span>
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>View Profile</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</div>
+										</CardContent>
+									</Card>
+								))}
 						</div>
 					) : (
 						<Card className="text-center py-12">
@@ -381,14 +433,14 @@ export default function ExplorePage() {
 									variant="outline"
 									onClick={() =>
 										setFilters({
-										budgetRange: [500, 3000],
-										ageRange: [18, 65],
-										location: '',
-										moveInDate: '',
-										roomType: [],
-										lifestyle: [],
-										verified: false,
-										hasPhotos: false,
+											budgetRange: [500, 3000],
+											ageRange: [18, 65],
+											location: '',
+											moveInDate: '',
+											roomType: [],
+											lifestyle: [],
+											verified: false,
+											hasPhotos: false,
 										})
 									}
 								>
@@ -419,6 +471,18 @@ export default function ExplorePage() {
 								</div>
 							</CardContent>
 						</Card>
+					)}
+
+					{/* Undo Button */}
+					{lastAction && (
+						<Button
+							onClick={handleUndo}
+							className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg bg-white/90 hover:bg-vibrant-orange text-vibrant-orange hover:text-white border-2 border-white"
+							size="icon"
+							aria-label="Undo last swipe"
+						>
+							<Undo2 className="h-6 w-6" />
+						</Button>
 					)}
 				</div>
 			</main>
