@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/auth-context';
 import {
 	ArrowLeft,
 	Calendar,
@@ -27,63 +28,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-// Sample matches data
-const matches = [
-	{
-		id: 1,
-		name: 'Sarah Johnson',
-		age: 26,
-		image:
-			'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
-		lastActive: 'Just now',
-		compatibility: 92,
-		verified: true,
-		unread: true,
-		lastMessage:
-			"Hey, I'm interested in your apartment! Is it still available?",
-		online: true,
-		property: 'Modern Studio',
-		location: 'Downtown',
-		budget: 1200,
-		moveIn: 'Immediate',
-	},
-	{
-		id: 2,
-		name: 'Michael Chen',
-		age: 28,
-		image:
-			'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
-		lastActive: '2h ago',
-		compatibility: 85,
-		verified: true,
-		unread: false,
-		lastMessage: 'The apartment looks great! When can I schedule a viewing?',
-		online: false,
-		property: 'Spacious 2-Bed',
-		location: 'Midtown',
-		budget: 1500,
-		moveIn: 'Next month',
-	},
-	{
-		id: 3,
-		name: 'Emma Rodriguez',
-		age: 24,
-		image:
-			'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3',
-		lastActive: '3h ago',
-		compatibility: 78,
-		verified: false,
-		unread: false,
-		lastMessage: 'Thanks for the info about the neighborhood!',
-		online: false,
-		property: 'Luxury Loft',
-		location: 'Uptown',
-		budget: 1800,
-		moveIn: 'Flexible',
-	},
-];
+import { useEffect, useMemo, useState } from 'react';
+import { Roommate, roommates } from '../explore/page';
 
 // Sample messages for a conversation
 const messages = [
@@ -122,14 +68,34 @@ const icebreakers = [
 ];
 
 export default function MatchesPage() {
+	const { user, updateProfile } = useAuth();
 	const [activeTab, setActiveTab] = useState('matches');
 	const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
 	const [messageText, setMessageText] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sidebarOpen, setSidebarOpen] = useState(false); // for mobile
 	const [isLoading, setIsLoading] = useState(false);
-
 	const router = useRouter();
+
+	// Compute mutual matches
+	const mutualMatches = useMemo<Roommate[]>(() => {
+		if (!user) return [];
+		return roommates.filter(
+			(roommate: Roommate) =>
+				user.likedUserIds?.includes(roommate.id.toString()) &&
+				roommate.likedUserIds?.includes(user.id)
+		);
+	}, [user]);
+
+	const filteredMatches = mutualMatches.filter(
+		(match: Roommate) =>
+			match.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			match.location.toLowerCase().includes(searchQuery.toLowerCase())
+	);
+
+	const currentMatch = mutualMatches.find(
+		(match: Roommate) => match.id === selectedMatch
+	);
 
 	// Prevent unwanted zooming on mobile
 	useEffect(() => {
@@ -161,14 +127,6 @@ export default function MatchesPage() {
 			setMessageText('');
 		}
 	};
-
-	const filteredMatches = matches.filter(
-		(match) =>
-			match.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			match.location.toLowerCase().includes(searchQuery.toLowerCase())
-	);
-
-	const currentMatch = matches.find((match) => match.id === selectedMatch);
 
 	const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -215,9 +173,6 @@ export default function MatchesPage() {
 												/>
 												<AvatarFallback>{match.name.charAt(0)}</AvatarFallback>
 											</Avatar>
-											{match.online && (
-												<span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
-											)}
 										</div>
 
 										<div className="flex-1 min-w-0">
@@ -230,14 +185,7 @@ export default function MatchesPage() {
 														<CheckCircle className="h-4 w-4 text-vibrant-orange shrink-0" />
 													)}
 												</div>
-												<span className="text-xs text-muted-foreground whitespace-nowrap ml-2 shrink-0">
-													{match.lastActive}
-												</span>
 											</div>
-
-											<p className="text-sm text-muted-foreground truncate mb-1">
-												{match.lastMessage}
-											</p>
 
 											<div className="flex items-center justify-between">
 												<div className="flex items-center gap-2">
@@ -251,9 +199,6 @@ export default function MatchesPage() {
 														{match.location}
 													</span>
 												</div>
-												{match.unread && (
-													<div className="w-2 h-2 bg-vibrant-orange rounded-full animate-pulse" />
-												)}
 											</div>
 										</div>
 									</button>
@@ -294,9 +239,7 @@ export default function MatchesPage() {
 										<CheckCircle className="h-5 w-5 text-vibrant-orange" />
 									)}
 								</div>
-								<span className="text-xs text-muted-foreground">
-									{currentMatch.online ? 'Online' : currentMatch.lastActive}
-								</span>
+								<span className="text-xs text-muted-foreground">Matched!</span>
 							</div>
 							<div className="ml-auto flex gap-2">
 								<Button variant="ghost" size="icon" title="Call">

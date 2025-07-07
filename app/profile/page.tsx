@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ProfileCompletenessMeter } from '@/components/profile/profile-completeness-meter';
 
 export default function ProfilePage() {
 	const router = useRouter();
@@ -75,6 +76,9 @@ export default function ProfilePage() {
 							{user.location ? ` • ${user.location}` : ''}
 						</p>
 					</div>
+
+					<ProfileCompletenessMeter user={user} />
+
 					<div className="flex gap-2 mt-4">
 						<Button
 							variant="outline"

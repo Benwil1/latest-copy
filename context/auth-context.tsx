@@ -10,6 +10,14 @@ import {
 	type ReactNode,
 } from 'react';
 
+export type SavedSearch = {
+	id: string;
+	name: string;
+	filters: any;
+	notificationEnabled: boolean;
+	createdAt: string;
+};
+
 export type User = {
 	id: string;
 	name: string;
@@ -52,6 +60,8 @@ export type User = {
 		occupation?: string;
 	};
 	languages?: string[];
+	savedSearches?: SavedSearch[];
+	likedUserIds?: string[];
 };
 
 type AuthContextType = {
@@ -94,6 +104,8 @@ const MOCK_USER: User = {
 	twoFactorEnabled: false,
 	role: 'user',
 	profilePicture: '',
+	savedSearches: [],
+	likedUserIds: [],
 };
 
 // Utility to strip large base64 data from user before saving to localStorage

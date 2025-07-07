@@ -11,6 +11,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/auth-context';
 import { cn } from '@/lib/utils';
 import {
 	Calendar,
@@ -21,9 +29,9 @@ import {
 	Star,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
-interface Roommate {
+export type Roommate = {
 	id: number;
 	name: string;
 	age: number;
@@ -39,7 +47,8 @@ interface Roommate {
 	hasPhotos: boolean;
 	roomType: string[];
 	moveInDate?: string;
-}
+	likedUserIds?: string[];
+};
 
 interface SearchFilters {
 	budgetRange: [number, number];
@@ -53,7 +62,7 @@ interface SearchFilters {
 }
 
 // Sample roommate data with enhanced properties
-const roommates: Roommate[] = [
+export const roommates: Roommate[] = [
 	{
 		id: 1,
 		name: 'Sarah Johnson',
@@ -69,8 +78,15 @@ const roommates: Roommate[] = [
 		verified: true,
 		hasPhotos: true,
 		roomType: ['Private Room', 'Entire Apartment'],
-		tags: ['Non-smoker', 'Pet-friendly', 'Early riser', 'Professional', 'Clean'],
+		tags: [
+			'Non-smoker',
+			'Pet-friendly',
+			'Early riser',
+			'Professional',
+			'Clean',
+		],
 		bio: 'Software engineer who loves hiking and cooking. Looking for a quiet and clean roommate.',
+		likedUserIds: ['user-123'],
 	},
 	{
 		id: 2,
@@ -89,6 +105,7 @@ const roommates: Roommate[] = [
 		roomType: ['Shared Room', 'Studio'],
 		tags: ['Non-smoker', 'Night owl', 'Social', 'Professional'],
 		bio: "Marketing professional who enjoys fitness and weekend adventures. I'm tidy and respectful of shared spaces.",
+		likedUserIds: ['user-123'],
 	},
 	{
 		id: 3,
@@ -107,6 +124,7 @@ const roommates: Roommate[] = [
 		roomType: ['Private Room', 'House'],
 		tags: ['Pet-friendly', 'Student', 'Quiet', 'Vegetarian'],
 		bio: "Graphic designer with a small cat. I'm creative, laid-back, and enjoy having friends over occasionally.",
+		likedUserIds: [],
 	},
 	{
 		id: 4,
@@ -125,6 +143,7 @@ const roommates: Roommate[] = [
 		roomType: ['Entire Apartment', 'Studio'],
 		tags: ['Non-smoker', 'Vegetarian', 'Early riser', 'Professional', 'Clean'],
 		bio: "Software developer who loves cooking Indian food. I'm clean, quiet, and respectful of shared spaces.",
+		likedUserIds: [],
 	},
 	{
 		id: 5,
@@ -143,6 +162,7 @@ const roommates: Roommate[] = [
 		roomType: ['Private Room', 'Shared Room'],
 		tags: ['Non-smoker', 'Student', 'Clean', 'Early riser'],
 		bio: 'Graduate student studying business. I enjoy trying new restaurants, watching movies, and keeping a tidy home.',
+		likedUserIds: [],
 	},
 	{
 		id: 6,
@@ -161,6 +181,7 @@ const roommates: Roommate[] = [
 		roomType: ['Entire Apartment', 'House'],
 		tags: ['Night owl', 'Social', 'Professional', 'Pet-friendly'],
 		bio: 'Financial analyst who enjoys nightlife and social events. Looking for someone who shares similar interests.',
+		likedUserIds: [],
 	},
 	{
 		id: 7,
@@ -179,6 +200,7 @@ const roommates: Roommate[] = [
 		roomType: ['Shared Room', 'Studio'],
 		tags: ['Student', 'Quiet', 'Vegetarian', 'Early riser'],
 		bio: 'Medical student looking for a quiet study environment. I keep to myself but am friendly.',
+		likedUserIds: [],
 	},
 	{
 		id: 8,
@@ -197,11 +219,14 @@ const roommates: Roommate[] = [
 		roomType: ['Private Room', 'Entire Apartment'],
 		tags: ['Non-smoker', 'Social', 'Professional', 'Clean'],
 		bio: 'Software architect who enjoys cooking and outdoor activities. Looking for a responsible roommate.',
+		likedUserIds: [],
 	},
 ];
 
 export default function ExplorePage() {
 	const router = useRouter();
+	const { toast } = useToast();
+	const { user, updateProfile } = useAuth();
 	const [filters, setFilters] = useState<SearchFilters>({
 		budgetRange: [500, 3000],
 		ageRange: [18, 65],
@@ -217,28 +242,39 @@ export default function ExplorePage() {
 	const filteredRoommates = useMemo(() => {
 		return roommates.filter((roommate) => {
 			// Budget filter
-			const budgetMatch = roommate.budget >= filters.budgetRange[0] && 
+			const budgetMatch =
+				roommate.budget >= filters.budgetRange[0] &&
 							   roommate.budget <= filters.budgetRange[1];
 
 			// Age filter
-			const ageMatch = roommate.age >= filters.ageRange[0] && 
+			const ageMatch =
+				roommate.age >= filters.ageRange[0] &&
 							roommate.age <= filters.ageRange[1];
 
 			// Location filter
-			const locationMatch = !filters.location || 
-								 roommate.location.toLowerCase().includes(filters.location.toLowerCase());
+			const locationMatch =
+				!filters.location ||
+				roommate.location
+					.toLowerCase()
+					.includes(filters.location.toLowerCase());
 
 			// Move-in date filter (if specified)
-			const moveInMatch = !filters.moveInDate || 
-							   (roommate.moveInDate && new Date(roommate.moveInDate) <= new Date(filters.moveInDate));
+			const moveInMatch =
+				!filters.moveInDate ||
+				(roommate.moveInDate &&
+					new Date(roommate.moveInDate) <= new Date(filters.moveInDate));
 
 			// Room type filter
-			const roomTypeMatch = filters.roomType.length === 0 || 
-								 filters.roomType.some(type => roommate.roomType.includes(type));
+			const roomTypeMatch =
+				filters.roomType.length === 0 ||
+				filters.roomType.some((type) => roommate.roomType.includes(type));
 
 			// Lifestyle filter
-			const lifestyleMatch = filters.lifestyle.length === 0 || 
-								  filters.lifestyle.every(lifestyle => roommate.tags.includes(lifestyle));
+			const lifestyleMatch =
+				filters.lifestyle.length === 0 ||
+				filters.lifestyle.every((lifestyle) =>
+					roommate.tags.includes(lifestyle)
+				);
 
 			// Verified filter
 			const verifiedMatch = !filters.verified || roommate.verified;
@@ -246,8 +282,16 @@ export default function ExplorePage() {
 			// Has photos filter
 			const photosMatch = !filters.hasPhotos || roommate.hasPhotos;
 
-			return budgetMatch && ageMatch && locationMatch && moveInMatch && 
-				   roomTypeMatch && lifestyleMatch && verifiedMatch && photosMatch;
+			return (
+				budgetMatch &&
+				ageMatch &&
+				locationMatch &&
+				moveInMatch &&
+				roomTypeMatch &&
+				lifestyleMatch &&
+				verifiedMatch &&
+				photosMatch
+			);
 		});
 	}, [filters]);
 
@@ -258,6 +302,43 @@ export default function ExplorePage() {
 	const handleContact = (roommateId: number) => {
 		// Navigate to matches page or direct message
 		router.push(`/matches?contact=${roommateId}`);
+	};
+
+	const handleSaveSearch = () => {
+		if (!user) return;
+		const savedSearches = user.savedSearches || [];
+		const exists = savedSearches.some(
+			(s) => JSON.stringify(s.filters) === JSON.stringify(filters)
+		);
+		if (exists) {
+			toast({
+				title: 'Already Saved',
+				description: 'This search is already in your saved searches.',
+			});
+			return;
+		}
+		const name =
+			[
+				filters.location && filters.location,
+				filters.budgetRange &&
+					`$${filters.budgetRange[0]}-${filters.budgetRange[1]}`,
+				filters.roomType.length > 0 && filters.roomType.join(', '),
+				filters.lifestyle.length > 0 && filters.lifestyle.join(', '),
+			]
+				.filter(Boolean)
+				.join(', ') || 'Custom Search';
+		const newSearch = {
+			id: Date.now().toString(),
+			name,
+			filters: { ...filters },
+			createdAt: new Date().toISOString().slice(0, 10),
+			notificationEnabled: false,
+		};
+		updateProfile({ savedSearches: [...savedSearches, newSearch] });
+		toast({
+			title: 'Search Saved',
+			description: 'You can manage saved searches in your settings.',
+		});
 	};
 
 	return (
@@ -271,15 +352,24 @@ export default function ExplorePage() {
 					/>
 
 					{/* Results Header */}
-					<div className="flex justify-between items-center mb-6">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
 						<div>
 							<h2 className="text-xl font-semibold">
-								{filteredRoommates.length} Roommate{filteredRoommates.length !== 1 ? 's' : ''} Found
+								{filteredRoommates.length} Roommate
+								{filteredRoommates.length !== 1 ? 's' : ''} Found
 							</h2>
 							<p className="text-sm text-muted-foreground">
 								Find your perfect roommate match
 							</p>
 						</div>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleSaveSearch}
+							className="whitespace-nowrap"
+						>
+							Save Search
+						</Button>
 					</div>
 
 					{/* Roommate Grid */}
@@ -288,7 +378,7 @@ export default function ExplorePage() {
 							{filteredRoommates.map((roommate) => (
 								<Card
 									key={roommate.id}
-									className="group overflow-hidden border hover:border-vibrant-orange/20 transition-all duration-300 hover:shadow-lg cursor-pointer"
+									className="group overflow-hidden border hover:border-vibrant-orange/20 transition-all duration-300 hover:shadow-lg cursor-pointer flex flex-col h-full min-h-0"
 									onClick={() => router.push(`/roommate/${roommate.id}`)}
 								>
 									<div className="relative aspect-[4/5] overflow-hidden">
@@ -326,8 +416,8 @@ export default function ExplorePage() {
 												</h3>
 												<div className="flex items-center gap-4 text-sm text-white/90 mb-2">
 													<div className="flex items-center gap-1">
-														<DollarSign className="h-3 w-3" />
-														${roommate.budget}/mo
+														<DollarSign className="h-3 w-3" />${roommate.budget}
+														/mo
 													</div>
 													<div className="flex items-center gap-1">
 														<MapPin className="h-3 w-3" />
@@ -343,7 +433,7 @@ export default function ExplorePage() {
 									</div>
 
 									{/* Card Content */}
-									<CardContent className="p-4">
+									<CardContent className="flex flex-col flex-1 min-h-0 overflow-y-auto p-4">
 										<div className="flex flex-wrap gap-1 mb-3">
 											{roommate.tags.slice(0, 3).map((tag, index) => (
 												<Badge
@@ -365,28 +455,94 @@ export default function ExplorePage() {
 											{roommate.bio}
 										</p>
 
-										<div className="flex gap-2">
+										<div className="flex w-full justify-between items-center gap-2 mt-auto">
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Button
+															size="icon"
+															variant={
+																user?.likedUserIds?.includes(
+																	roommate.id.toString()
+																)
+																	? 'default'
+																	: 'outline'
+															}
+															onClick={(e) => {
+																e.stopPropagation();
+																if (!user) return;
+																if (
+																	user.likedUserIds?.includes(
+																		roommate.id.toString()
+																	)
+																)
+																	return;
+																updateProfile({
+																	likedUserIds: [
+																		...(user.likedUserIds || []),
+																		roommate.id.toString(),
+																	],
+																});
+															}}
+															disabled={user?.likedUserIds?.includes(
+																roommate.id.toString()
+															)}
+															aria-label="Like"
+														>
+															<span role="img" aria-label="Like">
+																❤️
+															</span>
+														</Button>
+													</TooltipTrigger>
+													<TooltipContent>Like</TooltipContent>
+												</Tooltip>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<span className="mx-auto">
 											<Button
-												size="sm"
-												className="flex-1 bg-vibrant-orange hover:bg-orange-600"
+																size="icon"
+																className="bg-vibrant-orange hover:bg-orange-600"
+																disabled={
+																	!(
+																		user?.likedUserIds?.includes(
+																			roommate.id.toString()
+																		) &&
+																		roommate.likedUserIds?.includes(user.id)
+																	)
+																}
 												onClick={(e) => {
 													e.stopPropagation();
 													handleContact(roommate.id);
 												}}
+																aria-label="Message"
 											>
-												<MessageSquare className="h-3 w-3 mr-1" />
-												Message
+																<span role="img" aria-label="Message">
+																	💬
+																</span>
 											</Button>
+														</span>
+													</TooltipTrigger>
+													<TooltipContent>Message</TooltipContent>
+												</Tooltip>
+												<Tooltip>
+													<TooltipTrigger asChild>
 											<Button
+															size="icon"
 												variant="outline"
-												size="sm"
 												onClick={(e) => {
 													e.stopPropagation();
 													router.push(`/roommate/${roommate.id}`);
 												}}
+															aria-label="View Profile"
 											>
-												View Profile
+															<span role="img" aria-label="View Profile">
+																👁️
+															</span>
 											</Button>
+													</TooltipTrigger>
+													<TooltipContent>View Profile</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
 										</div>
 									</CardContent>
 								</Card>
@@ -403,7 +559,8 @@ export default function ExplorePage() {
 							<CardContent>
 								<Button
 									variant="outline"
-									onClick={() => setFilters({
+									onClick={() =>
+										setFilters({
 										budgetRange: [500, 3000],
 										ageRange: [18, 65],
 										location: '',
@@ -412,7 +569,8 @@ export default function ExplorePage() {
 										lifestyle: [],
 										verified: false,
 										hasPhotos: false,
-									})}
+										})
+									}
 								>
 									Clear All Filters
 								</Button>
@@ -428,10 +586,16 @@ export default function ExplorePage() {
 									💡 Search Tips
 								</h3>
 								<div className="text-sm text-muted-foreground space-y-1">
-									<p>• Use lifestyle filters to find roommates with compatible habits</p>
+									<p>
+										• Use lifestyle filters to find roommates with compatible
+										habits
+									</p>
 									<p>• Set a realistic budget range to see more options</p>
 									<p>• Consider roommates in nearby areas for more choices</p>
-									<p>• Verified profiles have gone through our identity verification process</p>
+									<p>
+										• Verified profiles have gone through our identity
+										verification process
+									</p>
 								</div>
 							</CardContent>
 						</Card>

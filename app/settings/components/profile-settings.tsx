@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
 import { useAuth } from '@/context/auth-context'
+import { Switch } from '@/components/ui/switch'
 
 interface ProfileSettingsProps {
   onSave: () => void
@@ -63,6 +64,20 @@ export default function ProfileSettings({ onSave }: ProfileSettingsProps) {
     await updateProfile(formData);
     setIsSaving(false);
     onSave();
+  };
+
+  const handleDeleteSearch = (id: string) => {
+    if (!user) return;
+    updateProfile({ savedSearches: (user.savedSearches || []).filter((s) => s.id !== id) });
+  };
+
+  const handleToggleNotification = (id: string) => {
+    if (!user) return;
+    updateProfile({
+      savedSearches: (user.savedSearches || []).map((s) =>
+        s.id === id ? { ...s, notificationEnabled: !s.notificationEnabled } : s
+      ),
+    });
   };
 
   return (
@@ -201,21 +216,61 @@ export default function ProfileSettings({ onSave }: ProfileSettingsProps) {
             </p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" type="button">
-            Cancel
-          </Button>
+        <CardFooter className="flex justify-end">
           <Button type="submit" disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </CardFooter>
+      </Card>
+
+      {/* Saved Searches Section */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Saved Searches</CardTitle>
+          <CardDescription>Manage your saved search filters and notifications</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(user?.savedSearches?.length ?? 0) === 0 ? (
+            <div className="text-sm text-muted-foreground">No saved searches yet.</div>
+          ) : (
+            user.savedSearches!.map((search) => (
+              <div key={search.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b last:border-b-0 pb-3 last:pb-0">
+                <div>
+                  <div className="font-medium text-sm">{search.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {Object.entries(search.filters).map(([k, v]) => `${k}: ${v}`).join(', ')}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">Saved on {search.createdAt}</div>
+                </div>
+                <div className="flex items-center gap-2 mt-1 sm:mt-0">
+                  <Switch
+                    checked={search.notificationEnabled}
+                    onCheckedChange={() => handleToggleNotification(search.id)}
+                    id={`notif-${search.id}`}
+                    aria-label="Enable notifications for this search"
+                  />
+                  <span className="text-xs">Notify</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {/* TODO: Implement view results navigation */}}
+                  >
+                    View Results
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => handleDeleteSearch(search.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
       </Card>
     </form>
   )
