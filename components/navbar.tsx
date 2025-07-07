@@ -76,9 +76,9 @@ export default function Navbar() {
 
 				<nav className="hidden md:flex items-center gap-6 lg:gap-8">
 					<Link
-						href="/"
+						href="/home"
 						className={`text-sm font-medium transition-colors hover:text-primary ${
-							isActive('/') ? 'text-primary' : 'text-muted-foreground'
+							isActive('/home') ? 'text-primary' : 'text-muted-foreground'
 						}`}
 					>
 						Home

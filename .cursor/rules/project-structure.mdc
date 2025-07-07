@@ -1,0 +1,14 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project Structure Guide
+
+- The main app entry point is [app/layout.tsx](mdc:app/layout.tsx), which sets up global providers, navigation, and meta tags.
+- Onboarding flow is implemented in [app/onboarding/page.tsx](mdc:app/onboarding/page.tsx).
+- User profile and preferences are managed in [app/profile/page.tsx](mdc:app/profile/page.tsx).
+- The main user type and authentication logic are in [context/auth-context.tsx](mdc:context/auth-context.tsx).
+- Admin dashboard and related features are in the `app/admin/` directory.
+- Global styles are loaded from [app/globals.css](mdc:app/globals.css).
+- Open Graph and other meta tags should be added in [app/layout.tsx](mdc:app/layout.tsx) inside the `<head>` block.

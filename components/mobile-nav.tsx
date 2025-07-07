@@ -21,20 +21,22 @@ export default function MobileNav() {
 
 	return (
 		<div className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background flex justify-around py-2 z-50">
-			<Link href="/" className="flex flex-col items-center p-2">
+			<Link href="/home" className="flex flex-col items-center p-2">
 				<Home
 					className={`h-5 w-5 ${
-						isActive('/') ? 'text-primary' : 'text-muted-foreground'
+						isActive('/home') ? 'text-primary' : 'text-muted-foreground'
 					}`}
 				/>
 				<span
 					className={`text-xs ${
-						isActive('/') ? 'text-primary font-medium' : 'text-muted-foreground'
+						isActive('/home')
+							? 'text-primary font-medium'
+							: 'text-muted-foreground'
 					}`}
 				>
 					Home
 				</span>
-				{isActive('/') && (
+				{isActive('/home') && (
 					<div className="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
 				)}
 			</Link>
