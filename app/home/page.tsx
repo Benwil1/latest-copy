@@ -530,28 +530,6 @@ export default function HomePage() {
 								</div>
 							</div>
 						</Card>
-
-						{/* Stats */}
-						<div className="mt-6 px-4 flex justify-center gap-8 text-center">
-							<div>
-								<p className="text-2xl font-bold text-vibrant-orange">
-									{likedProfiles.length}
-								</p>
-								<p className="text-sm text-muted-foreground">Liked</p>
-							</div>
-							<div>
-								<p className="text-2xl font-bold text-gray-500">
-									{passedProfiles.length}
-								</p>
-								<p className="text-sm text-muted-foreground">Passed</p>
-							</div>
-							<div>
-								<p className="text-2xl font-bold text-green-500">
-									{matchCount}
-								</p>
-								<p className="text-sm text-muted-foreground">Matches</p>
-							</div>
-						</div>
 					</div>
 				</main>
 
