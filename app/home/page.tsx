@@ -16,8 +16,8 @@ import {
 	Info,
 	MapPin,
 	Star,
-	X,
 	Undo2,
+	X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -150,7 +150,9 @@ export default function HomePage() {
 	const cardRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
 	const [matchCount, setMatchCount] = useState(0);
-	const [actionHistory, setActionHistory] = useState<{ type: 'like' | 'dislike'; roommateId: number }[]>([]);
+	const [actionHistory, setActionHistory] = useState<
+		{ type: 'like' | 'dislike'; roommateId: number }[]
+	>([]);
 
 	const currentRoommate = roommates[currentIndex];
 
@@ -158,10 +160,16 @@ export default function HomePage() {
 		setSwipeDirection(direction);
 		if (direction === 'right') {
 			setLikedProfiles((prev) => [...prev, currentRoommate.id]);
-			setActionHistory((prev) => [...prev, { type: 'like', roommateId: currentRoommate.id }]);
+			setActionHistory((prev) => [
+				...prev,
+				{ type: 'like', roommateId: currentRoommate.id },
+			]);
 		} else {
 			setPassedProfiles((prev) => [...prev, currentRoommate.id]);
-			setActionHistory((prev) => [...prev, { type: 'dislike', roommateId: currentRoommate.id }]);
+			setActionHistory((prev) => [
+				...prev,
+				{ type: 'dislike', roommateId: currentRoommate.id },
+			]);
 		}
 		setTimeout(() => {
 			setSwipeDirection(null);
@@ -179,11 +187,15 @@ export default function HomePage() {
 		if (actionHistory.length === 0) return;
 		const lastAction = actionHistory[actionHistory.length - 1];
 		if (lastAction.type === 'like') {
-			setLikedProfiles((prev) => prev.filter((id) => id !== lastAction.roommateId));
+			setLikedProfiles((prev) =>
+				prev.filter((id) => id !== lastAction.roommateId)
+			);
 		} else if (lastAction.type === 'dislike') {
-			setPassedProfiles((prev) => prev.filter((id) => id !== lastAction.roommateId));
+			setPassedProfiles((prev) =>
+				prev.filter((id) => id !== lastAction.roommateId)
+			);
 		}
-		setCurrentIndex(roommates.findIndex(r => r.id === lastAction.roommateId));
+		setCurrentIndex(roommates.findIndex((r) => r.id === lastAction.roommateId));
 		setActionHistory((prev) => prev.slice(0, -1));
 	};
 
