@@ -146,8 +146,8 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 async function startServer() {
   try {
-    await initializeDatabase();
-    console.log('Database initialized successfully');
+    await connectDB();
+    console.log('Database connected successfully');
     
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
