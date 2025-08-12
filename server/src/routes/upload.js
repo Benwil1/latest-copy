@@ -157,10 +157,9 @@ router.delete('/photos/:photoId', async (req, res) => {
       return res.status(404).json({ error: 'Photo not found' });
     }
 
-    // Delete file from filesystem
-    const filePath = path.join('.', photo.photo_url);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete file from S3
+    if (photo.s3_key) {
+      await deleteFromS3(photo.s3_key);
     }
 
     // Delete from database
