@@ -172,39 +172,69 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
-    // Check verification code
-    const verificationCode = await new Promise((resolve, reject) => {
-      db.get(`
-        SELECT * FROM verification_codes 
-        WHERE user_id = ? AND code = ? AND type = ? AND used = FALSE AND expires_at > datetime('now')
-      `, [userId, code, type], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
+    if (type === 'phone') {
+      // For phone verification, use Twilio Verify API
+      const user = await new Promise((resolve, reject) => {
+        db.get('SELECT phone FROM users WHERE id = ?', [userId], (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        });
       });
-    });
 
-    if (!verificationCode) {
-      return res.status(400).json({ error: 'Invalid or expired verification code' });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const isValidPhone = await verifyPhoneCode(user.phone, code);
+      if (!isValidPhone) {
+        return res.status(400).json({ error: 'Invalid phone verification code' });
+      }
+
+      // Update user phone verification status
+      await new Promise((resolve, reject) => {
+        db.run('UPDATE users SET phone_verified = TRUE WHERE id = ?', [userId], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      res.json({ message: 'Phone verified successfully' });
+    } else if (type === 'email') {
+      // For email verification, use traditional code verification
+      const verificationCode = await new Promise((resolve, reject) => {
+        db.get(`
+          SELECT * FROM verification_codes 
+          WHERE user_id = ? AND code = ? AND type = ? AND used = FALSE AND expires_at > datetime('now')
+        `, [userId, code, type], (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        });
+      });
+
+      if (!verificationCode) {
+        return res.status(400).json({ error: 'Invalid or expired verification code' });
+      }
+
+      // Mark code as used
+      await new Promise((resolve, reject) => {
+        db.run('UPDATE verification_codes SET used = TRUE WHERE id = ?', [verificationCode.id], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      // Update user email verification status
+      await new Promise((resolve, reject) => {
+        db.run('UPDATE users SET email_verified = TRUE WHERE id = ?', [userId], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      res.json({ message: 'Email verified successfully' });
+    } else {
+      return res.status(400).json({ error: 'Invalid verification type' });
     }
-
-    // Mark code as used
-    await new Promise((resolve, reject) => {
-      db.run('UPDATE verification_codes SET used = TRUE WHERE id = ?', [verificationCode.id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    // Update user verification status
-    const field = type === 'email' ? 'email_verified' : 'phone_verified';
-    await new Promise((resolve, reject) => {
-      db.run(`UPDATE users SET ${field} = TRUE WHERE id = ?`, [userId], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    res.json({ message: `${type} verified successfully` });
   } catch (error) {
     console.error('Verification error:', error);
     res.status(500).json({ error: 'Verification failed' });
