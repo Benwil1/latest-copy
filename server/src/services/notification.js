@@ -127,14 +127,22 @@ const sendNotificationEmail = async (email, subject, content, name) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: `"RoomieSwipe" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to: email,
+      from: {
+        email: process.env.VERIFIED_SENDER_EMAIL,
+        name: 'RoomieSwipe'
+      },
       subject: `${subject} - RoomieSwipe`,
       html,
     };
 
-    await emailTransporter.sendMail(mailOptions);
+    if (process.env.SENDGRID_API_KEY) {
+      await sgMail.send(msg);
+    } else {
+      console.log(`[DEV] Notification email for ${email}: ${subject}`);
+    }
+    
     console.log(`Notification email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send notification email:', error);
@@ -145,5 +153,6 @@ const sendNotificationEmail = async (email, subject, content, name) => {
 module.exports = {
   sendVerificationEmail,
   sendVerificationSMS,
+  verifyPhoneCode,
   sendNotificationEmail,
 };
