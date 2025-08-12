@@ -18,6 +18,7 @@ class RoomieSwipeAPITester:
         self.auth_token = None
         self.test_user_id = None
         self.test_results = []
+        self.test_user_data = None
         
     def log_test(self, test_name: str, success: bool, message: str, details: Any = None):
         """Log test results"""
