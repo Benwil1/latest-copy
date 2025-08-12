@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { getDatabase } = require('../database/init');
 const { validateRequest, schemas } = require('../middleware/validation');
-const { sendVerificationEmail, sendVerificationSMS } = require('../services/notification');
+const { sendVerificationEmail, sendVerificationSMS, verifyPhoneCode } = require('../services/notification');
 
 const router = express.Router();
 const db = getDatabase();
