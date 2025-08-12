@@ -25,6 +25,22 @@ import { usePathname } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+// Type definition for user data from backend
+interface User {
+        id: string;
+        name: string;
+        age?: number;
+        nationality?: string;
+        profile_picture?: string;
+        budget?: number;
+        location?: string;
+        move_in_date?: string;
+        bio?: string;
+        interests?: string[];
+        verification_status?: string;
+        lifestyle?: any;
+}
+
 // Sample roommate data
 const roommates = [
 	{
