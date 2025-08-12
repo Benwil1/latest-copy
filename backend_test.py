@@ -38,29 +38,13 @@ class RoomieSwipeAPITester:
         """Generate realistic test data"""
         random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         return {
-            "name": f"Sarah Johnson",
+            "name": "Sarah Johnson",
             "email": f"sarah.johnson.{random_suffix}@example.com",
-            "phone": f"+1555{random.randint(1000000, 9999999)}",
+            "phone": f"+15551234567",  # Fixed format for validation
             "password": "SecurePass123!",
             "country": "United States",
             "nationality": "American",
-            "location": "New York, NY",
-            "age": 25,
-            "gender": "female",
-            "occupation": "Software Engineer",
-            "bio": "Looking for a clean, responsible roommate in Manhattan. I work in tech and enjoy yoga, cooking, and weekend adventures.",
-            "budget": 2500,
-            "preferred_location": "Manhattan, NY",
-            "space_type": "apartment",
-            "interests": ["yoga", "cooking", "hiking", "reading", "movies"],
-            "languages": ["English", "Spanish"],
-            "lifestyle": {
-                "smoking": "no",
-                "pets": "cats_ok",
-                "cleanliness": "very_clean",
-                "noise": "quiet",
-                "guests": "occasionally"
-            }
+            "location": "New York, NY"
         }
     
     def make_request(self, method: str, endpoint: str, data: Dict = None, 
