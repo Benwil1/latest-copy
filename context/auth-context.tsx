@@ -349,18 +349,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const resendVerificationCode = async (type: 'email' | 'phone') => {
 		try {
-			// In a real app, this would be an API call to resend the code
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
+			const response = await apiClient.resendVerification(type);
+			
 			toast({
 				title: 'Code sent',
 				description: `A new verification code has been sent to your ${type}.`,
 			});
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Failed to resend code', error);
 			toast({
 				title: 'Failed to send code',
-				description: 'Please try again.',
+				description: error.message || 'Please try again.',
 				variant: 'destructive',
 			});
 		}
@@ -368,8 +367,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const resetPassword = async (email: string) => {
 		try {
-			// In a real app, this would be an API call to initiate password reset
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+			const response = await apiClient.resetPassword(email);
 
 			toast({
 				title: 'Password reset email sent',
@@ -378,11 +376,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			});
 
 			router.push('/login');
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Password reset failed', error);
 			toast({
 				title: 'Password reset failed',
-				description: 'Please try again.',
+				description: error.message || 'Please try again.',
 				variant: 'destructive',
 			});
 		}
