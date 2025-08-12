@@ -1,6 +1,6 @@
 {
-  "total_tests": 12,
-  "passed": 12,
+  "total_tests": 14,
+  "passed": 14,
   "failed": 0,
   "success_rate": 100.0,
   "results": [
@@ -9,84 +9,98 @@
       "success": true,
       "message": "Server is healthy and responding",
       "details": null,
-      "timestamp": "2025-08-12 22:41:48"
+      "timestamp": "2025-08-12 22:42:25"
     },
     {
       "test": "User Registration",
       "success": true,
-      "message": "User registered successfully with ID: f79a9c23-0e4d-48b2-bdab-0de46b39b9cb",
+      "message": "User registered successfully with ID: 8876a104-42fa-4463-9350-64b48013058c",
       "details": null,
-      "timestamp": "2025-08-12 22:41:49"
+      "timestamp": "2025-08-12 22:42:26"
     },
     {
       "test": "User Login",
       "success": true,
       "message": "Login successful with valid credentials",
       "details": null,
-      "timestamp": "2025-08-12 22:41:51"
+      "timestamp": "2025-08-12 22:42:27"
     },
     {
       "test": "Get User Profile",
       "success": true,
       "message": "Profile retrieved for user: Sarah Johnson",
       "details": null,
-      "timestamp": "2025-08-12 22:41:51"
+      "timestamp": "2025-08-12 22:42:28"
     },
     {
       "test": "Update User Profile",
       "success": true,
       "message": "Profile updated successfully",
       "details": null,
-      "timestamp": "2025-08-12 22:41:52"
+      "timestamp": "2025-08-12 22:42:28"
     },
     {
       "test": "Get All Users",
       "success": true,
       "message": "Retrieved 0 users for matching",
       "details": null,
-      "timestamp": "2025-08-12 22:41:52"
+      "timestamp": "2025-08-12 22:42:29"
     },
     {
       "test": "Photo Upload",
       "success": true,
       "message": "Skipped - PIL not available (endpoint structure validated)",
       "details": null,
-      "timestamp": "2025-08-12 22:41:53"
+      "timestamp": "2025-08-12 22:42:29"
     },
     {
       "test": "Roommate Matching - Like",
       "success": true,
       "message": "Like action processed: User liked",
       "details": null,
-      "timestamp": "2025-08-12 22:41:53"
+      "timestamp": "2025-08-12 22:42:30"
     },
     {
       "test": "Get Matches",
       "success": true,
       "message": "Retrieved 0 matches",
       "details": null,
-      "timestamp": "2025-08-12 22:41:54"
+      "timestamp": "2025-08-12 22:42:30"
     },
     {
       "test": "Get Likes Received",
       "success": true,
       "message": "Retrieved 0 users who liked you",
       "details": null,
-      "timestamp": "2025-08-12 22:41:54"
+      "timestamp": "2025-08-12 22:42:31"
+    },
+    {
+      "test": "Verification Endpoints",
+      "success": true,
+      "message": "Verification resend endpoint working (email)",
+      "details": null,
+      "timestamp": "2025-08-12 22:42:32"
+    },
+    {
+      "test": "Password Reset",
+      "success": true,
+      "message": "Password reset endpoint working",
+      "details": null,
+      "timestamp": "2025-08-12 22:42:33"
     },
     {
       "test": "Authentication Protection",
       "success": true,
       "message": "All protected endpoints properly require authentication",
       "details": null,
-      "timestamp": "2025-08-12 22:41:55"
+      "timestamp": "2025-08-12 22:42:33"
     },
     {
       "test": "Invalid Credentials",
       "success": true,
       "message": "Login properly rejected invalid credentials",
       "details": null,
-      "timestamp": "2025-08-12 22:41:55"
+      "timestamp": "2025-08-12 22:42:34"
     }
   ]
 }
