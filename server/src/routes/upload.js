@@ -145,12 +145,7 @@ router.delete('/photos/:photoId', async (req, res) => {
     const { photoId } = req.params;
 
     // Get photo info
-    const photo = await new Promise((resolve, reject) => {
-      db.get('SELECT * FROM user_photos WHERE id = ? AND user_id = ?', [photoId, req.userId], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const photo = await UserPhoto.findOne({ _id: photoId, user_id: req.userId });
 
     if (!photo) {
       return res.status(404).json({ error: 'Photo not found' });
@@ -162,12 +157,7 @@ router.delete('/photos/:photoId', async (req, res) => {
     }
 
     // Delete from database
-    await new Promise((resolve, reject) => {
-      db.run('DELETE FROM user_photos WHERE id = ?', [photoId], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await UserPhoto.findByIdAndDelete(photoId);
 
     res.json({ message: 'Photo deleted successfully' });
   } catch (error) {
