@@ -1,0 +1,92 @@
+{
+  "total_tests": 12,
+  "passed": 3,
+  "failed": 9,
+  "success_rate": 25.0,
+  "results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "Server is healthy and responding",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:46"
+    },
+    {
+      "test": "User Registration",
+      "success": false,
+      "message": "HTTP 400: Validation error",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:47"
+    },
+    {
+      "test": "User Login",
+      "success": false,
+      "message": "No test user available for login test",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:47"
+    },
+    {
+      "test": "Get User Profile",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:48"
+    },
+    {
+      "test": "Update User Profile",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:48"
+    },
+    {
+      "test": "Get All Users",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:49"
+    },
+    {
+      "test": "Photo Upload",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:49"
+    },
+    {
+      "test": "Roommate Matching - Like",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:50"
+    },
+    {
+      "test": "Get Matches",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:50"
+    },
+    {
+      "test": "Get Likes Received",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:51"
+    },
+    {
+      "test": "Authentication Protection",
+      "success": true,
+      "message": "All protected endpoints properly require authentication",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:51"
+    },
+    {
+      "test": "Invalid Credentials",
+      "success": true,
+      "message": "Login properly rejected invalid credentials",
+      "details": null,
+      "timestamp": "2025-08-12 22:40:52"
+    }
+  ]
+}
