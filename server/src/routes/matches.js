@@ -1,146 +1,113 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { getDatabase } = require('../database/init');
+const { User, Match } = require('../models');
 
 const router = express.Router();
-const db = getDatabase();
 
-// Like/dislike a user
+// Record like/dislike action
 router.post('/action', async (req, res) => {
   try {
-    const { target_user_id, action } = req.body; // action: 'like' or 'dislike'
-    
-    if (!target_user_id || !['like', 'dislike'].includes(action)) {
-      return res.status(400).json({ error: 'Invalid request data' });
+    const { target_user_id, action } = req.body;
+    const user_id = req.userId;
+
+    if (!target_user_id || !action) {
+      return res.status(400).json({ error: 'target_user_id and action are required' });
     }
 
-    if (target_user_id === req.userId) {
-      return res.status(400).json({ error: 'Cannot perform action on yourself' });
+    if (!['like', 'dislike'].includes(action)) {
+      return res.status(400).json({ error: 'action must be like or dislike' });
     }
 
-    // Check if match already exists
-    let match = await new Promise((resolve, reject) => {
-      db.get(`
-        SELECT * FROM matches 
-        WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
-      `, [req.userId, target_user_id, target_user_id, req.userId], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
+    if (target_user_id === user_id) {
+      return res.status(400).json({ error: 'Cannot match with yourself' });
+    }
+
+    // Check if target user exists
+    const targetUser = await User.findById(target_user_id);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Target user not found' });
+    }
+
+    // Check if action already exists
+    const existingMatch = await Match.findOne({ user_id, target_user_id });
+    if (existingMatch) {
+      return res.status(400).json({ error: 'Action already recorded for this user' });
+    }
+
+    // Create new match record
+    const matchRecord = new Match({
+      _id: uuidv4(),
+      user_id,
+      target_user_id,
+      action
     });
 
-    if (action === 'dislike') {
-      // If match exists, delete it
-      if (match) {
-        await new Promise((resolve, reject) => {
-          db.run('DELETE FROM matches WHERE id = ?', [match.id], (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-      }
-      return res.json({ message: 'User disliked' });
-    }
+    await matchRecord.save();
 
-    // Handle like action
-    if (!match) {
-      // Create new match
-      const matchId = uuidv4();
-      await new Promise((resolve, reject) => {
-        db.run(`
-          INSERT INTO matches (id, user1_id, user2_id, user1_liked, user2_liked)
-          VALUES (?, ?, ?, ?, ?)
-        `, [matchId, req.userId, target_user_id, true, false], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+    // Check for mutual match if this is a like
+    let isMutualMatch = false;
+    if (action === 'like') {
+      const reverseMatch = await Match.findOne({
+        user_id: target_user_id,
+        target_user_id: user_id,
+        action: 'like'
       });
 
-      return res.json({ message: 'User liked', is_mutual: false });
-    } else {
-      // Update existing match
-      const isCurrentUserUser1 = match.user1_id === req.userId;
-      const field = isCurrentUserUser1 ? 'user1_liked' : 'user2_liked';
-      const otherField = isCurrentUserUser1 ? 'user2_liked' : 'user1_liked';
-      const otherUserLiked = isCurrentUserUser1 ? match.user2_liked : match.user1_liked;
-
-      await new Promise((resolve, reject) => {
-        db.run(`
-          UPDATE matches 
-          SET ${field} = TRUE, is_mutual = ? 
-          WHERE id = ?
-        `, [otherUserLiked, match.id], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
-      const isMutual = otherUserLiked;
-
-      // If it's a mutual match, create notification
-      if (isMutual) {
-        const notificationId = uuidv4();
-        await new Promise((resolve, reject) => {
-          db.run(`
-            INSERT INTO notifications (id, user_id, type, title, message, data)
-            VALUES (?, ?, ?, ?, ?, ?)
-          `, [
-            notificationId, 
-            target_user_id, 
-            'match', 
-            'New Match!', 
-            'You have a new roommate match',
-            JSON.stringify({ match_id: match.id, user_id: req.userId })
-          ], (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+      if (reverseMatch) {
+        isMutualMatch = true;
+        // Update both records to indicate mutual match
+        await Promise.all([
+          Match.findByIdAndUpdate(matchRecord._id, { is_mutual: true }),
+          Match.findByIdAndUpdate(reverseMatch._id, { is_mutual: true })
+        ]);
       }
-
-      return res.json({ message: 'User liked', is_mutual: isMutual });
     }
+
+    res.json({
+      message: `${action} recorded successfully`,
+      match_id: matchRecord._id,
+      is_mutual_match: isMutualMatch
+    });
   } catch (error) {
     console.error('Match action error:', error);
-    res.status(500).json({ error: 'Failed to process match action' });
+    res.status(500).json({ error: 'Failed to record match action' });
   }
 });
 
-// Get user's matches
+// Get current user's matches
 router.get('/', async (req, res) => {
   try {
-    const matches = await new Promise((resolve, reject) => {
-      db.all(`
-        SELECT m.*, 
-               u1.name as user1_name, u1.profile_picture as user1_avatar,
-               u2.name as user2_name, u2.profile_picture as user2_avatar
-        FROM matches m
-        JOIN users u1 ON m.user1_id = u1.id
-        JOIN users u2 ON m.user2_id = u2.id
-        WHERE (m.user1_id = ? OR m.user2_id = ?) AND m.is_mutual = TRUE
-        ORDER BY m.created_at DESC
-      `, [req.userId, req.userId], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    const user_id = req.userId;
 
-    const processedMatches = matches.map(match => {
-      const isCurrentUserUser1 = match.user1_id === req.userId;
-      const otherUser = {
-        id: isCurrentUserUser1 ? match.user2_id : match.user1_id,
-        name: isCurrentUserUser1 ? match.user2_name : match.user1_name,
-        avatar: isCurrentUserUser1 ? match.user2_avatar : match.user1_avatar
-      };
+    // Get all mutual matches for the current user
+    const matches = await Match.find({
+      user_id,
+      action: 'like',
+      is_mutual: true
+    }).sort({ created_at: -1 });
 
+    // Get matched user details
+    const matchedUsers = await Promise.all(matches.map(async (match) => {
+      const user = await User.findById(match.target_user_id)
+        .select('name age location bio interests profile_picture verification_status');
+      
       return {
-        id: match.id,
-        user: otherUser,
+        match_id: match._id,
+        user: {
+          id: user._id,
+          name: user.name,
+          age: user.age,
+          location: user.location,
+          bio: user.bio,
+          interests: user.interests || [],
+          profile_picture: user.profile_picture,
+          verification_status: user.verification_status
+        },
         matched_at: match.created_at
       };
-    });
+    }));
 
-    res.json(processedMatches);
+    res.json(matchedUsers);
   } catch (error) {
     console.error('Get matches error:', error);
     res.status(500).json({ error: 'Failed to get matches' });
@@ -150,149 +117,113 @@ router.get('/', async (req, res) => {
 // Get users who liked current user
 router.get('/likes-me', async (req, res) => {
   try {
-    const likes = await new Promise((resolve, reject) => {
-      db.all(`
-        SELECT m.*, u.id, u.name, u.age, u.profile_picture, u.location, u.occupation, u.bio
-        FROM matches m
-        JOIN users u ON (
-          CASE 
-            WHEN m.user1_id = ? THEN m.user2_id = u.id
-            WHEN m.user2_id = ? THEN m.user1_id = u.id
-          END
-        )
-        WHERE (
-          (m.user1_id = ? AND m.user2_liked = TRUE AND m.user1_liked = FALSE) OR
-          (m.user2_id = ? AND m.user1_liked = TRUE AND m.user2_liked = FALSE)
-        )
-        ORDER BY m.created_at DESC
-      `, [req.userId, req.userId, req.userId, req.userId], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    const target_user_id = req.userId;
 
-    res.json(likes);
+    // Get all users who liked the current user
+    const likes = await Match.find({
+      target_user_id,
+      action: 'like'
+    }).sort({ created_at: -1 });
+
+    // Get user details and check if current user has also liked them
+    const likedByUsers = await Promise.all(likes.map(async (like) => {
+      const user = await User.findById(like.user_id)
+        .select('name age location bio interests profile_picture verification_status');
+
+      // Check if current user has liked them back
+      const reciprocalLike = await Match.findOne({
+        user_id: target_user_id,
+        target_user_id: like.user_id,
+        action: 'like'
+      });
+
+      return {
+        user: {
+          id: user._id,
+          name: user.name,
+          age: user.age,
+          location: user.location,
+          bio: user.bio,
+          interests: user.interests || [],
+          profile_picture: user.profile_picture,
+          verification_status: user.verification_status
+        },
+        liked_at: like.created_at,
+        is_mutual: like.is_mutual,
+        have_i_liked_back: !!reciprocalLike
+      };
+    }));
+
+    res.json(likedByUsers);
   } catch (error) {
-    console.error('Get likes error:', error);
-    res.status(500).json({ error: 'Failed to get likes' });
+    console.error('Get likes-me error:', error);
+    res.status(500).json({ error: 'Failed to get users who liked you' });
   }
 });
 
-// Calculate compatibility score between users
-router.get('/compatibility/:userId', async (req, res) => {
+// Get match statistics
+router.get('/stats', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const user_id = req.userId;
 
-    // Get both users' data
-    const [currentUser, targetUser] = await Promise.all([
-      new Promise((resolve, reject) => {
-        db.get('SELECT * FROM users WHERE id = ?', [req.userId], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      }),
-      new Promise((resolve, reject) => {
-        db.get('SELECT * FROM users WHERE id = ?', [userId], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      })
+    const [
+      totalLikes,
+      totalDislikes,
+      mutualMatches,
+      likesReceived
+    ] = await Promise.all([
+      Match.countDocuments({ user_id, action: 'like' }),
+      Match.countDocuments({ user_id, action: 'dislike' }),
+      Match.countDocuments({ user_id, action: 'like', is_mutual: true }),
+      Match.countDocuments({ target_user_id: user_id, action: 'like' })
     ]);
 
-    if (!currentUser || !targetUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Calculate compatibility score based on various factors
-    let score = 0;
-    let factors = 0;
-
-    // Location compatibility (30% weight)
-    if (currentUser.location && targetUser.location) {
-      if (currentUser.location.toLowerCase() === targetUser.location.toLowerCase()) {
-        score += 30;
-      } else if (currentUser.location.toLowerCase().includes(targetUser.location.toLowerCase()) ||
-                 targetUser.location.toLowerCase().includes(currentUser.location.toLowerCase())) {
-        score += 20;
-      }
-      factors += 30;
-    }
-
-    // Budget compatibility (25% weight)
-    if (currentUser.budget && targetUser.budget) {
-      const budgetDiff = Math.abs(currentUser.budget - targetUser.budget);
-      const maxBudget = Math.max(currentUser.budget, targetUser.budget);
-      const budgetCompatibility = Math.max(0, 1 - (budgetDiff / maxBudget));
-      score += budgetCompatibility * 25;
-      factors += 25;
-    }
-
-    // Age compatibility (15% weight)
-    if (currentUser.age && targetUser.age) {
-      const ageDiff = Math.abs(currentUser.age - targetUser.age);
-      const ageCompatibility = Math.max(0, 1 - (ageDiff / 20)); // 20 year max difference
-      score += ageCompatibility * 15;
-      factors += 15;
-    }
-
-    // Lifestyle compatibility (20% weight)
-    if (currentUser.lifestyle && targetUser.lifestyle) {
-      try {
-        const currentLifestyle = JSON.parse(currentUser.lifestyle);
-        const targetLifestyle = JSON.parse(targetUser.lifestyle);
-        
-        let lifestyleMatches = 0;
-        let lifestyleTotal = 0;
-
-        const lifestyleKeys = ['smoking', 'pets', 'cleanliness', 'noise', 'guests'];
-        lifestyleKeys.forEach(key => {
-          if (currentLifestyle[key] && targetLifestyle[key]) {
-            lifestyleTotal++;
-            if (currentLifestyle[key] === targetLifestyle[key]) {
-              lifestyleMatches++;
-            }
-          }
-        });
-
-        if (lifestyleTotal > 0) {
-          score += (lifestyleMatches / lifestyleTotal) * 20;
-        }
-        factors += 20;
-      } catch (e) {
-        // Invalid JSON, skip lifestyle compatibility
-      }
-    }
-
-    // Interests compatibility (10% weight)
-    if (currentUser.interests && targetUser.interests) {
-      try {
-        const currentInterests = JSON.parse(currentUser.interests);
-        const targetInterests = JSON.parse(targetUser.interests);
-        
-        const commonInterests = currentInterests.filter(interest => 
-          targetInterests.includes(interest)
-        );
-        
-        const totalInterests = new Set([...currentInterests, ...targetInterests]).size;
-        if (totalInterests > 0) {
-          score += (commonInterests.length / totalInterests) * 10;
-        }
-        factors += 10;
-      } catch (e) {
-        // Invalid JSON, skip interests compatibility
-      }
-    }
-
-    // Normalize score
-    const finalScore = factors > 0 ? Math.round((score / factors) * 100) : 50;
-
     res.json({
-      compatibility_score: Math.max(0, Math.min(100, finalScore)),
-      factors_considered: factors
+      total_likes_given: totalLikes,
+      total_dislikes_given: totalDislikes,
+      mutual_matches: mutualMatches,
+      likes_received: likesReceived,
+      match_rate: totalLikes > 0 ? (mutualMatches / totalLikes * 100).toFixed(1) : 0
     });
   } catch (error) {
-    console.error('Calculate compatibility error:', error);
-    res.status(500).json({ error: 'Failed to calculate compatibility' });
+    console.error('Get match stats error:', error);
+    res.status(500).json({ error: 'Failed to get match statistics' });
+  }
+});
+
+// Unmatch (remove mutual match)
+router.delete('/:matchId', async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const user_id = req.userId;
+
+    // Find the match record
+    const match = await Match.findById(matchId);
+    if (!match) {
+      return res.status(404).json({ error: 'Match not found' });
+    }
+
+    // Verify user is part of this match
+    if (match.user_id !== user_id && match.target_user_id !== user_id) {
+      return res.status(403).json({ error: 'Not authorized to unmatch this user' });
+    }
+
+    // Find and update both match records
+    const [userMatch, targetMatch] = await Promise.all([
+      Match.findOne({ user_id: match.user_id, target_user_id: match.target_user_id }),
+      Match.findOne({ user_id: match.target_user_id, target_user_id: match.user_id })
+    ]);
+
+    // Set is_mutual to false for both records
+    await Promise.all([
+      userMatch ? Match.findByIdAndUpdate(userMatch._id, { is_mutual: false }) : Promise.resolve(),
+      targetMatch ? Match.findByIdAndUpdate(targetMatch._id, { is_mutual: false }) : Promise.resolve()
+    ]);
+
+    res.json({ message: 'Successfully unmatched' });
+  } catch (error) {
+    console.error('Unmatch error:', error);
+    res.status(500).json({ error: 'Failed to unmatch user' });
   }
 });
 
