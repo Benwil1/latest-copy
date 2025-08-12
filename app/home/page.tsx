@@ -646,6 +646,8 @@ export default function HomePage() {
 							</div>
 						</Card>
 					</div>
+				</>
+				)}
 				</main>
 
 				{/* Show empty state when no users and not loading */}
