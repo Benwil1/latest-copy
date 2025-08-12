@@ -541,6 +541,8 @@ class RoomieSwipeAPITester:
             self.test_roommate_matching_like,
             self.test_get_matches,
             self.test_get_likes_received,
+            self.test_verification_endpoints,
+            self.test_password_reset,
             self.test_authentication_required_endpoints,
             self.test_invalid_credentials
         ]
