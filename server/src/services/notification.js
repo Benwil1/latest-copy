@@ -77,21 +77,38 @@ const sendVerificationEmail = async (email, code, name, type = 'email_verificati
 
 const sendVerificationSMS = async (phone, code) => {
   try {
-    if (!twilioClient) {
-      console.log(`SMS verification code for ${phone}: ${code}`);
+    if (!twilioClient || !process.env.TWILIO_VERIFY_SERVICE_SID) {
+      console.log(`[DEV] SMS verification code for ${phone}: ${code}`);
       return; // Skip SMS in development if Twilio not configured
     }
 
-    await twilioClient.messages.create({
-      body: `Your RoomieSwipe verification code is: ${code}. This code will expire in 10 minutes.`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phone,
-    });
+    // Use Twilio Verify API for SMS verification
+    await twilioClient.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verifications
+      .create({to: phone, channel: 'sms'});
 
     console.log(`Verification SMS sent to ${phone}`);
   } catch (error) {
     console.error('Failed to send verification SMS:', error);
     throw error;
+  }
+};
+
+const verifyPhoneCode = async (phone, code) => {
+  try {
+    if (!twilioClient || !process.env.TWILIO_VERIFY_SERVICE_SID) {
+      // In development, accept any 6-digit code
+      return code.length === 6 && /^\d+$/.test(code);
+    }
+
+    const verification = await twilioClient.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verificationChecks
+      .create({to: phone, code: code});
+
+    return verification.status === 'approved';
+  } catch (error) {
+    console.error('Failed to verify phone code:', error);
+    return false;
   }
 };
 
