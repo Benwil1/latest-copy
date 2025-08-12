@@ -43,36 +43,24 @@ router.post('/register', validateRequest(schemas.register), async (req, res) => 
       });
     });
 
-    // Generate verification codes
-    const phoneCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate verification codes (only for email)
     const emailCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Save verification codes
-    await Promise.all([
-      new Promise((resolve, reject) => {
-        db.run(`
-          INSERT INTO verification_codes (id, user_id, code, type, expires_at)
-          VALUES (?, ?, ?, ?, ?)
-        `, [uuidv4(), userId, phoneCode, 'phone', expiresAt.toISOString()], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      }),
-      new Promise((resolve, reject) => {
-        db.run(`
-          INSERT INTO verification_codes (id, user_id, code, type, expires_at)
-          VALUES (?, ?, ?, ?, ?)
-        `, [uuidv4(), userId, emailCode, 'email', expiresAt.toISOString()], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      })
-    ]);
+    // Save email verification code (phone verification is handled by Twilio Verify)
+    await new Promise((resolve, reject) => {
+      db.run(`
+        INSERT INTO verification_codes (id, user_id, code, type, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+      `, [uuidv4(), userId, emailCode, 'email', expiresAt.toISOString()], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
 
     // Send verification codes
     try {
-      await sendVerificationSMS(phone, phoneCode);
+      await sendVerificationSMS(phone); // Twilio Verify handles code generation
       await sendVerificationEmail(email, emailCode, name);
     } catch (error) {
       console.error('Failed to send verification codes:', error);
