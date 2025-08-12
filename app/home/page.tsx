@@ -417,7 +417,7 @@ export default function HomePage() {
 								{/* Main profile image */}
 								<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]">
 									<img
-										src={currentRoommate.image}
+										src={currentRoommate.profile_picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3'}
 										alt={currentRoommate.name}
 										className="h-full w-full object-cover object-top rounded-3xl"
 									/>
