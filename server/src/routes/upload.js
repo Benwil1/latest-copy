@@ -14,29 +14,51 @@ router.post('/photos', upload.array('photos', 5), async (req, res) => {
     }
 
     const photoUrls = [];
+    const failedUploads = [];
 
-    // Save photo records to database
+    // Upload files to S3 and save records to database
     for (let i = 0; i < req.files.length; i++) {
       const file = req.files[i];
       const photoId = uuidv4();
-      const photoUrl = `/uploads/photos/${file.filename}`;
+      
+      try {
+        const s3Result = await uploadToS3(file, `users/${req.userId}/photos`);
+        
+        if (s3Result.success) {
+          // Save photo record to database
+          await new Promise((resolve, reject) => {
+            db.run(`
+              INSERT INTO user_photos (id, user_id, photo_url, order_index)
+              VALUES (?, ?, ?, ?)
+            `, [photoId, req.userId, s3Result.url, i], (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
 
-      await new Promise((resolve, reject) => {
-        db.run(`
-          INSERT INTO user_photos (id, user_id, photo_url, order_index)
-          VALUES (?, ?, ?, ?)
-        `, [photoId, req.userId, photoUrl, i], (err) => {
-          if (err) reject(err);
-          else resolve();
+          photoUrls.push({
+            id: photoId,
+            url: s3Result.url,
+            s3_key: s3Result.key
+          });
+        } else {
+          failedUploads.push({
+            filename: file.originalname,
+            error: s3Result.error
+          });
+        }
+      } catch (error) {
+        failedUploads.push({
+          filename: file.originalname,
+          error: error.message
         });
-      });
-
-      photoUrls.push(photoUrl);
+      }
     }
 
     res.json({
-      message: 'Photos uploaded successfully',
-      photos: photoUrls
+      message: `${photoUrls.length} photos uploaded successfully, ${failedUploads.length} failed`,
+      photos: photoUrls,
+      failed: failedUploads
     });
   } catch (error) {
     console.error('Upload photos error:', error);
