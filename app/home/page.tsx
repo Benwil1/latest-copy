@@ -341,6 +341,34 @@ export default function HomePage() {
 		<ProtectedRoute>
 			<div className="min-h-screen bg-background">
 				<main className="container mx-auto px-0 sm:px-4 py-4">
+					{/* Loading state */}
+					{loading && (
+						<div className="flex items-center justify-center min-h-[60vh]">
+							<div className="text-center">
+								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-orange mx-auto mb-4"></div>
+								<p className="text-muted-foreground">Loading potential roommates...</p>
+							</div>
+						</div>
+					)}
+
+					{/* Error state */}
+					{error && !loading && (
+						<div className="flex items-center justify-center min-h-[60vh]">
+							<div className="text-center">
+								<p className="text-red-500 mb-4">{error}</p>
+								<button 
+									onClick={() => window.location.reload()} 
+									className="px-4 py-2 bg-vibrant-orange text-white rounded-lg hover:bg-orange-600"
+								>
+									Try Again
+								</button>
+							</div>
+						</div>
+					)}
+
+					{/* Main content - only show when not loading and no error and users exist */}
+					{!loading && !error && users.length > 0 && currentRoommate && (
+						<>
 					{/* Progress bar showing profiles viewed */}
 					<div className="max-w-3xl mx-auto mb-4 px-4">
 						<div className="flex items-center gap-1">
