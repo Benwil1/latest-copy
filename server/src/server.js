@@ -16,7 +16,7 @@ const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
 const adminRoutes = require('./routes/admin');
 
-const { initializeDatabase } = require('./database/init');
+const { connectDB } = require('./database/mongodb');
 const { authenticateToken } = require('./middleware/auth');
 const { errorHandler } = require('./middleware/errorHandler');
 
