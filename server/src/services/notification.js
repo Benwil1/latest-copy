@@ -52,14 +52,22 @@ const sendVerificationEmail = async (email, code, name, type = 'email_verificati
       `;
     }
 
-    const mailOptions = {
-      from: `"RoomieSwipe" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to: email,
+      from: {
+        email: process.env.VERIFIED_SENDER_EMAIL,
+        name: 'RoomieSwipe'
+      },
       subject,
       html,
     };
 
-    await emailTransporter.sendMail(mailOptions);
+    if (process.env.SENDGRID_API_KEY) {
+      await sgMail.send(msg);
+    } else {
+      console.log(`[DEV] Email verification code for ${email}: ${code}`);
+    }
+    
     console.log(`Verification email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send verification email:', error);
