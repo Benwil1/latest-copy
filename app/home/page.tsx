@@ -244,14 +244,14 @@ export default function HomePage() {
 		const lastAction = actionHistory[actionHistory.length - 1];
 		if (lastAction.type === 'like') {
 			setLikedProfiles((prev) =>
-				prev.filter((id) => id !== lastAction.roommateId)
+				prev.filter((id) => id !== lastAction.userId)
 			);
 		} else if (lastAction.type === 'dislike') {
 			setPassedProfiles((prev) =>
-				prev.filter((id) => id !== lastAction.roommateId)
+				prev.filter((id) => id !== lastAction.userId)
 			);
 		}
-		setCurrentIndex(roommates.findIndex((r) => r.id === lastAction.roommateId));
+		setCurrentIndex(users.findIndex((r) => r.id === lastAction.userId));
 		setActionHistory((prev) => prev.slice(0, -1));
 	};
 
