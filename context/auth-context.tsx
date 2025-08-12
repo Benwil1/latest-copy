@@ -276,11 +276,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const verifyPhone = async (code: string): Promise<boolean> => {
 		setIsLoading(true);
 		try {
-			// In a real app, this would be an API call to verify the phone
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-			// For demo purposes, we'll accept any 6-digit code
-			if (code.length === 6 && /^\d+$/.test(code)) {
+			const response = await apiClient.verifyCode(code, 'phone');
+			
+			if (response.message && response.message.includes('verified successfully')) {
 				const updatedUser = { ...user!, phoneVerified: true };
 				setUser(updatedUser);
 				localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -299,11 +297,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				});
 				return false;
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Phone verification failed', error);
 			toast({
 				title: 'Verification failed',
-				description: 'Please try again.',
+				description: error.message || 'Please try again.',
 				variant: 'destructive',
 			});
 			return false;
