@@ -2,12 +2,11 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { getDatabase } = require('../database/init');
+const { User, VerificationCode } = require('../models');
 const { validateRequest, schemas } = require('../middleware/validation');
 const { sendVerificationEmail, sendVerificationSMS, verifyPhoneCode } = require('../services/notification');
 
 const router = express.Router();
-const db = getDatabase();
 
 // Register
 router.post('/register', validateRequest(schemas.register), async (req, res) => {
@@ -15,48 +14,51 @@ router.post('/register', validateRequest(schemas.register), async (req, res) => 
     const { name, email, phone, password, country, nationality, location } = req.body;
 
     // Check if user already exists
-    const existingUser = await new Promise((resolve, reject) => {
-      db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
+    const existingUser = await User.findOne({ email: email });
     if (existingUser) {
-      return res.status(409).json({ error: 'User already exists with this email' });
+      return res.status(400).json({ error: 'User already exists with this email' });
     }
 
     // Hash password
     const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
     const userId = uuidv4();
-    await new Promise((resolve, reject) => {
-      db.run(`
-        INSERT INTO users (
-          id, email, password_hash, name, phone, country, nationality, location
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `, [userId, email, passwordHash, name, phone, country, nationality, location], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
+    const newUser = new User({
+      _id: userId,
+      name,
+      email,
+      phone,
+      password_hash: hashedPassword,
+      country,
+      nationality,
+      location
     });
 
-    // Generate verification codes (only for email)
+    await newUser.save();
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId, email, role: 'user' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Generate email verification code
     const emailCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Save email verification code (phone verification is handled by Twilio Verify)
-    await new Promise((resolve, reject) => {
-      db.run(`
-        INSERT INTO verification_codes (id, user_id, code, type, expires_at)
-        VALUES (?, ?, ?, ?, ?)
-      `, [uuidv4(), userId, emailCode, 'email', expiresAt.toISOString()], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    // Save email verification code
+    const emailVerificationCode = new VerificationCode({
+      _id: uuidv4(),
+      user_id: userId,
+      code: emailCode,
+      type: 'email',
+      expires_at: expiresAt
     });
+
+    await emailVerificationCode.save();
 
     // Send verification codes
     try {
@@ -67,31 +69,26 @@ router.post('/register', validateRequest(schemas.register), async (req, res) => 
       // Continue anyway - user can request resend
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId, email, role: 'user' },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Return user data (excluding sensitive information)
+    const userResponse = {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      email_verified: newUser.email_verified,
+      phone_verified: newUser.phone_verified,
+      country: newUser.country,
+      location: newUser.location
+    };
 
     res.status(201).json({
       message: 'User created successfully',
       token,
-      user: {
-        id: userId,
-        name,
-        email,
-        phone,
-        email_verified: false,
-        phone_verified: false,
-        country,
-        nationality,
-        location
-      }
+      user: userResponse
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
@@ -100,19 +97,13 @@ router.post('/login', validateRequest(schemas.login), async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Get user
-    const user = await new Promise((resolve, reject) => {
-      db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
+    // Find user
+    const user = await User.findOne({ email: email });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check password
+    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -120,25 +111,49 @@ router.post('/login', validateRequest(schemas.login), async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Remove sensitive data
-    delete user.password_hash;
+    // Prepare user response (excluding sensitive data)
+    const userResponse = {
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      email_verified: user.email_verified,
+      phone_verified: user.phone_verified,
+      two_factor_enabled: user.two_factor_enabled,
+      role: user.role,
+      profile_picture: user.profile_picture,
+      country: user.country,
+      nationality: user.nationality,
+      location: user.location,
+      age: user.age,
+      gender: user.gender,
+      occupation: user.occupation,
+      bio: user.bio,
+      interests: user.interests || [],
+      languages: user.languages || [],
+      budget: user.budget,
+      preferred_location: user.preferred_location,
+      move_in_date: user.move_in_date,
+      space_type: user.space_type,
+      bathroom_preference: user.bathroom_preference,
+      furnished_preference: user.furnished_preference,
+      amenities: user.amenities || [],
+      lifestyle: user.lifestyle || {},
+      roommate_preferences: user.roommate_preferences || {},
+      verification_status: user.verification_status,
+      created_at: user.created_at,
+      updated_at: user.updated_at
+    };
 
     res.json({
       message: 'Login successful',
       token,
-      user: {
-        ...user,
-        interests: user.interests ? JSON.parse(user.interests) : [],
-        languages: user.languages ? JSON.parse(user.languages) : [],
-        amenities: user.amenities ? JSON.parse(user.amenities) : [],
-        lifestyle: user.lifestyle ? JSON.parse(user.lifestyle) : {},
-        roommate_preferences: user.roommate_preferences ? JSON.parse(user.roommate_preferences) : {}
-      }
+      user: userResponse
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -162,13 +177,7 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
 
     if (type === 'phone') {
       // For phone verification, use Twilio Verify API
-      const user = await new Promise((resolve, reject) => {
-        db.get('SELECT phone FROM users WHERE id = ?', [userId], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-
+      const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -179,24 +188,17 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
       }
 
       // Update user phone verification status
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE users SET phone_verified = TRUE WHERE id = ?', [userId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+      await User.findByIdAndUpdate(userId, { phone_verified: true });
 
       res.json({ message: 'Phone verified successfully' });
     } else if (type === 'email') {
       // For email verification, use traditional code verification
-      const verificationCode = await new Promise((resolve, reject) => {
-        db.get(`
-          SELECT * FROM verification_codes 
-          WHERE user_id = ? AND code = ? AND type = ? AND used = FALSE AND expires_at > datetime('now')
-        `, [userId, code, type], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
+      const verificationCode = await VerificationCode.findOne({
+        user_id: userId,
+        code: code,
+        type: type,
+        used: false,
+        expires_at: { $gt: new Date() }
       });
 
       if (!verificationCode) {
@@ -204,20 +206,10 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
       }
 
       // Mark code as used
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE verification_codes SET used = TRUE WHERE id = ?', [verificationCode.id], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+      await VerificationCode.findByIdAndUpdate(verificationCode._id, { used: true });
 
       // Update user email verification status
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE users SET email_verified = TRUE WHERE id = ?', [userId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+      await User.findByIdAndUpdate(userId, { email_verified: true });
 
       res.json({ message: 'Email verified successfully' });
     } else {
@@ -229,10 +221,10 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
   }
 });
 
-// Resend verification code
+// Resend verification
 router.post('/resend-verification', async (req, res) => {
   try {
-    const { type } = req.body; // 'email' or 'phone'
+    const { type } = req.body;
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -243,41 +235,32 @@ router.post('/resend-verification', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
-    // Get user details
-    const user = await new Promise((resolve, reject) => {
-      db.get('SELECT email, phone, name FROM users WHERE id = ?', [userId], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Generate new verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    if (type === 'phone') {
+      await sendVerificationSMS(user.phone);
+    } else if (type === 'email') {
+      // Generate new email verification code
+      const emailCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Save verification code
-    await new Promise((resolve, reject) => {
-      db.run(`
-        INSERT INTO verification_codes (id, user_id, code, type, expires_at)
-        VALUES (?, ?, ?, ?, ?)
-      `, [uuidv4(), userId, code, type, expiresAt.toISOString()], (err) => {
-        if (err) reject(err);
-        else resolve();
+      // Save new verification code
+      const verificationCode = new VerificationCode({
+        _id: uuidv4(),
+        user_id: userId,
+        code: emailCode,
+        type: 'email',
+        expires_at: expiresAt
       });
-    });
 
-    // Send verification code
-    if (type === 'email') {
-      await sendVerificationEmail(user.email, code, user.name);
-    } else if (type === 'phone') {
-      await sendVerificationSMS(user.phone, code);
+      await verificationCode.save();
+      await sendVerificationEmail(user.email, emailCode, user.name);
     }
 
-    res.json({ message: `Verification code sent to ${type}` });
+    res.json({ message: `${type} verification code sent successfully` });
   } catch (error) {
     console.error('Resend verification error:', error);
     res.status(500).json({ error: 'Failed to resend verification code' });
@@ -289,16 +272,9 @@ router.post('/reset-password', async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if user exists
-    const user = await new Promise((resolve, reject) => {
-      db.get('SELECT id, name FROM users WHERE email = ?', [email], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
+    const user = await User.findOne({ email: email });
     if (!user) {
-      // Don't reveal if email exists or not for security
+      // Don't reveal if email exists for security
       return res.json({ message: 'If the email exists, a reset link has been sent' });
     }
 
@@ -307,15 +283,15 @@ router.post('/reset-password', async (req, res) => {
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
     // Save reset code
-    await new Promise((resolve, reject) => {
-      db.run(`
-        INSERT INTO verification_codes (id, user_id, code, type, expires_at)
-        VALUES (?, ?, ?, ?, ?)
-      `, [uuidv4(), user.id, resetCode, 'password_reset', expiresAt.toISOString()], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    const verificationCode = new VerificationCode({
+      _id: uuidv4(),
+      user_id: user._id,
+      code: resetCode,
+      type: 'password_reset',
+      expires_at: expiresAt
     });
+
+    await verificationCode.save();
 
     // Send reset email
     await sendVerificationEmail(email, resetCode, user.name, 'password_reset');
@@ -323,7 +299,7 @@ router.post('/reset-password', async (req, res) => {
     res.json({ message: 'If the email exists, a reset link has been sent' });
   } catch (error) {
     console.error('Password reset error:', error);
-    res.status(500).json({ error: 'Failed to process password reset' });
+    res.status(500).json({ error: 'Password reset failed' });
   }
 });
 
