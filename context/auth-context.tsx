@@ -213,37 +213,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	) => {
 		setIsLoading(true);
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
 			// Get onboarding data from localStorage if available
 			const onboardingData = localStorage.getItem('onboarding');
 			const onboarding = onboardingData ? JSON.parse(onboardingData) : {};
 
-			const newUser: User = {
-				...MOCK_USER,
+			const userData = {
 				name,
 				email,
 				phone,
-				emailVerified: false,
-				phoneVerified: false,
+				password,
 				country,
 				nationality,
 				location,
-				// Include onboarding data
 				...onboarding,
 			};
-			setUser(newUser);
-			localStorage.setItem('user', JSON.stringify(stripLargeFields(newUser)));
-			toast({
-				title: 'Account created',
-				description: 'Please verify your phone number to continue.',
-			});
-			router.push('/verify-phone');
-		} catch (error) {
+
+			const response = await apiClient.register(userData);
+			
+			if (response.user && response.token) {
+				setUser(response.user);
+				localStorage.setItem('user', JSON.stringify(stripLargeFields(response.user)));
+				toast({
+					title: 'Account created',
+					description: 'Please verify your phone number to continue.',
+				});
+				router.push('/verify-phone');
+			}
+		} catch (error: any) {
 			console.error('Signup failed', error);
 			toast({
 				title: 'Signup failed',
-				description: 'Please check your information and try again.',
+				description: error.message || 'Please check your information and try again.',
 				variant: 'destructive',
 			});
 		} finally {
