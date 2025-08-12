@@ -662,8 +662,6 @@ export default function HomePage() {
 						</div>
 					</div>
 				)}
-				</>
-				)}
 
 				<MobileNav />
 			</div>
