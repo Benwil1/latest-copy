@@ -176,37 +176,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const login = async (email: string, password: string) => {
 		setIsLoading(true);
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			const response = await apiClient.login(email, password);
+			
+			if (response.user && response.token) {
+				setUser(response.user);
+				localStorage.setItem('user', JSON.stringify(response.user));
 
-			let mockUser;
-			if (email === 'admin@email.com' && password === 'admin123') {
-				mockUser = {
-					...MOCK_USER,
-					name: 'Admin User',
-					email,
-					role: 'admin',
-				};
-			} else {
-				mockUser = {
-					...MOCK_USER,
-					email,
-					role: 'user',
-				};
+				toast({
+					title: 'Login successful',
+					description: 'Welcome back to RoomieSwipe!',
+				});
+
+				router.push('/home');
 			}
-			setUser(mockUser);
-			localStorage.setItem('user', JSON.stringify(mockUser));
-
-			toast({
-				title: 'Login successful',
-				description: 'Welcome back to RomieSwipe!',
-			});
-
-			router.push('/home');
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Login failed', error);
 			toast({
 				title: 'Login failed',
-				description: 'Please check your credentials and try again.',
+				description: error.message || 'Please check your credentials and try again.',
 				variant: 'destructive',
 			});
 			throw error;
