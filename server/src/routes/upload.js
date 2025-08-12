@@ -28,9 +28,9 @@ router.post('/photos', upload.array('photos', 5), async (req, res) => {
           // Save photo record to database
           await new Promise((resolve, reject) => {
             db.run(`
-              INSERT INTO user_photos (id, user_id, photo_url, order_index)
-              VALUES (?, ?, ?, ?)
-            `, [photoId, req.userId, s3Result.url, i], (err) => {
+              INSERT INTO user_photos (id, user_id, photo_url, s3_key, order_index)
+              VALUES (?, ?, ?, ?, ?)
+            `, [photoId, req.userId, s3Result.url, s3Result.key, i], (err) => {
               if (err) reject(err);
               else resolve();
             });
