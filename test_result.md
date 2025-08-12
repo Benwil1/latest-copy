@@ -554,12 +554,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication Context Integration"
-    - "Roommate Discovery (Home Page)"
-    - "Swipe/Match Functionality"
-    - "Phone Verification"
-    - "Email Verification"
+    - "User Profile Management (MongoDB)"
+    - "Roommate Matching System (MongoDB)"
+    - "User Search/Discovery (MongoDB)"
+    - "Phone Verification System"
   stuck_tasks:
+    - "User Profile Management (MongoDB)"
+    - "Roommate Matching System (MongoDB)"
+    - "User Search/Discovery (MongoDB)"
     - "Phone Verification"
     - "Email Verification"
     - "Roommate Discovery (Home Page)"
