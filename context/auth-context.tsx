@@ -253,9 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const logout = async () => {
 		try {
-			// In a real app, this would be an API call to invalidate the session
-			await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
-
+			apiClient.logout();
 			setUser(null);
 			localStorage.removeItem('user');
 
@@ -269,7 +267,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			console.error('Logout failed', error);
 			toast({
 				title: 'Logout failed',
-				description: 'Please try again.',
+				description: 'An error occurred while logging out.',
 				variant: 'destructive',
 			});
 		}
