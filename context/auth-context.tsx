@@ -2,6 +2,7 @@
 
 import { useToast } from '@/hooks/use-toast';
 import { usePathname, useRouter } from 'next/navigation';
+import apiClient from '@/lib/api-client';
 import {
 	createContext,
 	useContext,
