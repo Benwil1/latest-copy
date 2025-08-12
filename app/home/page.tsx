@@ -344,7 +344,7 @@ export default function HomePage() {
 					{/* Progress bar showing profiles viewed */}
 					<div className="max-w-3xl mx-auto mb-4 px-4">
 						<div className="flex items-center gap-1">
-							{roommates.map((_, index) => (
+							{users.map((_, index) => (
 								<div
 									key={index}
 									className={`h-1 flex-1 rounded-full transition-all duration-300 ${
