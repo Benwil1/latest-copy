@@ -545,7 +545,7 @@ export default function HomePage() {
 													<div className="flex justify-between">
 														<span className="text-white/70">Move-in:</span>
 														<span className="font-medium">
-															{currentRoommate.moveIn}
+															{currentRoommate.move_in_date || 'Not specified'}
 														</span>
 													</div>
 												</div>
