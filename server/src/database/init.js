@@ -58,6 +58,7 @@ const initializeDatabase = () => {
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           photo_url TEXT NOT NULL,
+          s3_key TEXT,
           is_primary BOOLEAN DEFAULT FALSE,
           order_index INTEGER DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
