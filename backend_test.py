@@ -123,8 +123,13 @@ class RoomieSwipeAPITester:
                     self.log_test("User Registration", False, "Missing token or user in response", data)
                     return False
             else:
-                error_msg = response.json().get("error", "Unknown error") if response.content else "No response"
-                self.log_test("User Registration", False, f"HTTP {response.status_code}: {error_msg}")
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get("error", "Unknown error")
+                    details = error_data.get("details", [])
+                    self.log_test("User Registration", False, f"HTTP {response.status_code}: {error_msg}", details)
+                except:
+                    self.log_test("User Registration", False, f"HTTP {response.status_code}: {response.text}")
                 return False
         except Exception as e:
             self.log_test("User Registration", False, f"Request failed: {str(e)}")
