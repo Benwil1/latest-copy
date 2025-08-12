@@ -591,7 +591,7 @@ export default function HomePage() {
 											</div>
 											<div className="flex items-center gap-1">
 												<Calendar className="h-5 w-5 text-vibrant-orange" />
-												{currentRoommate.moveIn}
+												{currentRoommate.move_in_date || 'Not specified'}
 											</div>
 										</div>
 
