@@ -4,7 +4,6 @@ const { UserPhoto } = require('../models');
 const { upload, uploadToS3, deleteFromS3 } = require('../services/s3');
 
 const router = express.Router();
-const db = getDatabase();
 
 // Upload user photos
 router.post('/photos', upload.array('photos', 5), async (req, res) => {
