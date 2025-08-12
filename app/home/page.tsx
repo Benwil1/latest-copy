@@ -6,6 +6,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import apiClient from '@/lib/api-client';
 import {
 	Bell,
 	Calendar,
