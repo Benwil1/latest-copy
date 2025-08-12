@@ -162,35 +162,74 @@ export default function HomePage() {
 	const [startX, setStartX] = useState(0);
 	const [offsetX, setOffsetX] = useState(0);
 	const [isDragging, setIsDragging] = useState(false);
-	const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
-	const [passedProfiles, setPassedProfiles] = useState<number[]>([]);
+	const [likedProfiles, setLikedProfiles] = useState<string[]>([]);
+	const [passedProfiles, setPassedProfiles] = useState<string[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const cardRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
 	const [matchCount, setMatchCount] = useState(0);
 	const [actionHistory, setActionHistory] = useState<
-		{ type: 'like' | 'dislike'; roommateId: number }[]
+		{ type: 'like' | 'dislike'; userId: string }[]
 	>([]);
 
-	const currentRoommate = roommates[currentIndex];
+	// Fetch users from backend on component mount
+	useEffect(() => {
+		const fetchUsers = async () => {
+			try {
+				setLoading(true);
+				const response = await apiClient.getUsers();
+				if (response && Array.isArray(response)) {
+					setUsers(response);
+				} else {
+					console.error('Invalid users response:', response);
+					setError('Failed to load users');
+				}
+			} catch (error) {
+				console.error('Failed to fetch users:', error);
+				setError('Failed to load potential roommates');
+			} finally {
+				setLoading(false);
+			}
+		};
 
-	const handleSwipe = (direction: string) => {
+		fetchUsers();
+	}, []);
+
+	const currentRoommate = users[currentIndex];
+
+	const handleSwipe = async (direction: string) => {
+		if (!currentRoommate) return;
+
 		setSwipeDirection(direction);
-		if (direction === 'right') {
-			setLikedProfiles((prev) => [...prev, currentRoommate.id]);
+		const action = direction === 'right' ? 'like' : 'dislike';
+		
+		try {
+			// Call backend API to record the like/dislike action
+			if (direction === 'right') {
+				await apiClient.likeUser(currentRoommate.id);
+				setLikedProfiles((prev) => [...prev, currentRoommate.id]);
+			} else {
+				await apiClient.dislikeUser(currentRoommate.id);
+				setPassedProfiles((prev) => [...prev, currentRoommate.id]);
+			}
+
 			setActionHistory((prev) => [
 				...prev,
-				{ type: 'like', roommateId: currentRoommate.id },
+				{ type: action, userId: currentRoommate.id },
 			]);
-		} else {
-			setPassedProfiles((prev) => [...prev, currentRoommate.id]);
-			setActionHistory((prev) => [
-				...prev,
-				{ type: 'dislike', roommateId: currentRoommate.id },
-			]);
+
+			// TODO: Check for matches and show match notification if needed
+			
+		} catch (error) {
+			console.error('Failed to record swipe action:', error);
+			// Still proceed with UI update even if API call fails
 		}
+
 		setTimeout(() => {
 			setSwipeDirection(null);
-			if (currentIndex < roommates.length - 1) {
+			if (currentIndex < users.length - 1) {
 				setCurrentIndex(currentIndex + 1);
 			} else {
 				setCurrentIndex(0);
