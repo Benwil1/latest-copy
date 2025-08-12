@@ -24,16 +24,16 @@ router.post('/photos', upload.array('photos', 5), async (req, res) => {
         const s3Result = await uploadToS3(file, `users/${req.userId}/photos`);
         
         if (s3Result.success) {
-          // Save photo record to database
-          await new Promise((resolve, reject) => {
-            db.run(`
-              INSERT INTO user_photos (id, user_id, photo_url, s3_key, order_index)
-              VALUES (?, ?, ?, ?, ?)
-            `, [photoId, req.userId, s3Result.url, s3Result.key, i], (err) => {
-              if (err) reject(err);
-              else resolve();
-            });
+          // Save photo record to MongoDB
+          const photoRecord = new UserPhoto({
+            _id: photoId,
+            user_id: req.userId,
+            photo_url: s3Result.url,
+            s3_key: s3Result.key,
+            order_index: i
           });
+
+          await photoRecord.save();
 
           photoUrls.push({
             id: photoId,
