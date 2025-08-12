@@ -547,10 +547,12 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.1"
-  test_sequence: 1
-  last_tested: "2025-08-12T22:56:00Z"
-  testing_agent: "auto_frontend_testing_agent"
+  version: "1.2"
+  test_sequence: 2
+  last_tested: "2025-08-12T23:50:00Z"
+  testing_agent: "deep_testing_backend_v2"
+  database_type: "MongoDB Atlas"
+  migration_status: "partial"
 
 test_plan:
   current_focus:
