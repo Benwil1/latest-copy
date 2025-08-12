@@ -73,11 +73,42 @@ router.post('/apartment-images', upload.array('apartment_images', 10), async (re
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    const imageUrls = req.files.map(file => `/uploads/apartment_images/${file.filename}`);
+    const { apartment_id } = req.body;
+    if (!apartment_id) {
+      return res.status(400).json({ error: 'Apartment ID is required' });
+    }
+
+    const imageUrls = [];
+    const failedUploads = [];
+
+    // Upload files to S3
+    for (const file of req.files) {
+      try {
+        const s3Result = await uploadToS3(file, `apartments/${apartment_id}/images`);
+        
+        if (s3Result.success) {
+          imageUrls.push({
+            url: s3Result.url,
+            s3_key: s3Result.key
+          });
+        } else {
+          failedUploads.push({
+            filename: file.originalname,
+            error: s3Result.error
+          });
+        }
+      } catch (error) {
+        failedUploads.push({
+          filename: file.originalname,
+          error: error.message
+        });
+      }
+    }
 
     res.json({
-      message: 'Images uploaded successfully',
-      images: imageUrls
+      message: `${imageUrls.length} images uploaded successfully, ${failedUploads.length} failed`,
+      images: imageUrls,
+      failed: failedUploads
     });
   } catch (error) {
     console.error('Upload apartment images error:', error);
@@ -92,12 +123,17 @@ router.post('/video', upload.single('video'), async (req, res) => {
       return res.status(400).json({ error: 'No video file uploaded' });
     }
 
-    const videoUrl = `/uploads/video/${req.file.filename}`;
-
-    res.json({
-      message: 'Video uploaded successfully',
-      video_url: videoUrl
-    });
+    const s3Result = await uploadToS3(req.file, `users/${req.userId}/videos`);
+    
+    if (s3Result.success) {
+      res.json({
+        message: 'Video uploaded successfully',
+        video_url: s3Result.url,
+        s3_key: s3Result.key
+      });
+    } else {
+      res.status(500).json({ error: s3Result.error });
+    }
   } catch (error) {
     console.error('Upload video error:', error);
     res.status(500).json({ error: 'Failed to upload video' });
