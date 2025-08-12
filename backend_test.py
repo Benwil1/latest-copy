@@ -138,16 +138,15 @@ class RoomieSwipeAPITester:
     
     def test_user_login(self):
         """Test user login endpoint"""
-        if not self.test_user_id:
+        if not self.test_user_id or not self.test_user_data:
             self.log_test("User Login", False, "No test user available for login test")
             return False
         
         try:
             # Use the same email from registration
-            test_data = self.generate_test_data()
             login_data = {
-                "email": test_data["email"],
-                "password": test_data["password"]
+                "email": self.test_user_data["email"],
+                "password": self.test_user_data["password"]
             }
             
             # Clear token to test fresh login
