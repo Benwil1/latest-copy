@@ -109,8 +109,8 @@ class RoomieSwipeAPITester:
     def test_user_registration(self):
         """Test user registration endpoint"""
         try:
-            test_data = self.generate_test_data()
-            response = self.make_request("POST", "/auth/register", test_data)
+            self.test_user_data = self.generate_test_data()
+            response = self.make_request("POST", "/auth/register", self.test_user_data)
             
             if response.status_code == 201:
                 data = response.json()
