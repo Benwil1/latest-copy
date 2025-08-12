@@ -1,0 +1,93 @@
+{
+  "total_tests": 12,
+  "passed": 11,
+  "failed": 1,
+  "success_rate": 91.66666666666666,
+  "results": [
+    {
+      "test": "MongoDB Connection Health",
+      "success": true,
+      "message": "Server healthy - MongoDB Atlas connection working",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:18"
+    },
+    {
+      "test": "User Registration (MongoDB)",
+      "success": true,
+      "message": "User registered in MongoDB Atlas with UUID: dfb6e610-09c1-4cd6-a082-0a06a6cedbeb",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:19"
+    },
+    {
+      "test": "User Login (MongoDB)",
+      "success": true,
+      "message": "Login successful - MongoDB user authentication working",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:20"
+    },
+    {
+      "test": "Email Verification Code Storage",
+      "success": true,
+      "message": "Verification code stored in MongoDB VerificationCodes collection",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:22"
+    },
+    {
+      "test": "Phone Verification Integration",
+      "success": false,
+      "message": "HTTP 500: Failed to resend verification code",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:22"
+    },
+    {
+      "test": "Password Reset (MongoDB)",
+      "success": true,
+      "message": "Password reset code stored in MongoDB VerificationCodes collection",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:23"
+    },
+    {
+      "test": "Multiple Users Creation (MongoDB)",
+      "success": true,
+      "message": "Created 3 users total in MongoDB Atlas",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:25"
+    },
+    {
+      "test": "MongoDB Indexes Performance",
+      "success": true,
+      "message": "Email uniqueness index working - duplicate registration prevented",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:26"
+    },
+    {
+      "test": "Data Validation Constraints",
+      "success": true,
+      "message": "MongoDB data validation working - invalid data rejected",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:26"
+    },
+    {
+      "test": "Concurrent User Operations",
+      "success": true,
+      "message": "MongoDB handles concurrent user operations correctly",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:28"
+    },
+    {
+      "test": "User Data Persistence (MongoDB)",
+      "success": true,
+      "message": "Complex user profile data persisted in MongoDB (arrays, nested objects, dates)",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:28"
+    },
+    {
+      "test": "Route Migration Status",
+      "success": true,
+      "message": "Migration status: {'auth_routes': '\u2705 MIGRATED', 'user_routes': '\u274c STILL USING SQLITE', 'match_routes': '\u274c NOT MIGRATED', 'message_routes': '\u274c NOT MIGRATED', 'apartment_routes': '\u274c NOT MIGRATED'}",
+      "details": null,
+      "timestamp": "2025-08-12 23:50:29"
+    }
+  ],
+  "users_created": 3
+}
