@@ -579,7 +579,7 @@ export default function HomePage() {
 											<div>
 												<h2 className="text-3xl font-bold text-white flex items-center gap-2">
 													{currentRoommate.name}{' '}
-													{currentRoommate.verified && (
+													{currentRoommate.verification_status === 'verified' && (
 														<CheckCircle className="h-6 w-6 text-vibrant-orange" />
 													)}
 												</h2>
