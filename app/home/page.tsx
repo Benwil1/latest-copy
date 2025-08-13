@@ -497,7 +497,7 @@ export default function HomePage() {
 													Interests
 												</h3>
 												<div className="flex flex-wrap gap-2">
-													{currentRoommate.interests.map((interest, index) => (
+													{currentRoommate.interests && currentRoommate.interests.map((interest, index) => (
 														<Badge
 															key={index}
 															variant="secondary"
