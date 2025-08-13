@@ -146,10 +146,16 @@ export default function SignupPage() {
 
 		if (validateForm()) {
 			try {
+				// Normalize phone to E.164-like (digits only, keep leading + if present)
+				const onlyDigits = formData.phone.replace(/\D/g, '');
+				const normalizedPhone = formData.phone.trim().startsWith('+')
+					? `+${onlyDigits}`
+					: onlyDigits;
+
 				await signup(
 					formData.name,
 					formData.email,
-					formData.phone,
+					normalizedPhone,
 					formData.password,
 					formData.country,
 					formData.location

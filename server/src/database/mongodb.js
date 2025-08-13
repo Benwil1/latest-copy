@@ -1,19 +1,49 @@
 const mongoose = require('mongoose');
+let MongoMemoryServerInstance = null;
+let MongoMemoryServer;
+
+try {
+  // Lazy require to avoid hard dependency if not installed
+  MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
+} catch (e) {
+  MongoMemoryServer = null;
+}
 
 const connectDB = async () => {
   try {
+    const useInMemory = String(process.env.USE_IN_MEMORY_DB || '').toLowerCase() === 'true';
     const mongoUri = process.env.MONGO_URL || 'mongodb://localhost:27017/roomieswipe';
-    
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    
-    console.log('MongoDB connected successfully');
-    
-    // Create indexes for better performance
-    await createIndexes();
-    
+
+    const connect = async (uri) => {
+      await mongoose.connect(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      console.log(`MongoDB connected successfully (${uri.includes('mongodb://127.0.0.1') || uri.includes('localhost') ? 'local' : 'remote'})`);
+      await createIndexes();
+    };
+
+    try {
+      await connect(mongoUri);
+    } catch (primaryError) {
+      if (useInMemory) {
+        if (!MongoMemoryServer) {
+          throw new Error('mongodb-memory-server is not installed, but USE_IN_MEMORY_DB is true');
+        }
+        console.warn('Primary MongoDB connection failed. Falling back to in-memory MongoDB...');
+        MongoMemoryServerInstance = await MongoMemoryServer.create();
+        const memUri = MongoMemoryServerInstance.getUri();
+        await connect(memUri);
+        console.log('Using in-memory MongoDB for development. Data will not persist across restarts.');
+      } else {
+        throw primaryError;
+      }
+    }
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
   } catch (error) {
     console.error('MongoDB connection error:', error);
     process.exit(1);
