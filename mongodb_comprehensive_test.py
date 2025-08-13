@@ -121,6 +121,7 @@ class MongoDBAtlasAPITester:
         """Test user registration with MongoDB Atlas storage"""
         try:
             user_data = self.generate_test_user("primary")
+            print(f"   Attempting registration with: {user_data}")
             response = self.make_request("POST", "/auth/register", user_data)
             
             if response.status_code == 201:
@@ -150,6 +151,7 @@ class MongoDBAtlasAPITester:
                     return False
             else:
                 error_data = response.json() if response.content else {}
+                print(f"   Registration error details: {error_data}")
                 self.log_test("User Registration (MongoDB)", False, 
                             f"HTTP {response.status_code}: {error_data.get('error', 'Unknown error')}")
                 return False
