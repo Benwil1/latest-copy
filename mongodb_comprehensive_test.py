@@ -43,10 +43,13 @@ class MongoDBAtlasAPITester:
         names = ["Emma Wilson", "Liam Chen", "Sophia Rodriguez", "Noah Patel", "Olivia Kim"]
         locations = ["New York, NY", "San Francisco, CA", "London, UK", "Toronto, ON", "Sydney, AU"]
         
+        # Generate unique phone number for each user
+        phone_suffix = ''.join(random.choices(string.digits, k=7))
+        
         return {
             "name": random.choice(names),
             "email": f"user.{suffix}@roomieswipe.test",
-            "phone": f"+15551234567",  # Fixed format for validation
+            "phone": f"+1555{phone_suffix}",
             "password": "SecurePass123!",
             "country": "United States",
             "nationality": "American",
