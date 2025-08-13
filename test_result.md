@@ -358,11 +358,14 @@ backend:
     file: "/app/server/src/routes/auth.js"
     stuck_count: 1
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "Minor: Phone verification integration with Twilio failing due to service configuration issue. Code structure correct but service not responding."
+      - working: false
+        agent: "testing"
+        comment: "Minor: Phone verification still failing with HTTP 500 error during resend verification. Twilio service configuration issue persists. Email verification working correctly. This is expected in test environment without proper Twilio credentials."
 
   - task: "User Profile Management (MongoDB)"
     implemented: true
