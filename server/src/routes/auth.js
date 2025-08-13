@@ -192,6 +192,16 @@ router.post('/verify', validateRequest(schemas.verifyCode), async (req, res) => 
 
       res.json({ message: 'Phone verified successfully' });
     } else if (type === 'email') {
+      // In development, optionally accept any 6-digit code when email provider isn't configured
+      const allowDevAny = String(process.env.ALLOW_DEV_VERIFICATION_ANY_CODE || '').toLowerCase() === 'true' || !process.env.SENDGRID_API_KEY;
+      if (allowDevAny) {
+        if (!/^\d{6}$/.test(code)) {
+          return res.status(400).json({ error: 'Invalid verification code format' });
+        }
+        await User.findByIdAndUpdate(userId, { email_verified: true });
+        return res.json({ message: 'Email verified successfully' });
+      }
+
       // For email verification, use traditional code verification
       const verificationCode = await VerificationCode.findOne({
         user_id: userId,
