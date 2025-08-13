@@ -1,93 +1,92 @@
 {
   "total_tests": 12,
-  "passed": 11,
-  "failed": 1,
-  "success_rate": 91.66666666666666,
+  "passed": 1,
+  "failed": 11,
+  "success_rate": 8.333333333333332,
   "results": [
     {
-      "test": "MongoDB Connection Health",
+      "test": "MongoDB Atlas Connection",
       "success": true,
-      "message": "Server healthy - MongoDB Atlas connection working",
+      "message": "Server connected to MongoDB Atlas successfully",
       "details": null,
-      "timestamp": "2025-08-12 23:50:18"
+      "timestamp": "2025-08-13 00:01:57"
     },
     {
       "test": "User Registration (MongoDB)",
-      "success": true,
-      "message": "User registered in MongoDB Atlas with UUID: dfb6e610-09c1-4cd6-a082-0a06a6cedbeb",
-      "details": null,
-      "timestamp": "2025-08-12 23:50:19"
-    },
-    {
-      "test": "User Login (MongoDB)",
-      "success": true,
-      "message": "Login successful - MongoDB user authentication working",
-      "details": null,
-      "timestamp": "2025-08-12 23:50:20"
-    },
-    {
-      "test": "Email Verification Code Storage",
-      "success": true,
-      "message": "Verification code stored in MongoDB VerificationCodes collection",
-      "details": null,
-      "timestamp": "2025-08-12 23:50:22"
-    },
-    {
-      "test": "Phone Verification Integration",
       "success": false,
-      "message": "HTTP 500: Failed to resend verification code",
+      "message": "HTTP 400: Validation error",
       "details": null,
-      "timestamp": "2025-08-12 23:50:22"
+      "timestamp": "2025-08-13 00:01:58"
     },
     {
-      "test": "Password Reset (MongoDB)",
-      "success": true,
-      "message": "Password reset code stored in MongoDB VerificationCodes collection",
+      "test": "Multiple User Creation",
+      "success": false,
+      "message": "Only created 0 users, expected at least 2",
       "details": null,
-      "timestamp": "2025-08-12 23:50:23"
+      "timestamp": "2025-08-13 00:01:58"
     },
     {
-      "test": "Multiple Users Creation (MongoDB)",
-      "success": true,
-      "message": "Created 3 users total in MongoDB Atlas",
+      "test": "User Profile (MongoDB)",
+      "success": false,
+      "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-12 23:50:25"
+      "timestamp": "2025-08-13 00:01:59"
     },
     {
-      "test": "MongoDB Indexes Performance",
-      "success": true,
-      "message": "Email uniqueness index working - duplicate registration prevented",
+      "test": "User Profile Update (MongoDB)",
+      "success": false,
+      "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-12 23:50:26"
+      "timestamp": "2025-08-13 00:01:59"
     },
     {
-      "test": "Data Validation Constraints",
-      "success": true,
-      "message": "MongoDB data validation working - invalid data rejected",
+      "test": "User Discovery (MongoDB)",
+      "success": false,
+      "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-12 23:50:26"
+      "timestamp": "2025-08-13 00:02:00"
     },
     {
-      "test": "Concurrent User Operations",
-      "success": true,
-      "message": "MongoDB handles concurrent user operations correctly",
+      "test": "Roommate Matching (MongoDB)",
+      "success": false,
+      "message": "Insufficient test data",
       "details": null,
-      "timestamp": "2025-08-12 23:50:28"
+      "timestamp": "2025-08-13 00:02:00"
     },
     {
-      "test": "User Data Persistence (MongoDB)",
-      "success": true,
-      "message": "Complex user profile data persisted in MongoDB (arrays, nested objects, dates)",
+      "test": "Mutual Matching (MongoDB)",
+      "success": false,
+      "message": "Insufficient test data",
       "details": null,
-      "timestamp": "2025-08-12 23:50:28"
+      "timestamp": "2025-08-13 00:02:01"
     },
     {
-      "test": "Route Migration Status",
-      "success": true,
-      "message": "Migration status: {'auth_routes': '\u2705 MIGRATED', 'user_routes': '\u274c STILL USING SQLITE', 'match_routes': '\u274c NOT MIGRATED', 'message_routes': '\u274c NOT MIGRATED', 'apartment_routes': '\u274c NOT MIGRATED'}",
+      "test": "Email Verification (MongoDB)",
+      "success": false,
+      "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-12 23:50:29"
+      "timestamp": "2025-08-13 00:02:01"
+    },
+    {
+      "test": "Phone Verification (MongoDB)",
+      "success": false,
+      "message": "No auth token available",
+      "details": null,
+      "timestamp": "2025-08-13 00:02:02"
+    },
+    {
+      "test": "Data Integrity (MongoDB)",
+      "success": false,
+      "message": "Request failed: list index out of range",
+      "details": null,
+      "timestamp": "2025-08-13 00:02:02"
+    },
+    {
+      "test": "Concurrent Operations (MongoDB)",
+      "success": false,
+      "message": "Insufficient test data",
+      "details": null,
+      "timestamp": "2025-08-13 00:02:03"
     }
-  ],
-  "users_created": 3
+  ]
 }
