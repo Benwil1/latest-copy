@@ -9,84 +9,84 @@
       "success": true,
       "message": "Server connected to MongoDB Atlas successfully",
       "details": null,
-      "timestamp": "2025-08-13 00:01:57"
+      "timestamp": "2025-08-13 00:02:55"
     },
     {
       "test": "User Registration (MongoDB)",
       "success": false,
       "message": "HTTP 400: Validation error",
       "details": null,
-      "timestamp": "2025-08-13 00:01:58"
+      "timestamp": "2025-08-13 00:02:55"
     },
     {
       "test": "Multiple User Creation",
       "success": false,
       "message": "Only created 0 users, expected at least 2",
       "details": null,
-      "timestamp": "2025-08-13 00:01:58"
+      "timestamp": "2025-08-13 00:02:56"
     },
     {
       "test": "User Profile (MongoDB)",
       "success": false,
       "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-13 00:01:59"
+      "timestamp": "2025-08-13 00:02:56"
     },
     {
       "test": "User Profile Update (MongoDB)",
       "success": false,
       "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-13 00:01:59"
+      "timestamp": "2025-08-13 00:02:57"
     },
     {
       "test": "User Discovery (MongoDB)",
       "success": false,
       "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-13 00:02:00"
+      "timestamp": "2025-08-13 00:02:57"
     },
     {
       "test": "Roommate Matching (MongoDB)",
       "success": false,
       "message": "Insufficient test data",
       "details": null,
-      "timestamp": "2025-08-13 00:02:00"
+      "timestamp": "2025-08-13 00:02:58"
     },
     {
       "test": "Mutual Matching (MongoDB)",
       "success": false,
       "message": "Insufficient test data",
       "details": null,
-      "timestamp": "2025-08-13 00:02:01"
+      "timestamp": "2025-08-13 00:02:58"
     },
     {
       "test": "Email Verification (MongoDB)",
       "success": false,
       "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-13 00:02:01"
+      "timestamp": "2025-08-13 00:02:59"
     },
     {
       "test": "Phone Verification (MongoDB)",
       "success": false,
       "message": "No auth token available",
       "details": null,
-      "timestamp": "2025-08-13 00:02:02"
+      "timestamp": "2025-08-13 00:02:59"
     },
     {
       "test": "Data Integrity (MongoDB)",
       "success": false,
       "message": "Request failed: list index out of range",
       "details": null,
-      "timestamp": "2025-08-13 00:02:02"
+      "timestamp": "2025-08-13 00:03:00"
     },
     {
       "test": "Concurrent Operations (MongoDB)",
       "success": false,
       "message": "Insufficient test data",
       "details": null,
-      "timestamp": "2025-08-13 00:02:03"
+      "timestamp": "2025-08-13 00:03:00"
     }
   ]
 }
