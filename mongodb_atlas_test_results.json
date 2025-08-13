@@ -1,92 +1,92 @@
 {
   "total_tests": 12,
-  "passed": 1,
-  "failed": 11,
-  "success_rate": 8.333333333333332,
+  "passed": 11,
+  "failed": 1,
+  "success_rate": 91.66666666666666,
   "results": [
     {
       "test": "MongoDB Atlas Connection",
       "success": true,
       "message": "Server connected to MongoDB Atlas successfully",
       "details": null,
-      "timestamp": "2025-08-13 00:02:55"
+      "timestamp": "2025-08-13 00:03:41"
     },
     {
       "test": "User Registration (MongoDB)",
-      "success": false,
-      "message": "HTTP 400: Validation error",
+      "success": true,
+      "message": "User registered with UUID: 28f3c2d8-4eba-4421-8ffe-679fe2abebc1",
       "details": null,
-      "timestamp": "2025-08-13 00:02:55"
+      "timestamp": "2025-08-13 00:03:42"
     },
     {
       "test": "Multiple User Creation",
-      "success": false,
-      "message": "Only created 0 users, expected at least 2",
+      "success": true,
+      "message": "Created 3 additional test users in MongoDB",
       "details": null,
-      "timestamp": "2025-08-13 00:02:56"
+      "timestamp": "2025-08-13 00:03:45"
     },
     {
       "test": "User Profile (MongoDB)",
-      "success": false,
-      "message": "No auth token available",
+      "success": true,
+      "message": "Profile retrieved with complex data structures: True",
       "details": null,
-      "timestamp": "2025-08-13 00:02:56"
+      "timestamp": "2025-08-13 00:03:46"
     },
     {
       "test": "User Profile Update (MongoDB)",
-      "success": false,
-      "message": "No auth token available",
+      "success": true,
+      "message": "Complex nested data and arrays updated successfully",
       "details": null,
-      "timestamp": "2025-08-13 00:02:57"
+      "timestamp": "2025-08-13 00:03:47"
     },
     {
       "test": "User Discovery (MongoDB)",
-      "success": false,
-      "message": "No auth token available",
+      "success": true,
+      "message": "Retrieved 11 users from MongoDB, 11 potential matches",
       "details": null,
-      "timestamp": "2025-08-13 00:02:57"
+      "timestamp": "2025-08-13 00:03:48"
     },
     {
       "test": "Roommate Matching (MongoDB)",
-      "success": false,
-      "message": "Insufficient test data",
+      "success": true,
+      "message": "Like action stored in MongoDB with UUID: 25c5cc3e-0b66-4396-9a4a-74a1a347a14c",
       "details": null,
-      "timestamp": "2025-08-13 00:02:58"
+      "timestamp": "2025-08-13 00:03:49"
     },
     {
       "test": "Mutual Matching (MongoDB)",
-      "success": false,
-      "message": "Insufficient test data",
+      "success": true,
+      "message": "Mutual match detected and stored in MongoDB",
       "details": null,
-      "timestamp": "2025-08-13 00:02:58"
+      "timestamp": "2025-08-13 00:03:50"
     },
     {
       "test": "Email Verification (MongoDB)",
-      "success": false,
-      "message": "No auth token available",
+      "success": true,
+      "message": "Email verification code generated and stored in MongoDB",
       "details": null,
-      "timestamp": "2025-08-13 00:02:59"
+      "timestamp": "2025-08-13 00:03:52"
     },
     {
       "test": "Phone Verification (MongoDB)",
       "success": false,
-      "message": "No auth token available",
+      "message": "HTTP 500: Failed to resend verification code",
       "details": null,
-      "timestamp": "2025-08-13 00:02:59"
+      "timestamp": "2025-08-13 00:03:52"
     },
     {
       "test": "Data Integrity (MongoDB)",
-      "success": false,
-      "message": "Request failed: list index out of range",
+      "success": true,
+      "message": "Email uniqueness constraint enforced by MongoDB",
       "details": null,
-      "timestamp": "2025-08-13 00:03:00"
+      "timestamp": "2025-08-13 00:03:53"
     },
     {
       "test": "Concurrent Operations (MongoDB)",
-      "success": false,
-      "message": "Insufficient test data",
+      "success": true,
+      "message": "3/3 concurrent operations successful",
       "details": null,
-      "timestamp": "2025-08-13 00:03:00"
+      "timestamp": "2025-08-13 00:03:54"
     }
   ]
 }
