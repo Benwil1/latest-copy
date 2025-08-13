@@ -1,0 +1,50 @@
+{
+  "total_tests": 6,
+  "passed": 5,
+  "failed": 1,
+  "success_rate": 83.33333333333334,
+  "results": [
+    {
+      "test": "User Registration with Phone",
+      "success": true,
+      "message": "User registered with phone +15551234567, verified: False",
+      "details": null,
+      "timestamp": "2025-08-13 05:34:56"
+    },
+    {
+      "test": "MongoDB Phone Data Storage",
+      "success": true,
+      "message": "Phone data stored correctly in MongoDB, verified: False",
+      "details": null,
+      "timestamp": "2025-08-13 05:34:57"
+    },
+    {
+      "test": "Phone Verification Resend",
+      "success": false,
+      "message": "Twilio service configuration issue: Failed to resend verification code",
+      "details": null,
+      "timestamp": "2025-08-13 05:34:58"
+    },
+    {
+      "test": "Phone Verification with Code",
+      "success": true,
+      "message": "Phone verification properly rejects invalid codes",
+      "details": null,
+      "timestamp": "2025-08-13 05:34:59"
+    },
+    {
+      "test": "Phone Verification Invalid Code",
+      "success": true,
+      "message": "Phone verification properly rejects invalid codes",
+      "details": null,
+      "timestamp": "2025-08-13 05:34:59"
+    },
+    {
+      "test": "Phone Verification Without Auth",
+      "success": true,
+      "message": "Phone verification properly requires authentication",
+      "details": null,
+      "timestamp": "2025-08-13 05:35:00"
+    }
+  ]
+}
