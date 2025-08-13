@@ -566,7 +566,8 @@ export default function HomePage() {
 													)}
 												</h2>
 												<p className="text-lg text-gray-200">
-													{currentRoommate.age} • {currentRoommate.nationality}
+													{currentRoommate.age && `${currentRoommate.age} • `}
+													{currentRoommate.nationality || currentRoommate.location || 'Location not specified'}
 												</p>
 											</div>
 											<div className="flex items-center gap-2">
