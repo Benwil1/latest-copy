@@ -669,20 +669,6 @@ export default function HomePage() {
 				)}
 				</main>
 
-				{/* Show empty state when no users and not loading */}
-				{!loading && !error && users.length === 0 && (
-					<div className="flex items-center justify-center min-h-[60vh]">
-						<div className="text-center">
-							<p className="text-muted-foreground mb-4">No potential roommates found</p>
-							<button 
-								onClick={() => window.location.reload()} 
-								className="px-4 py-2 bg-vibrant-orange text-white rounded-lg hover:bg-orange-600"
-							>
-								Refresh
-							</button>
-						</div>
-					</div>
-				)}
 
 				<MobileNav />
 			</div>
