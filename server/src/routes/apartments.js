@@ -1,11 +1,10 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { getDatabase } = require('../database/init');
+const { Apartment, User } = require('../models');
 const { validateRequest, schemas } = require('../middleware/validation');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
-const db = getDatabase();
 
 // Get all apartments (with optional filters)
 router.get('/', optionalAuth, async (req, res) => {
@@ -14,77 +13,86 @@ router.get('/', optionalAuth, async (req, res) => {
       location,
       min_price,
       max_price,
-      beds,
-      baths,
-      property_type,
+      bedrooms,
+      bathrooms,
+      furnished,
       amenities,
       page = 1,
       limit = 20
     } = req.query;
 
-    let query = `
-      SELECT a.*, u.name as owner_name, u.profile_picture as owner_avatar
-      FROM apartments a
-      JOIN users u ON a.owner_id = u.id
-      WHERE a.active = TRUE AND a.verified = TRUE
-    `;
-    const params = [];
+    // Build filter object
+    const filter = { status: 'active' };
 
-    // Add filters
     if (location) {
-      query += ' AND a.location LIKE ?';
-      params.push(`%${location}%`);
+      filter.$or = [
+        { address: new RegExp(location, 'i') },
+        { city: new RegExp(location, 'i') },
+        { country: new RegExp(location, 'i') }
+      ];
     }
 
-    if (min_price) {
-      query += ' AND a.price >= ?';
-      params.push(parseInt(min_price));
+    if (min_price || max_price) {
+      filter.price = {};
+      if (min_price) filter.price.$gte = parseInt(min_price);
+      if (max_price) filter.price.$lte = parseInt(max_price);
     }
 
-    if (max_price) {
-      query += ' AND a.price <= ?';
-      params.push(parseInt(max_price));
+    if (bedrooms) {
+      filter.bedrooms = { $gte: parseInt(bedrooms) };
     }
 
-    if (beds) {
-      query += ' AND a.beds >= ?';
-      params.push(parseInt(beds));
+    if (bathrooms) {
+      filter.bathrooms = { $gte: parseInt(bathrooms) };
     }
 
-    if (baths) {
-      query += ' AND a.baths >= ?';
-      params.push(parseFloat(baths));
+    if (furnished !== undefined) {
+      filter.furnished = furnished === 'true';
     }
 
-    if (property_type) {
-      query += ' AND a.property_type = ?';
-      params.push(property_type);
+    if (amenities) {
+      const amenityList = Array.isArray(amenities) ? amenities : [amenities];
+      filter.amenities = { $in: amenityList };
     }
 
-    // Add pagination
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    query += ' ORDER BY a.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const apartments = await new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    const apartments = await Apartment.find(filter)
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('owner_id', 'name profile_picture email');
 
-    // Parse JSON fields and add additional data
+    // Format response
     const processedApartments = apartments.map(apartment => ({
-      ...apartment,
-      images: apartment.images ? JSON.parse(apartment.images) : [],
-      amenities: apartment.amenities ? JSON.parse(apartment.amenities) : [],
+      id: apartment._id,
+      title: apartment.title,
+      description: apartment.description,
+      address: apartment.address,
+      city: apartment.city,
+      country: apartment.country,
+      price: apartment.price,
+      bedrooms: apartment.bedrooms,
+      bathrooms: apartment.bathrooms,
+      area: apartment.area,
+      furnished: apartment.furnished,
+      amenities: apartment.amenities,
+      images: apartment.images,
+      available_from: apartment.available_from,
+      lease_duration: apartment.lease_duration,
+      deposit: apartment.deposit,
+      utilities_included: apartment.utilities_included,
+      pet_friendly: apartment.pet_friendly,
+      smoking_allowed: apartment.smoking_allowed,
+      status: apartment.status,
+      created_at: apartment.created_at,
       landlord: {
-        name: apartment.owner_name,
-        image: apartment.owner_avatar,
+        name: apartment.owner_id?.name,
+        image: apartment.owner_id?.profile_picture,
         rating: 4.5, // Mock rating - implement proper rating system
-        responseRate: '95%',
-        responseTime: 'within a few hours',
-        memberSince: '2022'
+        response_rate: '95%',
+        response_time: 'within a few hours',
+        member_since: '2022'
       }
     }));
 
@@ -100,39 +108,48 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const apartment = await new Promise((resolve, reject) => {
-      db.get(`
-        SELECT a.*, u.name as owner_name, u.profile_picture as owner_avatar, u.email as owner_email
-        FROM apartments a
-        JOIN users u ON a.owner_id = u.id
-        WHERE a.id = ?
-      `, [id], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const apartment = await Apartment.findById(id).populate('owner_id', 'name profile_picture email');
 
     if (!apartment) {
       return res.status(404).json({ error: 'Apartment not found' });
     }
 
     // Check if apartment is active or if user is the owner
-    if (!apartment.active && apartment.owner_id !== req.userId) {
+    if (apartment.status !== 'active' && apartment.owner_id._id.toString() !== req.userId) {
       return res.status(404).json({ error: 'Apartment not found' });
     }
 
     res.json({
-      ...apartment,
-      images: apartment.images ? JSON.parse(apartment.images) : [],
-      amenities: apartment.amenities ? JSON.parse(apartment.amenities) : [],
+      id: apartment._id,
+      title: apartment.title,
+      description: apartment.description,
+      address: apartment.address,
+      city: apartment.city,
+      country: apartment.country,
+      price: apartment.price,
+      bedrooms: apartment.bedrooms,
+      bathrooms: apartment.bathrooms,
+      area: apartment.area,
+      furnished: apartment.furnished,
+      amenities: apartment.amenities,
+      images: apartment.images,
+      available_from: apartment.available_from,
+      lease_duration: apartment.lease_duration,
+      deposit: apartment.deposit,
+      utilities_included: apartment.utilities_included,
+      pet_friendly: apartment.pet_friendly,
+      smoking_allowed: apartment.smoking_allowed,
+      status: apartment.status,
+      created_at: apartment.created_at,
+      updated_at: apartment.updated_at,
       landlord: {
-        name: apartment.owner_name,
-        image: apartment.owner_avatar,
-        email: apartment.owner_email,
+        name: apartment.owner_id?.name,
+        image: apartment.owner_id?.profile_picture,
+        email: apartment.owner_id?.email,
         rating: 4.5,
-        responseRate: '95%',
-        responseTime: 'within a few hours',
-        memberSince: '2022'
+        response_rate: '95%',
+        response_time: 'within a few hours',
+        member_since: '2022'
       }
     });
   } catch (error) {
@@ -142,31 +159,35 @@ router.get('/:id', optionalAuth, async (req, res) => {
 });
 
 // Create apartment
-router.post('/', authenticateToken, validateRequest(schemas.createApartment), async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const apartmentData = req.body;
     const apartmentId = uuidv4();
 
-    // Convert arrays to JSON strings
-    const amenities = JSON.stringify(apartmentData.amenities || []);
-    const images = JSON.stringify(apartmentData.images || []);
-
-    await new Promise((resolve, reject) => {
-      db.run(`
-        INSERT INTO apartments (
-          id, owner_id, title, description, location, price, beds, baths, sqft,
-          available_date, property_type, furnished, amenities, images
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        apartmentId, req.userId, apartmentData.title, apartmentData.description,
-        apartmentData.location, apartmentData.price, apartmentData.beds,
-        apartmentData.baths, apartmentData.sqft, apartmentData.available_date,
-        apartmentData.property_type, apartmentData.furnished, amenities, images
-      ], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    const newApartment = new Apartment({
+      _id: apartmentId,
+      owner_id: req.userId,
+      title: apartmentData.title,
+      description: apartmentData.description,
+      address: apartmentData.address,
+      city: apartmentData.city,
+      country: apartmentData.country,
+      price: apartmentData.price,
+      bedrooms: apartmentData.bedrooms,
+      bathrooms: apartmentData.bathrooms,
+      area: apartmentData.area,
+      furnished: apartmentData.furnished || false,
+      amenities: apartmentData.amenities || [],
+      images: apartmentData.images || [],
+      available_from: apartmentData.available_from,
+      lease_duration: apartmentData.lease_duration,
+      deposit: apartmentData.deposit,
+      utilities_included: apartmentData.utilities_included || false,
+      pet_friendly: apartmentData.pet_friendly || false,
+      smoking_allowed: apartmentData.smoking_allowed || false
     });
+
+    await newApartment.save();
 
     res.status(201).json({
       message: 'Apartment created successfully',
@@ -185,40 +206,19 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const updates = req.body;
 
     // Check if user owns the apartment
-    const apartment = await new Promise((resolve, reject) => {
-      db.get('SELECT owner_id FROM apartments WHERE id = ?', [id], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const apartment = await Apartment.findById(id);
 
     if (!apartment) {
       return res.status(404).json({ error: 'Apartment not found' });
     }
 
-    if (apartment.owner_id !== req.userId) {
+    if (apartment.owner_id.toString() !== req.userId) {
       return res.status(403).json({ error: 'Not authorized to update this apartment' });
     }
 
-    // Convert arrays to JSON strings
-    if (updates.amenities) updates.amenities = JSON.stringify(updates.amenities);
-    if (updates.images) updates.images = JSON.stringify(updates.images);
-
-    // Build dynamic update query
-    const fields = Object.keys(updates);
-    const values = Object.values(updates);
-    const setClause = fields.map(field => `${field} = ?`).join(', ');
-
-    await new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE apartments SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [...values, id],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
+    // Update the apartment
+    updates.updated_at = new Date();
+    await Apartment.findByIdAndUpdate(id, updates);
 
     res.json({ message: 'Apartment updated successfully' });
   } catch (error) {
@@ -233,27 +233,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     // Check if user owns the apartment
-    const apartment = await new Promise((resolve, reject) => {
-      db.get('SELECT owner_id FROM apartments WHERE id = ?', [id], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const apartment = await Apartment.findById(id);
 
     if (!apartment) {
       return res.status(404).json({ error: 'Apartment not found' });
     }
 
-    if (apartment.owner_id !== req.userId) {
+    if (apartment.owner_id.toString() !== req.userId) {
       return res.status(403).json({ error: 'Not authorized to delete this apartment' });
     }
 
-    await new Promise((resolve, reject) => {
-      db.run('DELETE FROM apartments WHERE id = ?', [id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await Apartment.findByIdAndDelete(id);
 
     res.json({ message: 'Apartment deleted successfully' });
   } catch (error) {
@@ -265,21 +255,32 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 // Get user's apartments
 router.get('/user/my-listings', authenticateToken, async (req, res) => {
   try {
-    const apartments = await new Promise((resolve, reject) => {
-      db.all(`
-        SELECT * FROM apartments 
-        WHERE owner_id = ? 
-        ORDER BY created_at DESC
-      `, [req.userId], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    const apartments = await Apartment.find({ owner_id: req.userId })
+      .sort({ created_at: -1 });
 
     const processedApartments = apartments.map(apartment => ({
-      ...apartment,
-      images: apartment.images ? JSON.parse(apartment.images) : [],
-      amenities: apartment.amenities ? JSON.parse(apartment.amenities) : []
+      id: apartment._id,
+      title: apartment.title,
+      description: apartment.description,
+      address: apartment.address,
+      city: apartment.city,
+      country: apartment.country,
+      price: apartment.price,
+      bedrooms: apartment.bedrooms,
+      bathrooms: apartment.bathrooms,
+      area: apartment.area,
+      furnished: apartment.furnished,
+      amenities: apartment.amenities,
+      images: apartment.images,
+      available_from: apartment.available_from,
+      lease_duration: apartment.lease_duration,
+      deposit: apartment.deposit,
+      utilities_included: apartment.utilities_included,
+      pet_friendly: apartment.pet_friendly,
+      smoking_allowed: apartment.smoking_allowed,
+      status: apartment.status,
+      created_at: apartment.created_at,
+      updated_at: apartment.updated_at
     }));
 
     res.json(processedApartments);
