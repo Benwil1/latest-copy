@@ -322,20 +322,38 @@ class RoomieSwipeAPITester:
             return False
         
         try:
-            # Create a dummy target user ID for testing
-            dummy_user_id = "test-user-id-12345"
+            # First get a list of users to find a valid target user ID
+            users_response = self.make_request("GET", "/users")
+            if users_response.status_code != 200:
+                self.log_test("Roommate Matching - Like", False, "Could not fetch users for matching test")
+                return False
+            
+            users = users_response.json()
+            if not users or len(users) == 0:
+                self.log_test("Roommate Matching - Like", False, "No users available for matching test")
+                return False
+            
+            # Find a user that's not the current test user
+            target_user = None
+            for user in users:
+                if user.get('id') != self.test_user_id:
+                    target_user = user
+                    break
+            
+            if not target_user:
+                self.log_test("Roommate Matching - Like", False, "No valid target user found for matching")
+                return False
             
             match_data = {
-                "target_user_id": dummy_user_id,
+                "target_user_id": target_user['id'],
                 "action": "like"
             }
             
             response = self.make_request("POST", "/matches/action", match_data)
             
-            # We expect this to work even with a non-existent user (creates match record)
             if response.status_code == 200:
                 data = response.json()
-                if "message" in data and "is_mutual" in data:
+                if "message" in data and "is_mutual_match" in data:
                     self.log_test("Roommate Matching - Like", True, 
                                 f"Like action processed: {data['message']}")
                     return True
