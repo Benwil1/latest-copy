@@ -19,6 +19,7 @@ class RoomieSwipeAPITester:
         self.test_user_id = None
         self.test_results = []
         self.test_user_data = None
+        self.test_users_created = []  # Track created users for cleanup
         
     def log_test(self, test_name: str, success: bool, message: str, details: Any = None):
         """Log test results"""
