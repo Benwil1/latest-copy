@@ -44,11 +44,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
 
 const createIndexes = async () => {
   try {
