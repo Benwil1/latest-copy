@@ -46,7 +46,7 @@ class MongoDBAtlasAPITester:
         return {
             "name": random.choice(names),
             "email": f"user.{suffix}@roomieswipe.test",
-            "phone": f"+1555{random.randint(1000000, 9999999)}",
+            "phone": f"+15551234567",  # Fixed format for validation
             "password": "SecurePass123!",
             "country": "United States",
             "nationality": "American",
