@@ -1,9 +1,8 @@
 const express = require('express');
-const { getDatabase } = require('../database/init');
+const { User, Apartment, Match, Message } = require('../models');
 const { requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
-const db = getDatabase();
 
 // Apply admin middleware to all routes
 router.use(requireAdmin);
@@ -13,286 +12,247 @@ router.get('/stats', async (req, res) => {
   try {
     const stats = await Promise.all([
       // Total users
-      new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
-          if (err) reject(err);
-          else resolve(row.count);
-        });
-      }),
+      User.countDocuments(),
       // Total apartments
-      new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(*) as count FROM apartments', (err, row) => {
-          if (err) reject(err);
-          else resolve(row.count);
-        });
-      }),
+      Apartment.countDocuments(),
       // Total matches
-      new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(*) as count FROM matches WHERE is_mutual = TRUE', (err, row) => {
-          if (err) reject(err);
-          else resolve(row.count);
-        });
+      Match.countDocuments({ is_mutual: true }),
+      // Total messages
+      Message.countDocuments(),
+      // New users this month
+      User.countDocuments({
+        created_at: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
       }),
-      // Pending reports
-      new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(*) as count FROM reports WHERE status = "open"', (err, row) => {
-          if (err) reject(err);
-          else resolve(row.count);
-        });
-      }),
-      // New users this week
-      new Promise((resolve, reject) => {
-        db.get(`
-          SELECT COUNT(*) as count FROM users 
-          WHERE created_at >= datetime('now', '-7 days')
-        `, (err, row) => {
-          if (err) reject(err);
-          else resolve(row.count);
-        });
-      })
+      // Active apartments
+      Apartment.countDocuments({ status: 'active' })
     ]);
 
     res.json({
       total_users: stats[0],
       total_apartments: stats[1],
       total_matches: stats[2],
-      pending_reports: stats[3],
-      new_users_this_week: stats[4]
+      total_messages: stats[3],
+      new_users_this_month: stats[4],
+      active_apartments: stats[5]
     });
   } catch (error) {
-    console.error('Get admin stats error:', error);
-    res.status(500).json({ error: 'Failed to get admin stats' });
+    console.error('Get stats error:', error);
+    res.status(500).json({ error: 'Failed to get stats' });
   }
 });
 
 // Get all users with pagination
 router.get('/users', async (req, res) => {
   try {
-    const { page = 1, limit = 20, search = '', status = '' } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { page = 1, limit = 20, search } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    let query = 'SELECT * FROM users WHERE 1=1';
-    const params = [];
-
+    let filter = {};
     if (search) {
-      query += ' AND (name LIKE ? OR email LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`);
+      filter = {
+        $or: [
+          { name: new RegExp(search, 'i') },
+          { email: new RegExp(search, 'i') }
+        ]
+      };
     }
 
-    if (status) {
-      if (status === 'verified') {
-        query += ' AND email_verified = TRUE AND phone_verified = TRUE';
-      } else if (status === 'unverified') {
-        query += ' AND (email_verified = FALSE OR phone_verified = FALSE)';
-      }
-    }
+    const users = await User.find(filter)
+      .select('-password_hash')
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    const totalUsers = await User.countDocuments(filter);
 
-    const users = await new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
+    res.json({
+      users,
+      total: totalUsers,
+      page: parseInt(page),
+      pages: Math.ceil(totalUsers / parseInt(limit))
     });
-
-    // Remove sensitive data
-    const sanitizedUsers = users.map(user => {
-      delete user.password_hash;
-      return user;
-    });
-
-    res.json(sanitizedUsers);
   } catch (error) {
-    console.error('Get admin users error:', error);
+    console.error('Get users error:', error);
     res.status(500).json({ error: 'Failed to get users' });
+  }
+});
+
+// Get user details
+router.get('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id).select('-password_hash');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get additional stats for this user
+    const [matchesCount, messagesCount, apartmentsCount] = await Promise.all([
+      Match.countDocuments({
+        $or: [{ user_id: id }, { target_user_id: id }]
+      }),
+      Message.countDocuments({ sender_id: id }),
+      Apartment.countDocuments({ owner_id: id })
+    ]);
+
+    res.json({
+      ...user.toObject(),
+      stats: {
+        matches_count: matchesCount,
+        messages_count: messagesCount,
+        apartments_count: apartmentsCount
+      }
+    });
+  } catch (error) {
+    console.error('Get user details error:', error);
+    res.status(500).json({ error: 'Failed to get user details' });
+  }
+});
+
+// Update user verification status
+router.put('/users/:id/verification', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email_verified, phone_verified } = req.body;
+
+    const updateData = {};
+    if (email_verified !== undefined) updateData.email_verified = email_verified;
+    if (phone_verified !== undefined) updateData.phone_verified = phone_verified;
+
+    await User.findByIdAndUpdate(id, updateData);
+
+    res.json({ message: 'User verification status updated successfully' });
+  } catch (error) {
+    console.error('Update user verification error:', error);
+    res.status(500).json({ error: 'Failed to update user verification' });
+  }
+});
+
+// Ban/unban user
+router.put('/users/:id/ban', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { banned, ban_reason } = req.body;
+
+    const updateData = {
+      banned: banned,
+      ban_reason: ban_reason || null,
+      updated_at: new Date()
+    };
+
+    await User.findByIdAndUpdate(id, updateData);
+
+    res.json({ message: banned ? 'User banned successfully' : 'User unbanned successfully' });
+  } catch (error) {
+    console.error('Ban user error:', error);
+    res.status(500).json({ error: 'Failed to update user ban status' });
   }
 });
 
 // Get all apartments with pagination
 router.get('/apartments', async (req, res) => {
   try {
-    const { page = 1, limit = 20, status = '' } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { page = 1, limit = 20, status } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    let query = `
-      SELECT a.*, u.name as owner_name, u.email as owner_email
-      FROM apartments a
-      JOIN users u ON a.owner_id = u.id
-      WHERE 1=1
-    `;
-    const params = [];
-
-    if (status === 'pending') {
-      query += ' AND a.verified = FALSE';
-    } else if (status === 'verified') {
-      query += ' AND a.verified = TRUE';
+    let filter = {};
+    if (status) {
+      filter.status = status;
     }
 
-    query += ' ORDER BY a.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    const apartments = await Apartment.find(filter)
+      .populate('owner_id', 'name email')
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    const apartments = await new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
+    const totalApartments = await Apartment.countDocuments(filter);
+
+    res.json({
+      apartments,
+      total: totalApartments,
+      page: parseInt(page),
+      pages: Math.ceil(totalApartments / parseInt(limit))
     });
-
-    res.json(apartments);
   } catch (error) {
-    console.error('Get admin apartments error:', error);
+    console.error('Get apartments error:', error);
     res.status(500).json({ error: 'Failed to get apartments' });
   }
 });
 
-// Get all reports
-router.get('/reports', async (req, res) => {
+// Update apartment status
+router.put('/apartments/:id/status', async (req, res) => {
   try {
-    const { page = 1, limit = 20, status = '' } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { id } = req.params;
+    const { status } = req.body;
 
-    let query = `
-      SELECT r.*, 
-             u1.name as reporter_name, u1.email as reporter_email,
-             u2.name as reported_user_name, u2.email as reported_user_email,
-             a.title as reported_apartment_title
-      FROM reports r
-      JOIN users u1 ON r.reporter_id = u1.id
-      LEFT JOIN users u2 ON r.reported_user_id = u2.id
-      LEFT JOIN apartments a ON r.reported_apartment_id = a.id
-      WHERE 1=1
-    `;
-    const params = [];
-
-    if (status) {
-      query += ' AND r.status = ?';
-      params.push(status);
-    }
-
-    query += ' ORDER BY r.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
-
-    const reports = await new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-
-    res.json(reports);
-  } catch (error) {
-    console.error('Get admin reports error:', error);
-    res.status(500).json({ error: 'Failed to get reports' });
-  }
-});
-
-// Update user status
-router.put('/users/:userId/status', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { action } = req.body; // 'ban', 'unban', 'verify', 'delete'
-
-    if (!['ban', 'unban', 'verify', 'delete'].includes(action)) {
-      return res.status(400).json({ error: 'Invalid action' });
-    }
-
-    if (action === 'delete') {
-      await new Promise((resolve, reject) => {
-        db.run('DELETE FROM users WHERE id = ?', [userId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    } else if (action === 'verify') {
-      await new Promise((resolve, reject) => {
-        db.run(`
-          UPDATE users 
-          SET email_verified = TRUE, phone_verified = TRUE, verification_status = 'verified'
-          WHERE id = ?
-        `, [userId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    } else {
-      const status = action === 'ban' ? 'banned' : 'active';
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE users SET verification_status = ? WHERE id = ?', [status, userId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    }
-
-    res.json({ message: `User ${action} successful` });
-  } catch (error) {
-    console.error('Update user status error:', error);
-    res.status(500).json({ error: 'Failed to update user status' });
-  }
-});
-
-// Verify/reject apartment
-router.put('/apartments/:apartmentId/verify', async (req, res) => {
-  try {
-    const { apartmentId } = req.params;
-    const { action } = req.body; // 'approve', 'reject'
-
-    if (!['approve', 'reject'].includes(action)) {
-      return res.status(400).json({ error: 'Invalid action' });
-    }
-
-    if (action === 'approve') {
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE apartments SET verified = TRUE WHERE id = ?', [apartmentId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    } else {
-      await new Promise((resolve, reject) => {
-        db.run('UPDATE apartments SET verified = FALSE, active = FALSE WHERE id = ?', [apartmentId], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    }
-
-    res.json({ message: `Apartment ${action} successful` });
-  } catch (error) {
-    console.error('Verify apartment error:', error);
-    res.status(500).json({ error: 'Failed to verify apartment' });
-  }
-});
-
-// Update report status
-router.put('/reports/:reportId/status', async (req, res) => {
-  try {
-    const { reportId } = req.params;
-    const { status } = req.body; // 'investigating', 'resolved', 'dismissed'
-
-    if (!['investigating', 'resolved', 'dismissed'].includes(status)) {
+    if (!['active', 'inactive', 'pending', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
-    const resolvedAt = ['resolved', 'dismissed'].includes(status) ? new Date().toISOString() : null;
-
-    await new Promise((resolve, reject) => {
-      db.run(`
-        UPDATE reports 
-        SET status = ?, resolved_at = ?
-        WHERE id = ?
-      `, [status, resolvedAt, reportId], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    await Apartment.findByIdAndUpdate(id, { 
+      status, 
+      updated_at: new Date() 
     });
 
-    res.json({ message: 'Report status updated successfully' });
+    res.json({ message: 'Apartment status updated successfully' });
   } catch (error) {
-    console.error('Update report status error:', error);
-    res.status(500).json({ error: 'Failed to update report status' });
+    console.error('Update apartment status error:', error);
+    res.status(500).json({ error: 'Failed to update apartment status' });
+  }
+});
+
+// Delete apartment
+router.delete('/apartments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Apartment.findByIdAndDelete(id);
+
+    res.json({ message: 'Apartment deleted successfully' });
+  } catch (error) {
+    console.error('Delete apartment error:', error);
+    res.status(500).json({ error: 'Failed to delete apartment' });
+  }
+});
+
+// Get recent activity
+router.get('/activity', async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+
+    // Get recent users
+    const recentUsers = await User.find()
+      .select('name email created_at')
+      .sort({ created_at: -1 })
+      .limit(parseInt(limit) / 2);
+
+    // Get recent apartments
+    const recentApartments = await Apartment.find()
+      .populate('owner_id', 'name')
+      .select('title owner_id created_at')
+      .sort({ created_at: -1 })
+      .limit(parseInt(limit) / 2);
+
+    // Combine and sort by creation date
+    const activity = [
+      ...recentUsers.map(user => ({
+        type: 'user_registration',
+        data: { name: user.name, email: user.email },
+        created_at: user.created_at
+      })),
+      ...recentApartments.map(apartment => ({
+        type: 'apartment_listing',
+        data: { title: apartment.title, owner: apartment.owner_id?.name },
+        created_at: apartment.created_at
+      }))
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    res.json(activity.slice(0, parseInt(limit)));
+  } catch (error) {
+    console.error('Get activity error:', error);
+    res.status(500).json({ error: 'Failed to get activity' });
   }
 });
 
