@@ -609,7 +609,7 @@ export default function HomePage() {
 										</div>
 
 										<div className="flex flex-wrap gap-2">
-											{currentRoommate.tags.slice(0, 3).map((tag) => (
+											{currentRoommate.interests && currentRoommate.interests.slice(0, 3).map((tag) => (
 												<Badge
 													key={tag}
 													variant="secondary"
@@ -618,12 +618,12 @@ export default function HomePage() {
 													{tag}
 												</Badge>
 											))}
-											{currentRoommate.tags.length > 3 && (
+											{currentRoommate.interests && currentRoommate.interests.length > 3 && (
 												<Badge
 													variant="secondary"
 													className="bg-white/10 hover:bg-white/20 transition-colors text-white border-none"
 												>
-													+{currentRoommate.tags.length - 3} more
+													+{currentRoommate.interests.length - 3} more
 												</Badge>
 											)}
 										</div>
