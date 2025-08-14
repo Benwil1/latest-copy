@@ -1,8 +1,8 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { usePathname, useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { usePathname, useRouter } from 'next/navigation';
 import {
 	createContext,
 	useContext,
@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setIsLoading(true);
 		try {
 			const response = await apiClient.login(email, password);
-			
+
 			if (response.user && response.token) {
 				setUser(response.user);
 				localStorage.setItem('user', JSON.stringify(response.user));
@@ -193,7 +193,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			console.error('Login failed', error);
 			toast({
 				title: 'Login failed',
-				description: error.message || 'Please check your credentials and try again.',
+				description:
+					error.message || 'Please check your credentials and try again.',
 				variant: 'destructive',
 			});
 			throw error;
@@ -213,10 +214,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	) => {
 		setIsLoading(true);
 		try {
-			// Get onboarding data from localStorage if available
-			const onboardingData = localStorage.getItem('onboarding');
-			const onboarding = onboardingData ? JSON.parse(onboardingData) : {};
-
+			// Only include fields that are allowed in the registration schema
 			const userData = {
 				name,
 				email,
@@ -225,14 +223,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				country,
 				nationality,
 				location,
-				...onboarding,
 			};
 
 			const response = await apiClient.register(userData);
-			
+
 			if (response.user && response.token) {
 				setUser(response.user);
-				localStorage.setItem('user', JSON.stringify(stripLargeFields(response.user)));
+				localStorage.setItem(
+					'user',
+					JSON.stringify(stripLargeFields(response.user))
+				);
 				toast({
 					title: 'Account created',
 					description: 'Please verify your phone number to continue.',
@@ -243,7 +243,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			console.error('Signup failed', error);
 			toast({
 				title: 'Signup failed',
-				description: error.message || 'Please check your information and try again.',
+				description:
+					error.message || 'Please check your information and try again.',
 				variant: 'destructive',
 			});
 		} finally {
@@ -277,8 +278,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setIsLoading(true);
 		try {
 			const response = await apiClient.verifyCode(code, 'phone');
-			
-			if (response.message && response.message.includes('verified successfully')) {
+
+			if (
+				response.message &&
+				response.message.includes('verified successfully')
+			) {
 				const updatedUser = { ...user!, phoneVerified: true };
 				setUser(updatedUser);
 				localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -314,8 +318,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setIsLoading(true);
 		try {
 			const response = await apiClient.verifyCode(code, 'email');
-			
-			if (response.message && response.message.includes('verified successfully')) {
+
+			if (
+				response.message &&
+				response.message.includes('verified successfully')
+			) {
 				const updatedUser = { ...user!, emailVerified: true };
 				setUser(updatedUser);
 				localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -350,7 +357,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const resendVerificationCode = async (type: 'email' | 'phone') => {
 		try {
 			const response = await apiClient.resendVerification(type);
-			
+
 			toast({
 				title: 'Code sent',
 				description: `A new verification code has been sent to your ${type}.`,
