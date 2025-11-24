@@ -6,7 +6,6 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import apiClient from '@/lib/api-client';
 import {
 	Bell,
 	Calendar,
@@ -174,27 +173,26 @@ export default function HomePage() {
 		{ type: 'like' | 'dislike'; userId: string }[]
 	>([]);
 
-	// Fetch users from backend on component mount
+	// Use mock roommate data
 	useEffect(() => {
-		const fetchUsers = async () => {
-			try {
-				setLoading(true);
-				const response = await apiClient.getUsers();
-				if (response && Array.isArray(response)) {
-					setUsers(response);
-				} else {
-					console.error('Invalid users response:', response);
-					setError('Failed to load users');
-				}
-			} catch (error) {
-				console.error('Failed to fetch users:', error);
-				setError('Failed to load potential roommates');
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchUsers();
+		setLoading(true);
+		// Convert mock roommates to User format
+		const formattedUsers: User[] = roommates.map((rm) => ({
+			id: rm.id.toString(),
+			name: rm.name,
+			age: rm.age,
+			nationality: rm.nationality,
+			profile_picture: rm.image,
+			budget: rm.budget,
+			location: rm.location,
+			move_in_date: rm.moveIn,
+			bio: rm.bio,
+			interests: rm.interests,
+			verification_status: rm.verified ? 'verified' : 'unverified',
+			lifestyle: rm.lifestyle,
+		}));
+		setUsers(formattedUsers);
+		setLoading(false);
 	}, []);
 
 	const currentRoommate = users[currentIndex];
@@ -205,27 +203,29 @@ export default function HomePage() {
 		setSwipeDirection(direction);
 		const action = direction === 'right' ? 'like' : 'dislike';
 		
-		try {
-			// Call backend API to record the like/dislike action
-			if (direction === 'right') {
-				await apiClient.likeUser(currentRoommate.id);
-				setLikedProfiles((prev) => [...prev, currentRoommate.id]);
-			} else {
-				await apiClient.dislikeUser(currentRoommate.id);
-				setPassedProfiles((prev) => [...prev, currentRoommate.id]);
+		// Store like/dislike in localStorage
+		if (direction === 'right') {
+			setLikedProfiles((prev) => [...prev, currentRoommate.id]);
+			// Store in localStorage
+			const likedIds = JSON.parse(localStorage.getItem('likedUserIds') || '[]');
+			if (!likedIds.includes(currentRoommate.id)) {
+				likedIds.push(currentRoommate.id);
+				localStorage.setItem('likedUserIds', JSON.stringify(likedIds));
 			}
-
-			setActionHistory((prev) => [
-				...prev,
-				{ type: action, userId: currentRoommate.id },
-			]);
-
-			// TODO: Check for matches and show match notification if needed
-			
-		} catch (error) {
-			console.error('Failed to record swipe action:', error);
-			// Still proceed with UI update even if API call fails
+		} else {
+			setPassedProfiles((prev) => [...prev, currentRoommate.id]);
+			// Store in localStorage
+			const passedIds = JSON.parse(localStorage.getItem('passedUserIds') || '[]');
+			if (!passedIds.includes(currentRoommate.id)) {
+				passedIds.push(currentRoommate.id);
+				localStorage.setItem('passedUserIds', JSON.stringify(passedIds));
+			}
 		}
+
+		setActionHistory((prev) => [
+			...prev,
+			{ type: action, userId: currentRoommate.id },
+		]);
 
 		setTimeout(() => {
 			setSwipeDirection(null);
@@ -240,7 +240,7 @@ export default function HomePage() {
 	};
 
 	const handleUndo = () => {
-		if (actionHistory.length === 0) return;
+		if (actionHistory.length === 0 || users.length === 0) return;
 		const lastAction = actionHistory[actionHistory.length - 1];
 		if (lastAction.type === 'like') {
 			setLikedProfiles((prev) =>
@@ -251,7 +251,10 @@ export default function HomePage() {
 				prev.filter((id) => id !== lastAction.userId)
 			);
 		}
-		setCurrentIndex(users.findIndex((r) => r.id === lastAction.userId));
+		const userIndex = users.findIndex((r) => r.id === lastAction.userId);
+		if (userIndex !== -1) {
+			setCurrentIndex(userIndex);
+		}
 		setActionHistory((prev) => prev.slice(0, -1));
 	};
 

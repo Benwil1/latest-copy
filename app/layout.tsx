@@ -65,13 +65,13 @@ export default function RootLayout({
 					<CurrencyProvider>
 						<AuthProvider>
 							<MarketplaceProvider>
-								<div className="flex min-h-screen flex-col">
-									<Navbar />
-									<main className="flex-1 mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 md:pb-0 pt-0">
-										{children}
-									</main>
-									<MobileNav />
-								</div>
+							<div className="flex min-h-screen flex-col">
+								<Navbar />
+								<main className="flex-1 w-full pb-16 md:pb-0 pt-0">
+									{children}
+								</main>
+								<MobileNav />
+							</div>
 							</MarketplaceProvider>
 						</AuthProvider>
 					</CurrencyProvider>

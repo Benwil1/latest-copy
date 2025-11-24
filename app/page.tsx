@@ -17,7 +17,7 @@ export default function HomePage() {
 	}, [user, isLoading, router]);
 
 	return (
-		<div className="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen flex flex-col items-center justify-center text-center px-0 mx-0">
+		<div className="w-full min-h-screen">
 			<RomieSwipeLanding />
 		</div>
 	);

@@ -13,7 +13,7 @@
 		--popover: 0 0% 100%;
 		--popover-foreground: 222.2 84% 4.9%;
 
-		--primary: 24 95% 53%;
+		--primary: 217 91% 60%;
 		--primary-foreground: 210 40% 98%;
 
 		--secondary: 210 40% 96.1%;
@@ -45,7 +45,7 @@
 		--popover: 224 71% 4%;
 		--popover-foreground: 215 20.2% 65.1%;
 
-		--primary: 24 95% 53%;
+		--primary: 217 91% 60%;
 		--primary-foreground: 222.2 47.4% 11.2%;
 
 		--secondary: 222.2 47.4% 11.2%;
@@ -70,8 +70,17 @@
 	* {
 		@apply border-border;
 	}
+	html {
+		scroll-behavior: smooth;
+		scroll-padding-top: 4rem;
+	}
+	html,
 	body {
 		@apply bg-background text-foreground;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		overflow-x: hidden;
 	}
 }
 
@@ -298,4 +307,160 @@ button {
 
 .animate-dislike-card {
 	animation: dislike-card 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Gradient animation */
+@keyframes gradient {
+	0%,
+	100% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+}
+
+.animate-gradient {
+	background-size: 200% 200%;
+	animation: gradient 3s ease infinite;
+}
+
+/* Smooth scroll animations */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(50px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slide-down {
+	from {
+		opacity: 0;
+		transform: translateY(-50px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes parallax {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(-20px);
+	}
+}
+
+/* Scroll animation classes */
+.scroll-fade-in {
+	opacity: 0;
+	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-fade-in.visible {
+	opacity: 1;
+}
+
+.scroll-slide-up {
+	opacity: 0;
+	transform: translateY(50px);
+	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-slide-up.visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.scroll-slide-down {
+	opacity: 0;
+	transform: translateY(-50px);
+	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-slide-down.visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.scroll-scale-in {
+	opacity: 0;
+	transform: scale(0.9);
+	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-scale-in.visible {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* Parallax effect */
+.parallax-slow {
+	transition: transform 0.3s ease-out;
+}
+
+.parallax-medium {
+	transition: transform 0.2s ease-out;
+}
+
+.parallax-fast {
+	transition: transform 0.1s ease-out;
+}
+
+/* Floating particles */
+@keyframes float-particle {
+	0% {
+		transform: translateY(0) translateX(0) rotate(0deg);
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-100vh) translateX(50px) rotate(360deg);
+		opacity: 0;
+	}
+}
+
+.float-particle {
+	animation: float-particle 20s linear infinite;
+}
+
+.float-particle-delayed {
+	animation: float-particle 25s linear infinite;
+	animation-delay: -5s;
+}
+
+.float-particle-slow {
+	animation: float-particle 30s linear infinite;
+	animation-delay: -10s;
 }
